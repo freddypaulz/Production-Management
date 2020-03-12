@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ProductCode = require('../../models/Configurations/ProductCode');
+const ProductCode = require('../../../models/Administrator/Configurations/ProductCode');
 
 router.post('/product-code', (req, res, next) => {
    ProductCode.find({ _id: req.body._id }).then(ProductCode => {

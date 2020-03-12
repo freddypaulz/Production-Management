@@ -40,33 +40,39 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //aws
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'administrator/build')));
+// const path = require('path');
+// app.use(express.static(path.join(__dirname, 'administrator/build')));
 
-app.use('/', require('./routes/index'));
-app.use('/users', require('./routes/users'));
-app.use('/roles', require('./routes/roles'));
-app.use('/shifts', require('./routes/shifts'));
-app.use('/countries', require('./routes/countries'));
-app.use('/states', require('./routes/states'));
-app.use('/cities', require('./routes/cities'));
-app.use('/measuring-units', require('./routes/measuringUnit'));
-app.use('/material-types', require('./routes/materialTypes'));
-app.use('/raw-materials', require('./routes/rawMaterials'));
-app.use('/work-locations', require('./routes/workLocations'));
-app.use('/production-units', require('./routes/productionUnits'));
-app.use('/products', require('./routes/products'));
-app.use('/departments', require('./routes/departments'));
-app.use('/vendors', require('./routes/vendors'));
-app.use('/distributors', require('./routes/distributors'));
-app.use('/employees', require('./routes/employees'));
-app.use('/boxes', require('./routes/boxes'));
-app.use('/designations', require('./routes/designations'));
-app.use('/request-details', require('./routes/requests/requestDetails'));
-app.use('/logs', require('./routes/logs/logs'));
-app.use('/product-code', require('./routes/configurations/productCode'));
-app.use('/productions', require('./routes/reports/productions'));
-app.use('/sales', require('./routes/reports/sales'));
+app.use('/', require('./routes/administrator/index'));
+app.use('/users', require('./routes/administrator/users'));
+app.use('/roles', require('./routes/administrator/roles'));
+app.use('/shifts', require('./routes/administrator/shifts'));
+app.use('/countries', require('./routes/administrator/countries'));
+app.use('/states', require('./routes/administrator/states'));
+app.use('/cities', require('./routes/administrator/cities'));
+app.use('/measuring-units', require('./routes/administrator/measuringUnit'));
+app.use('/material-types', require('./routes/administrator/materialTypes'));
+app.use('/raw-materials', require('./routes/administrator/rawMaterials'));
+app.use('/work-locations', require('./routes/administrator/workLocations'));
+app.use('/production-units', require('./routes/administrator/productionUnits'));
+app.use('/products', require('./routes/administrator/products'));
+app.use('/departments', require('./routes/administrator/departments'));
+app.use('/vendors', require('./routes/administrator/vendors'));
+app.use('/distributors', require('./routes/administrator/distributors'));
+app.use('/employees', require('./routes/administrator/employees'));
+app.use('/boxes', require('./routes/administrator/boxes'));
+app.use('/designations', require('./routes/administrator/designations'));
+app.use(
+   '/request-details',
+   require('./routes/administrator/requests/requestDetails')
+);
+app.use('/logs', require('./routes/administrator/logs/logs'));
+app.use(
+   '/product-code',
+   require('./routes/administrator/configurations/productCode')
+);
+app.use('/productions', require('./routes/administrator/reports/productions'));
+app.use('/sales', require('./routes/administrator/reports/sales'));
 
 app.listen(5000, () => {
    console.log(`App listening on port ${PORT}!`);

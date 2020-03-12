@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ProductionUnits = require('../models/ProductionUnit');
+const ProductionUnits = require('../../models/Administrator/ProductionUnit');
 
 router.get('/production-units', (req, res) => {
    ProductionUnits.find({}).then(ProductionUnits => {

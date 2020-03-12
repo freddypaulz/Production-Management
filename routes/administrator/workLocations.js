@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const WorkLocations = require('../models/WorkLocation');
+const WorkLocations = require('../../models/Administrator/WorkLocation');
 
 router.get('/work-locations', (req, res, next) => {
    WorkLocations.find({}).then(WorkLocations => {

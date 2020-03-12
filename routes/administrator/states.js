@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const States = require('../models/State');
+const States = require('../../models/Administrator/State');
 
 router.get('/states', (req, res, next) => {
    //console.log(sessionStorage.getItem('Authenticated'));

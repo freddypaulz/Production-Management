@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Designations = require('../models/Designation');
+const Designations = require('../../models/Administrator/Designation');
 
 router.get('/designations', (req, res) => {
    Designations.find({}).then(Designations => {

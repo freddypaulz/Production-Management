@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Shifts = require('../models/Shift');
+const Shifts = require('../../models/Administrator/Shift');
 
 router.get('/shifts', (req, res, next) => {
    Shifts.find({}).then(shifts => {

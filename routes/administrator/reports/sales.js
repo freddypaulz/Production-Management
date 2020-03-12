@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const moment = require('moment');
-const Sales = require('../../models/Reports/Sales');
+const Sales = require('../../../models/Administrator/Reports/Sales');
 
 router.get('/sales', (req, res, next) => {
    Sales.find({}).then(Sales => {

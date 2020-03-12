@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const MaterialTypes = require('../models/Material_Type');
+const MaterialTypes = require('../../models/Administrator/Material_Type');
 
 router.get('/material-types', (req, res, next) => {
    MaterialTypes.find({}).then(MaterialTypes => {

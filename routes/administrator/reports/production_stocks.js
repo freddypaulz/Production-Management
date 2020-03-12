@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ProductionStocks = require('../../models/Reports/Production_Stock');
+const ProductionStocks = require('../../../models/Administrator/Reports/Production_Stock');
 
 router.get('/production-stocks', (req, res, next) => {
    ProductionStocks.find({}).then(ProductionStocks => {

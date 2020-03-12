@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Roles = require('../models/Role');
+const Roles = require('../../models/Administrator/Role');
 
 router.get('/roles', (req, res, next) => {
    Roles.find({}).then(roles => {

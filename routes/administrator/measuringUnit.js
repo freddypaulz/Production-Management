@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const MeasuringUnits = require('../models/Measuring_Unit');
+const MeasuringUnits = require('../../models/Administrator/Measuring_Unit');
 
 router.get('/measuring-units', (req, res) => {
    MeasuringUnits.find({}).then(MeasuringUnits => {

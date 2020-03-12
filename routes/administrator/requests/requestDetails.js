@@ -1,5 +1,5 @@
-const request_details = require('../../models/Requests/RequestDetails');
-const Logs = require('../../models/Logs/Logs');
+const request_details = require('../../../models/Administrator/Requests/RequestDetails');
+const Logs = require('../../../models/Administrator/Logs/Logs');
 const express = require('express');
 const fileupload = require('express-fileupload');
 const router = express.Router();

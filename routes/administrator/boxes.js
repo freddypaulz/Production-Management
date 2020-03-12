@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Boxes = require('../models/Box');
+const Boxes = require('../../models/Administrator/Box');
 
 router.get('/boxes', (req, res, next) => {
    Boxes.find({}).then(Boxes => {

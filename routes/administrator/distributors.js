@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Distributors = require('../models/Distributor');
+const Distributors = require('../../models/Administrator/Distributor');
 
 router.get('/distributors', (req, res, next) => {
    Distributors.find({}).then(Distributors => {

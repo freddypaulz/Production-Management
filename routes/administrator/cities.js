@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Cities = require('../models/City');
+const Cities = require('../../models/Administrator/City');
 
 router.get('/cities', (req, res, next) => {
    Cities.find({}).then(cities => {

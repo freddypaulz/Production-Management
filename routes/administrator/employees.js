@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Employees = require('../models/Employee');
+const Employees = require('../../models/Administrator/Employee');
 
 router.get('/employees', (req, res, next) => {
    Employees.find({}).then(Employees => {

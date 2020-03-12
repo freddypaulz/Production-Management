@@ -1,4 +1,4 @@
-const logs = require('../../models/Logs/Logs');
+const logs = require('../../../models/Administrator/Logs/Logs');
 const express = require('express');
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const RawMaterials = require('../models/Raw_Materials');
+const RawMaterials = require('../../models/Administrator/Raw_Materials');
 
 router.get('/raw-materials', (req, res, next) => {
    RawMaterials.find({}).then(RawMaterials => {

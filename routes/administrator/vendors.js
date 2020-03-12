@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Vendors = require('../models/Vendor');
+const Vendors = require('../../models/Administrator/Vendor');
 
 router.get('/vendors', (req, res, next) => {
    Vendors.find({}).then(Vendors => {
