@@ -1,0 +1,39 @@
+{
+  "name": "node_auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "server": "nodemon app.js",
+    "client": "cd administrator && npm start",
+    "start": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@david.kucsai/react-pdf-table": "^0.3.0",
+    "@material-ui/lab": "^4.0.0-alpha.40",
+    "@react-pdf/renderer": "^1.6.8",
+    "axios": "^0.19.2",
+    "bcryptjs": "^2.4.3",
+    "concurrently": "^5.0.2",
+    "connect-flash": "^0.1.1",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.0",
+    "express-fileupload": "^1.1.6",
+    "express-session": "^1.17.0",
+    "moment": "^2.24.0",
+    "mongoose": "^5.8.9",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "react-charts": "^2.0.0-beta.6",
+    "react-csv": "^2.0.1",
+    "react-csv-reader": "^2.0.2",
+    "react-to-pdf": "0.0.10"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
