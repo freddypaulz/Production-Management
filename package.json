@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "server": "nodemon app.js",
-    "client": "cd administrator && npm start",
+    "client": "cd client && npm start",
     "start": "concurrently \"npm run server\" \"npm run client\""
   },
   "keywords": [],
