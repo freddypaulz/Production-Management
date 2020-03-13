@@ -1,21 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const ProductCode = require('../../../models/Administrator/Configurations/ProductCode');
+const BoxCode = require('../../models/Production/Box_Code');
 
 router.get('/', (req, res) => {
-   ProductCode.find({}).then(ProductCode => {
-      res.send({ ProductCode });
+   BoxCode.find({}).then(BoxCode => {
+      res.send({ BoxCode });
    });
 });
 
 router.post('/product-code', (req, res, next) => {
-   ProductCode.find({ _id: req.body._id }).then(ProductCode => {
-      res.send({ ProductCode });
+   BoxCode.find({ _id: req.body._id }).then(BoxCode => {
+      res.send({ BoxCode });
    });
 });
 
 router.post('/add-product-code', (req, res) => {
-   const { _id, code_prefix, code_separator } = req.body;
+   const { code_prefix, code_separator } = req.body;
    let errors = [];
 
    if (code_prefix.length > 10) {
@@ -29,13 +29,13 @@ router.post('/add-product-code', (req, res) => {
    if (errors.length > 0) {
       res.send({ errors });
    } else {
-      const newProductCode = new ProductCode({
+      const newBoxCode = new BoxCode({
          code_prefix,
          code_separator
       });
 
-      newProductCode.save().then(ProductCode => {
-         return res.send({ ProductCode, errors });
+      newBoxCode.save().then(BoxCode => {
+         return res.send({ BoxCode, errors });
       });
    }
 });
@@ -54,18 +54,18 @@ router.post('/edit-product-code', (req, res) => {
    if (errors.length > 0) {
       res.send({ errors });
    } else {
-      ProductCode.findOneAndUpdate(
+      BoxCode.findOneAndUpdate(
          { _id },
          {
             code_prefix,
             code_separator
          }
-      ).then(ProductCode => {
-         if (!ProductCode) {
-            errors.push('ProductCode Not found');
+      ).then(BoxCode => {
+         if (!BoxCode) {
+            errors.push('BoxCode Not found');
             return res.send({ errors });
          } else {
-            return res.send({ ProductCode, errors });
+            return res.send({ BoxCode, errors });
          }
       });
    }
@@ -83,17 +83,17 @@ router.post('/product-code', (req, res) => {
       errors.push('separator must be 1 character long');
    }
 
-   ProductCode.findOneAndUpdate(
+   BoxCode.findOneAndUpdate(
       { _id },
       {
          code_prefix,
          code_separator
       }
-   ).then(ProductCode => {
-      if (!ProductCode) {
+   ).then(BoxCode => {
+      if (!BoxCode) {
          return res.send({ errors });
       } else {
-         return res.send({ ProductCode, errors });
+         return res.send({ BoxCode, errors });
       }
    });
 });

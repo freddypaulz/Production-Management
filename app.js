@@ -40,8 +40,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //aws
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'client/build')));
+// const path = require('path');
+// app.use(express.static(path.join(__dirname, 'client/build')));
 
 //Admin
 app.use('/', require('./routes/administrator/index'));
@@ -87,10 +87,21 @@ app.use(
    '/purchase-wastages',
    require('./routes/purchase/PurchaseWastagesRoute')
 );
+
+//Production
+app.use('/pre-production', require('./routes/production/pre_production'));
+app.use('/wastage', require('./routes/production/wastage'));
+app.use('/quality-check', require('./routes/production/qualitycheck'));
+app.use('/sales', require('./routes/production/sales'));
+app.use('/qc-method', require('./routes/production/qc_method'));
+app.use('/production-unit', require('./routes/production/production_unit'));
+app.use('/production-stock', require('./routes/production/production_stock'));
 app.use(
-   '/production',
-   require('./Routes/purchase/production_raw_material_stock')
+   '/production-raw-material-stock',
+   require('./routes/purchase/production_raw_material_stock')
 );
+app.use('/production', require('./routes/production/production'));
+app.use('/box-code', require('./routes/production/box_code'));
 
 app.listen(5000, () => {
    console.log(`App listening on port ${PORT}!`);
