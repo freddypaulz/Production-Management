@@ -41,7 +41,7 @@ app.use(passport.session());
 
 //aws
 const path = require('path');
-app.use(express.static(path.join(__dirname, 'administrator/build')));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.use('/', require('./routes/administrator/index'));
 app.use('/users', require('./routes/administrator/users'));
