@@ -9,6 +9,7 @@ import Requests from './Containers/Requests/Requests';
 import Reports from './Containers/Reports/Reports';
 import PurchaseManagement from './Containers/Purchase/PurchaseManagement';
 import FinanceManagement from './Containers/Finance/FinanceManagement';
+import ProductionManagement from './Containers/Production/ProductionManagement';
 import Configurations from './Containers/Configurations/Configurations';
 
 function App() {
@@ -25,6 +26,10 @@ function App() {
          />
          <ProtectedRoute path='/home/purchase' component={PurchaseManagement} />
          <ProtectedRoute path='/home/finance' component={FinanceManagement} />
+         <ProtectedRoute
+            path='/home/production'
+            component={ProductionManagement}
+         />
       </BrowserRouter>
    );
 }

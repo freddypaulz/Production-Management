@@ -24,7 +24,21 @@ const Permissions = [
    { name: 'Manage Purchase', value: false, component: 'purchase' },
    { name: 'Manage Purchase Wastages', value: false, component: 'purchase' },
    { name: 'Manage Purchase Stocks', value: false, component: 'purchase' },
-   { name: 'Manage Finance', value: false, component: 'finance' }
+   { name: 'Manage Finance', value: false, component: 'finance' },
+   { name: 'Manage PreProduction', value: false, component: 'production' },
+   { name: 'Manage Production', value: false, component: 'production' },
+   {
+      name: 'Manage Raw Material Request',
+      value: false,
+      component: 'production'
+   },
+   { name: 'Manage Wastage', value: false, component: 'production' },
+   { name: 'Manage Unit Request', value: false, component: 'production' },
+   { name: 'Manage Quality Check', value: false, component: 'production' },
+   { name: 'Manage Sales', value: false, component: 'production' },
+   { name: 'Manage Production Stock', value: false, component: 'production' },
+   { name: 'Manage Raw Material Stock', value: false, component: 'production' },
+   { name: 'Manage Unit', value: false, component: 'production' }
 ];
 
 export default Permissions;

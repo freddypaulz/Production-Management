@@ -28,6 +28,7 @@ export default class EditRole extends Component {
          configurations: false,
          finance: false,
          purchase: false,
+         production: false,
          errors: [],
          success: false,
          open: false
@@ -39,6 +40,7 @@ export default class EditRole extends Component {
       this.purchaseSelected = 0;
       this.configurationSelected = 0;
       this.financeSelected = 0;
+      this.productionSelected = 0;
 
       this.onEditHandler = () => {
          let givenPermissions = [];
@@ -60,6 +62,9 @@ export default class EditRole extends Component {
          }
          if (this.state.finance) {
             givenPermissions.push({ name: 'Finance', Value: true });
+         }
+         if (this.state.production) {
+            givenPermissions.push({ name: 'Production', Value: true });
          }
          this.state.permissions.map(permission => {
             if (permission.value === true) {
@@ -204,6 +209,24 @@ export default class EditRole extends Component {
                }
                break;
             }
+            case 'production': {
+               console.log(`production ${value}`);
+               if (value) {
+                  this.productionSelected++;
+               } else {
+                  this.productionSelected--;
+               }
+               if (this.productionSelected > 0) {
+                  this.setState({
+                     production: true
+                  });
+               } else {
+                  this.setState({
+                     production: false
+                  });
+               }
+               break;
+            }
             default: {
                break;
             }
@@ -251,6 +274,11 @@ export default class EditRole extends Component {
                            finance: true
                         });
                         this.financeSelected++;
+                     } else if (rolePermission.component === 'production') {
+                        this.setState({
+                           production: true
+                        });
+                        this.productionSelected++;
                      }
                      permission.value = true;
                   }
@@ -391,6 +419,18 @@ export default class EditRole extends Component {
                            />
                         }
                         label='Finance'
+                     />
+                  </Box>
+                  <Box width='20%' display='flex'>
+                     <FormControlLabel
+                        control={
+                           <Checkbox
+                              checked={this.state.production}
+                              disabled
+                              value={this.state.production}
+                           />
+                        }
+                        label='Production'
                      />
                   </Box>
                   <Box width='20%' display='flex'>

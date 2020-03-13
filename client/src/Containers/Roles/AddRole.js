@@ -27,6 +27,7 @@ export default class AddUser extends Component {
          configurations: false,
          finance: false,
          purchase: false,
+         production: false,
          errors: [],
          success: false
       };
@@ -37,6 +38,7 @@ export default class AddUser extends Component {
       this.configurationSelected = 0;
       this.purchaseSelected = 0;
       this.financeSelected = 0;
+      this.productionSelected = 0;
 
       this.onAddHandler = () => {
          let givenPermissions = [];
@@ -57,6 +59,9 @@ export default class AddUser extends Component {
          }
          if (this.state.finance) {
             givenPermissions.push({ name: 'Finance', Value: true });
+         }
+         if (this.state.production) {
+            givenPermissions.push({ name: 'Production', Value: true });
          }
          this.state.permissions.map(permission => {
             if (permission.value === true) {
@@ -194,6 +199,24 @@ export default class AddUser extends Component {
                } else {
                   this.setState({
                      finance: false
+                  });
+               }
+               break;
+            }
+            case 'production': {
+               console.log(`production ${value}`);
+               if (value) {
+                  this.productionSelected++;
+               } else {
+                  this.productionSelected--;
+               }
+               if (this.productionSelected > 0) {
+                  this.setState({
+                     production: true
+                  });
+               } else {
+                  this.setState({
+                     production: false
                   });
                }
                break;
@@ -340,6 +363,18 @@ export default class AddUser extends Component {
                            />
                         }
                         label='Finance'
+                     />
+                  </Box>
+                  <Box width='20%' display='flex'>
+                     <FormControlLabel
+                        control={
+                           <Checkbox
+                              checked={this.state.production}
+                              disabled
+                              value={this.state.production}
+                           />
+                        }
+                        label='Production'
                      />
                   </Box>
                   <Box width='20%' display='flex'>

@@ -18,6 +18,7 @@ export default class Home extends Component {
          'Reports',
          'Purchase',
          'Finance',
+         'Production',
          'Configurations'
       ];
       this.logout = () => {
