@@ -26,6 +26,7 @@ export default class EditRole extends Component {
          requests: false,
          reports: false,
          configurations: false,
+         purchase: false,
          errors: [],
          success: false,
          open: false
@@ -34,6 +35,7 @@ export default class EditRole extends Component {
       this.manageSelected = 0;
       this.requestSelected = 0;
       this.reportSelected = 0;
+      this.purchaseSelected = 0;
       this.configurationSelected = 0;
 
       this.onEditHandler = () => {
@@ -50,6 +52,9 @@ export default class EditRole extends Component {
          }
          if (this.state.configurations) {
             givenPermissions.push({ name: 'Configurations', Value: true });
+         }
+         if (this.state.purchase) {
+            givenPermissions.push({ name: 'Purchase', Value: true });
          }
 
          this.state.permissions.map(permission => {
@@ -78,14 +83,6 @@ export default class EditRole extends Component {
                      permission.value = false;
                      return null;
                   });
-                  // this.setState({
-                  //    role_name: '',
-                  //    description: '',
-                  //    permissions: [],
-                  //    errors: [],
-                  //    success: true,
-                  //    open: true
-                  // });
                   this.props.snack();
                   this.props.cancel();
                }
@@ -167,6 +164,24 @@ export default class EditRole extends Component {
                }
                break;
             }
+            case 'purchase': {
+               console.log(`purchase ${value}`);
+               if (value) {
+                  this.purchaseSelected++;
+               } else {
+                  this.purchaseSelected--;
+               }
+               if (this.purchaseSelected > 0) {
+                  this.setState({
+                     purchase: true
+                  });
+               } else {
+                  this.setState({
+                     purchase: false
+                  });
+               }
+               break;
+            }
             default: {
                break;
             }
@@ -199,6 +214,11 @@ export default class EditRole extends Component {
                            reports: true
                         });
                         this.reportSelected++;
+                     } else if (rolePermission.component === 'purchase') {
+                        this.setState({
+                           purchase: true
+                        });
+                        this.purchaseSelected++;
                      } else if (rolePermission.component === 'configurations') {
                         this.setState({
                            configurations: true
@@ -326,6 +346,18 @@ export default class EditRole extends Component {
                      <FormControlLabel
                         control={
                            <Checkbox
+                              checked={this.state.purchase}
+                              disabled
+                              value={this.state.purchase}
+                           />
+                        }
+                        label='Purchase'
+                     />
+                  </Box>
+                  <Box width='20%' display='flex'>
+                     <FormControlLabel
+                        control={
+                           <Checkbox
                               checked={this.state.configurations}
                               disabled
                               value={this.state.configurations}
@@ -342,13 +374,6 @@ export default class EditRole extends Component {
                                  <Checkbox
                                     checked={permission.value}
                                     onClick={e => {
-                                       // permission.value = !permission.value;
-                                       // this.setState({
-                                       //    permissions: [
-                                       //       ...this.state.permissions
-                                       //    ]
-                                       // });
-                                       // console.log(this.state.permissions);
                                        permission.value = !permission.value;
                                        console.log(permission.component);
                                        this.onCheckHandle(

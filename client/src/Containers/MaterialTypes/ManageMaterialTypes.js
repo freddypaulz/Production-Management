@@ -81,22 +81,6 @@ export default class ManageMaterialTypes extends Component {
                >
                   Add
                </Button>
-               {/* <Button
-                  variant='contained'
-                  color='primary'
-                  style={{
-                     marginBottom: '20px',
-                     display: 'flex'
-                  }}
-                  size='large'
-                  onClick={() => {
-                     this.setState({
-                        openUploadCSV: true
-                     });
-                  }}
-               >
-                  Upload CSV
-               </Button> */}
             </Box>
 
             <MaterialTable

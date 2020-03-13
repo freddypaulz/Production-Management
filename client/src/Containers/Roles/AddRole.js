@@ -25,6 +25,7 @@ export default class AddUser extends Component {
          requests: false,
          reports: false,
          configurations: false,
+         purchase: false,
          errors: [],
          success: false
       };
@@ -33,6 +34,7 @@ export default class AddUser extends Component {
       this.requestSelected = 0;
       this.reportSelected = 0;
       this.configurationSelected = 0;
+      this.purchaseSelected = 0;
 
       this.onAddHandler = () => {
          let givenPermissions = [];
@@ -47,6 +49,9 @@ export default class AddUser extends Component {
          }
          if (this.state.configurations) {
             givenPermissions.push({ name: 'Configurations', Value: true });
+         }
+         if (this.state.purchase) {
+            givenPermissions.push({ name: 'Purchase', Value: true });
          }
          this.state.permissions.map(permission => {
             if (permission.value === true) {
@@ -69,13 +74,6 @@ export default class AddUser extends Component {
                      success: false
                   });
                } else {
-                  // this.setState({
-                  //    role_name: '',
-                  //    description: '',
-                  //    permissions: [],
-                  //    errors: [],
-                  //    success: true
-                  // });
                   this.props.cancel();
                   this.props.snack();
                }
@@ -155,6 +153,24 @@ export default class AddUser extends Component {
                } else {
                   this.setState({
                      configurations: false
+                  });
+               }
+               break;
+            }
+            case 'purchase': {
+               console.log(`purchase ${value}`);
+               if (value) {
+                  this.purchaseSelected++;
+               } else {
+                  this.purchaseSelected--;
+               }
+               if (this.purchaseSelected > 0) {
+                  this.setState({
+                     purchase: true
+                  });
+               } else {
+                  this.setState({
+                     purchase: false
                   });
                }
                break;
@@ -277,6 +293,18 @@ export default class AddUser extends Component {
                            />
                         }
                         label='Reports'
+                     />
+                  </Box>
+                  <Box width='20%' display='flex'>
+                     <FormControlLabel
+                        control={
+                           <Checkbox
+                              checked={this.state.purchase}
+                              disabled
+                              value={this.state.purchase}
+                           />
+                        }
+                        label='Purchase'
                      />
                   </Box>
                   <Box width='20%' display='flex'>

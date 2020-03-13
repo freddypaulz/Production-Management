@@ -20,7 +20,10 @@ const Permissions = [
    { name: 'Purchase Requests', value: false, component: 'requests' },
    { name: 'Purchase Report', value: false, component: 'reports' },
    { name: 'Production and Sales Report', value: false, component: 'reports' },
-   { name: 'Product Code', value: false, component: 'configurations' }
+   { name: 'Product Code', value: false, component: 'configurations' },
+   { name: 'Manage Purchase', value: false, component: 'purchase' },
+   { name: 'Manage Purchase Wastages', value: false, component: 'purchase' },
+   { name: 'Manage Purchase Stocks', value: false, component: 'purchase' }
 ];
 
 export default Permissions;

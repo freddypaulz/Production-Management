@@ -3,8 +3,12 @@ import { Box } from '@material-ui/core';
 import Dashboard from '../../Components/Dashboard/Dashboard';
 import auth from '../../Components/Auth/auth';
 import AppBar from '../../Components/AppBar/AppBar';
+import ManagePurchase from './Purchase/Manage_Purchase';
+import ManagePurchaseStocks from './Purchase Stock/Manage_Purchase_Stocks';
+import ManagePurchaseWastage from './Purchase Wastage/Manage_Wastage';
+import { Route } from 'react-router';
 
-export default class Home extends Component {
+export default class PurchaseManagement extends Component {
    constructor(props) {
       super(props);
       this.state = {
@@ -13,12 +17,9 @@ export default class Home extends Component {
       };
       this.permissions = JSON.parse(sessionStorage.getItem('permissions'));
       this.contents = [
-         'Management',
-         'Requests',
-         'Reports',
-         'Purchase',
-         'Finance',
-         'Configurations'
+         'Manage Purchase',
+         'Manage Purchase Stocks',
+         'Manage Purchase Wastages'
       ];
       this.logout = () => {
          if (auth.logout()) {
@@ -29,6 +30,9 @@ export default class Home extends Component {
          this.setState({
             width: '.1px'
          });
+      };
+      this.home = () => {
+         this.props.history.push('/home');
       };
       this.dashboardMax = () => {
          this.setState({
@@ -43,9 +47,7 @@ export default class Home extends Component {
                return el === content ? true : false;
             })
          ) {
-            //console.log('true: ', content);
             let path = content.toLowerCase().replace(/ /g, '-');
-            //console.log(path);
             this.setState({});
             this.setState(prevState => {
                prevState.dashboardItems.push({
@@ -61,16 +63,16 @@ export default class Home extends Component {
       return (
          <Box>
             <AppBar
-               name='Home'
+               name='Purchase'
                logout={this.logout}
-               homeButtonDisable={true}
+               home={this.home}
                dashboardMax={this.dashboardMax}
                dashboardMin={this.dashboardMin}
             />
-            <Box>
+            <Box display='flex'>
                <Dashboard
                   items={this.state.dashboardItems}
-                  componentName='home'
+                  componentName='home/purchase'
                   width={this.state.width}
                   dashboardMin={this.dashboardMin}
                />
@@ -81,18 +83,21 @@ export default class Home extends Component {
                   width='100%'
                   marginTop='10px'
                >
-                  <Box
-                     width='90%'
-                     display='flex'
-                     justifyContent='center'
-                     flexDirection='column'
-                  >
-                     {this.props.history.location.state ? (
-                        <Box color='red' textAlign='center'>
-                           {this.props.history.location.state.msg}
-                        </Box>
-                     ) : null}
-                  </Box>
+                  <Route
+                     exact
+                     path='/home/purchase/manage-purchase'
+                     component={ManagePurchase}
+                  />
+                  <Route
+                     exact
+                     path='/home/purchase/manage-purchase-stocks'
+                     component={ManagePurchaseStocks}
+                  />
+                  <Route
+                     exact
+                     path='/home/purchase/manage-purchase-wastages'
+                     component={ManagePurchaseWastage}
+                  />
                </Box>
             </Box>
          </Box>
