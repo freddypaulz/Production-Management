@@ -40,9 +40,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //aws
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'client/build')));
+// const path = require('path');
+// app.use(express.static(path.join(__dirname, 'client/build')));
 
+//Admin
 app.use('/', require('./routes/administrator/index'));
 app.use('/users', require('./routes/administrator/users'));
 app.use('/roles', require('./routes/administrator/roles'));
@@ -73,6 +74,23 @@ app.use(
 );
 app.use('/productions', require('./routes/administrator/reports/productions'));
 app.use('/sales', require('./routes/administrator/reports/sales'));
+
+//Purchase
+app.use('/request-details', require('./routes/purchase/request_details'));
+app.use('/raw-material', require('./routes/purchase/raw_material'));
+app.use('/vendor', require('./routes/purchase/VendorsRoute'));
+app.use('/log', require('./routes/purchase/LogsRoute'));
+app.use('/measuring-unit', require('./routes/purchase/measuringUnit'));
+app.use('/files', require('./routes/purchase/FilesRoute'));
+app.use('/purchase-stocks', require('./routes/purchase/PurchaseStocksRoute'));
+app.use(
+   '/purchase-wastages',
+   require('./routes/purchase/PurchaseWastagesRoute')
+);
+app.use(
+   '/production',
+   require('./Routes/purchase/production_raw_material_stock')
+);
 
 app.listen(5000, () => {
    console.log(`App listening on port ${PORT}!`);

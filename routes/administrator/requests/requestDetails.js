@@ -1,4 +1,4 @@
-const request_details = require('../../../models/Administrator/Requests/RequestDetails');
+const request_details = require('../../../models/Purchase/Request_Details');
 const Logs = require('../../../models/Administrator/Logs/Logs');
 const express = require('express');
 const fileupload = require('express-fileupload');
