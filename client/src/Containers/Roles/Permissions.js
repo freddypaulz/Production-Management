@@ -23,7 +23,8 @@ const Permissions = [
    { name: 'Product Code', value: false, component: 'configurations' },
    { name: 'Manage Purchase', value: false, component: 'purchase' },
    { name: 'Manage Purchase Wastages', value: false, component: 'purchase' },
-   { name: 'Manage Purchase Stocks', value: false, component: 'purchase' }
+   { name: 'Manage Purchase Stocks', value: false, component: 'purchase' },
+   { name: 'Manage Finance', value: false, component: 'finance' }
 ];
 
 export default Permissions;

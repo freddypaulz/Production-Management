@@ -26,6 +26,7 @@ export default class EditRole extends Component {
          requests: false,
          reports: false,
          configurations: false,
+         finance: false,
          purchase: false,
          errors: [],
          success: false,
@@ -37,6 +38,7 @@ export default class EditRole extends Component {
       this.reportSelected = 0;
       this.purchaseSelected = 0;
       this.configurationSelected = 0;
+      this.financeSelected = 0;
 
       this.onEditHandler = () => {
          let givenPermissions = [];
@@ -56,7 +58,9 @@ export default class EditRole extends Component {
          if (this.state.purchase) {
             givenPermissions.push({ name: 'Purchase', Value: true });
          }
-
+         if (this.state.finance) {
+            givenPermissions.push({ name: 'Finance', Value: true });
+         }
          this.state.permissions.map(permission => {
             if (permission.value === true) {
                givenPermissions.push(permission);
@@ -182,6 +186,24 @@ export default class EditRole extends Component {
                }
                break;
             }
+            case 'finance': {
+               console.log(`finance ${value}`);
+               if (value) {
+                  this.financeSelected++;
+               } else {
+                  this.financeSelected--;
+               }
+               if (this.financeSelected > 0) {
+                  this.setState({
+                     finance: true
+                  });
+               } else {
+                  this.setState({
+                     finance: false
+                  });
+               }
+               break;
+            }
             default: {
                break;
             }
@@ -224,6 +246,11 @@ export default class EditRole extends Component {
                            configurations: true
                         });
                         this.configurationSelected++;
+                     } else if (rolePermission.component === 'finance') {
+                        this.setState({
+                           finance: true
+                        });
+                        this.financeSelected++;
                      }
                      permission.value = true;
                   }
@@ -352,6 +379,18 @@ export default class EditRole extends Component {
                            />
                         }
                         label='Purchase'
+                     />
+                  </Box>
+                  <Box width='20%' display='flex'>
+                     <FormControlLabel
+                        control={
+                           <Checkbox
+                              checked={this.state.finance}
+                              disabled
+                              value={this.state.finance}
+                           />
+                        }
+                        label='Finance'
                      />
                   </Box>
                   <Box width='20%' display='flex'>

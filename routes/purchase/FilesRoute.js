@@ -20,7 +20,7 @@ router.post('/', (req, res) => {
       if (file.length) {
          for (let i = 0; i < file.length; i++) {
             file[i].mv(
-               `${__dirname}/../../client/src/file storage/${file[i].name}`,
+               `${__dirname}/../../client/public/uploads/${file[i].name}`,
                err => {
                   if (err) res.send(err);
                   else {
@@ -35,7 +35,7 @@ router.post('/', (req, res) => {
          }
       } else {
          file.mv(
-            `${__dirname}/../../client/src/file storage/${file.name}`,
+            `${__dirname}/../../client/public/uploads/${file.name}`,
             err => {
                if (err) {
                   console.log(err);

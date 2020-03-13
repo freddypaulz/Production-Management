@@ -3,10 +3,10 @@ import MaterialTable from 'material-table';
 import { Box, DialogContent, Snackbar, Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
-import EditPurchase from './Edit_Purchase';
+import EditPurchase from './Finance_Edit_Purchase';
 import Alert from '@material-ui/lab/Alert';
 
-export default class ManagePurchase extends Component {
+export default class Manage_Finance extends Component {
    constructor(props) {
       super();
       this.EditData = {};
@@ -15,6 +15,7 @@ export default class ManagePurchase extends Component {
             { title: 'Material Name', field: 'Raw_Material_Id' },
             { title: 'Quantity', field: 'Quantity' },
             { title: 'Measuring Unit', field: 'Measuring_Unit' },
+            { title: 'Priority', field: 'Priority' },
             { title: 'Status', field: 'Status' },
             { title: 'Comments', field: 'Comments' }
          ],
@@ -22,9 +23,9 @@ export default class ManagePurchase extends Component {
          openAdd: false,
          openEdit: false,
          alert: false,
-         vendorList: [],
-         unitList: [],
          materialList: [],
+         unitList: [],
+         vendorList: [],
          fieldDisabled: {
             quantity: false,
             unit: false,
@@ -38,11 +39,29 @@ export default class ManagePurchase extends Component {
             to: '',
             uploadFile: 'flex'
          },
-         logComments: '',
-         temp: []
+         logComments: 'no commments'
       };
       this.closeAlert = () => {
          this.setState({ alert: false });
+      };
+      this.loadDetails = () => {
+         axios.get('/request-details').then(res => {
+            let temp = [];
+            console.log('Details: ', res.data);
+            for (let i = 0; i < res.data.length; i++) {
+               res.data[i].Raw_Material_Id = this.getMaterialName(
+                  res.data[i].Raw_Material_Id
+               );
+               res.data[i].Measuring_Unit = this.getUnit(
+                  res.data[i].Measuring_Unit
+               );
+               res.data[i].Vendor = this.getVendor(res.data[i].Vendor);
+               temp.push(res.data[i]);
+            }
+            this.setState({
+               data: temp
+            });
+         });
       };
       this.OnEditHandler = (event, rowData) => {
          axios
@@ -56,7 +75,6 @@ export default class ManagePurchase extends Component {
                });
             });
       };
-
       this.getMaterialName = id => {
          let temp = id;
          this.state.materialList.map(material => {
@@ -66,7 +84,6 @@ export default class ManagePurchase extends Component {
          });
          return temp;
       };
-
       this.getUnit = id => {
          let temp = id;
          this.state.unitList.map(unit => {
@@ -76,7 +93,6 @@ export default class ManagePurchase extends Component {
          });
          return temp;
       };
-
       this.getVendor = id => {
          let temp = id;
          if (id !== '') {
@@ -90,7 +106,6 @@ export default class ManagePurchase extends Component {
          }
          return temp;
       };
-
       this.handleClose = () => {
          //get Material List
          axios
@@ -133,14 +148,16 @@ export default class ManagePurchase extends Component {
             let temp = [];
             console.log('Details: ', res.data);
             for (let i = 0; i < res.data.length; i++) {
-               res.data[i].Raw_Material_Id = this.getMaterialName(
-                  res.data[i].Raw_Material_Id
-               );
-               res.data[i].Measuring_Unit = this.getUnit(
-                  res.data[i].Measuring_Unit
-               );
-               res.data[i].Vendor = this.getVendor(res.data[i].Vendor);
-               temp.push(res.data[i]);
+               if (res.data[i].Status === 'ForwardedToFinance') {
+                  res.data[i].Raw_Material_Id = this.getMaterialName(
+                     res.data[i].Raw_Material_Id
+                  );
+                  res.data[i].Measuring_Unit = this.getUnit(
+                     res.data[i].Measuring_Unit
+                  );
+                  res.data[i].Vendor = this.getVendor(res.data[i].Vendor);
+                  temp.push(res.data[i]);
+               }
             }
             this.setState({
                data: temp
@@ -163,109 +180,105 @@ export default class ManagePurchase extends Component {
                Request Details
             </Box>
             <Box width='90%' display='flex' flexDirection='row'>
-               <MaterialTable
-                  title=' '
-                  columns={this.state.columns}
-                  data={this.state.data}
+               <Button
+                  variant='contained'
+                  color='primary'
                   style={{
-                     width: '100%',
-                     maxHeight: '500px',
-                     overflow: 'auto'
+                     marginBottom: '20px',
+                     display: 'flex',
+                     marginRight: '10px'
                   }}
-                  options={{
-                     sorting: true,
-                     headerStyle: {
-                        backgroundColor: '#3f51b5',
-                        color: '#FFF',
-                        fontSize: 'medium',
-                        fontWeight: 'bold'
-                     }
+                  size='small'
+                  onClick={this.loadDetails}
+               >
+                  Purchase Details
+               </Button>
+               <Button
+                  variant='contained'
+                  color='primary'
+                  size='small'
+                  style={{
+                     marginBottom: '20px',
+                     display: 'flex'
                   }}
-                  actions={[
-                     {
-                        icon: 'edit',
-                        tooltip: 'Edit User',
-                        onClick: (event, rowData) => {
-                           if (
-                              rowData.Status === 'Requesting' ||
-                              rowData.Status === 'ForwardedToPurchase' ||
-                              rowData.Status === 'Finance-Accepted'
-                           ) {
-                              if (rowData.Status === 'Finance-Accepted') {
-                                 this.setState({
-                                    logComments: rowData.Comments,
-                                    from: rowData.From,
-                                    to: rowData.To,
-                                    uploadFile: 'none',
-                                    fieldDisabled: {
-                                       quantity: true,
-                                       unit: true,
-                                       vendor: true,
-                                       amount: true,
-                                       status: true,
-                                       comment: true,
-                                       btnDisplay: 'none',
-                                       btnText: 'Close'
-                                    }
-                                 });
-                                 this.OnEditHandler(event, rowData);
-                              } else {
-                                 this.setState({
-                                    logComments: rowData.Comments,
-                                    from: rowData.From,
-                                    to: rowData.To,
-                                    uploadFile: 'flex',
-                                    fieldDisabled: {
-                                       quantity: false,
-                                       unit: false,
-                                       vendor: false,
-                                       amount: false,
-                                       status: false,
-                                       comment: false,
-                                       btnDisplay: 'flex',
-                                       btnText: 'Cancel'
-                                    }
-                                 });
-                                 this.OnEditHandler(event, rowData);
-                              }
-                           } else {
-                              this.setState({ alert: true });
-                           }
-                        }
-                     }
-                  ]}
-                  onRowClick={(event, rowData) => {
-                     this.setState({
-                        logComments: rowData.Comments,
-                        from: rowData.From,
-                        to: rowData.To,
-                        uploadFile: 'none',
-                        fieldDisabled: {
-                           quantity: true,
-                           unit: true,
-                           vendor: true,
-                           amount: true,
-                           status: true,
-                           comment: true,
-                           btnDisplay: 'none',
-                           btnText: 'Close'
-                        }
-                     });
-                     this.OnEditHandler(event, rowData);
-                  }}
-               />
+                  onClick={this.handleClose}
+               >
+                  Request Details
+               </Button>
             </Box>
-
+            <MaterialTable
+               title=' '
+               columns={this.state.columns}
+               data={this.state.data}
+               style={{ width: '90%', maxHeight: '500px', overflow: 'auto' }}
+               options={{
+                  sorting: true,
+                  headerStyle: {
+                     backgroundColor: '#3f51b5',
+                     color: '#FFF',
+                     fontSize: 'medium',
+                     fontWeight: 'bold'
+                  }
+               }}
+               actions={[
+                  {
+                     icon: 'edit',
+                     tooltip: 'Edit User',
+                     onClick: (event, rowData) => {
+                        if (rowData.Status === 'ForwardedToFinance') {
+                           this.setState({
+                              logComments: rowData.Comments,
+                              from: rowData.From,
+                              to: rowData.To,
+                              uploadFile: 'flex',
+                              fieldDisabled: {
+                                 quantity: false,
+                                 unit: false,
+                                 vendor: true,
+                                 amount: true,
+                                 status: false,
+                                 comment: false,
+                                 btnDisplay: 'flex',
+                                 btnText: 'Cancel'
+                              }
+                           });
+                           this.OnEditHandler(event, rowData);
+                        } else {
+                           this.setState({ alert: true });
+                        }
+                     }
+                  }
+               ]}
+               onRowClick={(event, rowData) => {
+                  this.setState({
+                     logComments: rowData.Comments,
+                     from: rowData.From,
+                     to: rowData.To,
+                     uploadFile: 'none',
+                     fieldDisabled: {
+                        quantity: true,
+                        unit: true,
+                        vendor: true,
+                        amount: true,
+                        status: true,
+                        comment: true,
+                        btnDisplay: 'none',
+                        btnText: 'Close'
+                     }
+                  });
+                  this.OnEditHandler(event, rowData);
+               }}
+            />
             <Dialog open={this.state.openEdit} maxWidth='lg' fullWidth>
                <DialogContent style={{ padding: '20px' }}>
                   <EditPurchase
                      disabled={this.state.fieldDisabled}
-                     dept='Purchase'
-                     uploadFile={this.state.uploadFile}
+                     dept='Finance'
+                     uploadFile='none'
                      From={this.state.from}
                      To={this.state.to}
                      logComments={this.state.logComments}
-                     Purchase={this.EditData}
+                     Finance={this.EditData}
                      cancel={() => {
                         this.setState({
                            openEdit: false

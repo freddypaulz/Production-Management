@@ -8,6 +8,7 @@ import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import Requests from './Containers/Requests/Requests';
 import Reports from './Containers/Reports/Reports';
 import PurchaseManagement from './Containers/Purchase/PurchaseManagement';
+import FinanceManagement from './Containers/Finance/FinanceManagement';
 import Configurations from './Containers/Configurations/Configurations';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             component={Configurations}
          />
          <ProtectedRoute path='/home/purchase' component={PurchaseManagement} />
+         <ProtectedRoute path='/home/finance' component={FinanceManagement} />
       </BrowserRouter>
    );
 }
