@@ -40,8 +40,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //aws
-// const path = require('path');
-// app.use(express.static(path.join(__dirname, 'client/build')));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 //Admin
 app.use('/', require('./routes/administrator/index'));
