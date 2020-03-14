@@ -96,7 +96,7 @@ class Add_Purchase_Stock extends Component {
                //console.log('called')
                return temp.push('File not found');
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -119,7 +119,9 @@ class Add_Purchase_Stock extends Component {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'invoice ' + new moment().format('DD_MM_YYYY HH_m_s ') + this.state.file[i].name
+                  'invoice_' +
+                     new moment().format('DD_MM_YYYY_HH_m_s_') +
+                     this.state.file[i].name
                );
             }
             axios
@@ -407,30 +409,27 @@ class Add_Purchase_Stock extends Component {
                                  }}
                               />
                            ) : (
-                                 <DeleteOutlineIcon
-                                    color='secondary'
-                                    style={{
-                                       display: 'flex'
-                                    }}
-                                    onClick={() => {
-                                       this.setState({});
-                                       this.setState(prevState => {
-                                          prevState.Id.splice(index, 1);
-                                          console.log(prevState.Id);
-                                       });
-                                    }}
-                                 />
-                              )}
+                              <DeleteOutlineIcon
+                                 color='secondary'
+                                 style={{
+                                    display: 'flex'
+                                 }}
+                                 onClick={() => {
+                                    this.setState({});
+                                    this.setState(prevState => {
+                                       prevState.Id.splice(index, 1);
+                                       console.log(prevState.Id);
+                                    });
+                                 }}
+                              />
+                           )}
                         </Box>
                      );
                   }).reverse()}
                </Box>
             </Box>
             <Box style={styles.boxSize2}>
-               <Box
-                  display={this.props.uploadFile}
-                  flexDirection='column'
-               >
+               <Box display={this.props.uploadFile} flexDirection='column'>
                   <input
                      style={{ display: 'none' }}
                      id='#file2'

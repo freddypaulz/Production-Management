@@ -24,7 +24,7 @@ router.post('/upload', (req, res) => {
       let i = '25-10-2020';
       const file = req.files.file;
       const fileType = file.name.split('.');
-      const fileName = `quotation ${new moment().format('DD_MM_YYYY HH_m_s')}.${
+      const fileName = `quotation_${new moment().format('DD_MM_YYYY_HH_m_s')}.${
          fileType[1]
       }`;
       file.mv(

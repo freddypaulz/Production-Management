@@ -75,8 +75,8 @@ export default class EditPurchase extends Component {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'quotation ' +
-                     new moment().format('DD_MM_YYYY HH_m_s ') +
+                  'quotation_' +
+                     new moment().format('DD_MM_YYYY_HH_m_s_') +
                      file
                );
             }
