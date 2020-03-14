@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 //
 import { PaperBoard } from '../PaperBoard/PaperBoard';
 import styles from '../styles/FormStyles';
-import { Box, TextField, Select, MenuItem } from '@material-ui/core';
+import { Box, TextField, Select, MenuItem, Button } from '@material-ui/core';
 import { Chart } from 'react-charts';
 export const Charts = props => {
    const [state, setState] = useState('line');
@@ -36,17 +36,23 @@ export const Charts = props => {
    );
    return (
       <Box style={styles.box}>
-         <PaperBoard>
-            <Box width='900px' height='400px' overflow='hidden'>
-               <Chart
-                  data={data}
-                  series={series}
-                  axes={axes}
-                  getSeriesStyle={getSeriesStyle}
-                  getDatumStyle={getDatumStyle}
-                  tooltip
-               />
-            </Box>
+         <Box
+            width='90%'
+            height='400px'
+            overflow='hidden'
+            border='1px solid black'
+            padding='10px'
+         >
+            <Chart
+               data={data}
+               series={series}
+               axes={axes}
+               getSeriesStyle={getSeriesStyle}
+               getDatumStyle={getDatumStyle}
+               tooltip
+            />
+         </Box>
+         <Box style={{ marginTop: '20px' }}>
             <Select
                value={state}
                onChange={e => {
@@ -57,7 +63,27 @@ export const Charts = props => {
                <MenuItem value='line'>Line</MenuItem>
                <MenuItem value='area'>Area</MenuItem>
             </Select>
-         </PaperBoard>
+         </Box>
+         <Box
+            display=' flex'
+            marginTop='10px'
+            justifyContent='flex-end'
+            width='92%'
+         >
+            <Box width='100px'>
+               <Button
+                  fullWidth
+                  variant='contained'
+                  color='primary'
+                  size='large'
+                  onClick={() => {
+                     props.cancel();
+                  }}
+               >
+                  Close
+               </Button>
+            </Box>
+         </Box>
       </Box>
    );
 };

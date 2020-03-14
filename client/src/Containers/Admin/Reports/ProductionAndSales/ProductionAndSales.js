@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Charts } from '../../../../Components/Charts/Charts';
 import styles from '../../../../Components/styles/FormStyles';
+import { PaperBoard } from '../../../../Components/PaperBoard/PaperBoard';
 import { Datepick } from '../../../../Components/Date/Datepick';
 import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
 import axios from 'axios';
@@ -41,7 +42,6 @@ export default class ProductionAndSales extends Component {
                });
                this.setState(prevState => {
                   prevState.SalesData.push([
-                     //new moment(Sale.date).format('MM-YYYY'),
                      Sale.Product_ID +
                         '-' +
                         new moment(Sale.Selling_Date).format('MMM-YYYY'),
@@ -91,50 +91,59 @@ export default class ProductionAndSales extends Component {
                });
          });
    };
-   componentDidMount() {
-      // axios.get('/production-s/production-s').then(res => {
-      //    console.log(res.data.Productions);
-      // });
-   }
+   componentDidMount() {}
    render() {
       return (
-         <Box>
+         <Box style={styles.box}>
             <Box fontSize='30px' mb={3}>
                Production And Sales Report
             </Box>
-            <Box style={styles.box}>
+            <PaperBoard>
                <Box style={styles.box_field}>
-                  <Datepick
-                     id='1'
-                     Name='Select Start month'
-                     Req={true}
-                     value={this.state.start_date}
-                     minDate={new Date('01-01-1990')}
-                     maxDate={new Date()}
-                     setDate={date => {
-                        this.setState({
-                           start_date: date.startOf('month')
-                        });
-                     }}
-                  />
+                  <Box style={styles.box} marginRight='10px'>
+                     <Datepick
+                        id='1'
+                        Name='Select Start month'
+                        Req={true}
+                        value={this.state.start_date}
+                        minDate={new Date('01-01-1990')}
+                        maxDate={new Date()}
+                        setDate={date => {
+                           this.setState({
+                              start_date: date.startOf('month')
+                           });
+                        }}
+                     />
+                  </Box>
+                  <Box style={styles.box}>
+                     <Datepick
+                        id='2'
+                        Name='Select End Month'
+                        Req={true}
+                        value={this.state.end_date}
+                        minDate={this.state.start_date}
+                        maxDate={new moment() + 1000 * 60 * 60 * 24 * 30}
+                        setDate={date => {
+                           this.setState({
+                              end_date: date.endOf('month')
+                           });
+                        }}
+                     />
+                  </Box>
                </Box>
-               <Box style={styles.box_field}>
-                  <Datepick
-                     id='2'
-                     Name='Select End Month'
-                     Req={true}
-                     value={this.state.end_date}
-                     minDate={this.state.start_date}
-                     maxDate={new moment() + 1000 * 60 * 60 * 24 * 30}
-                     setDate={date => {
-                        this.setState({
-                           end_date: date.endOf('month')
-                        });
-                     }}
-                  />
-               </Box>
-               <Box>
+            </PaperBoard>
+            <Box
+               display=' flex'
+               marginTop='20px'
+               justifyContent='flex-end'
+               width='94%'
+            >
+               <Box width='100px'>
                   <Button
+                     fullWidth
+                     variant='contained'
+                     color='primary'
+                     size='large'
                      onClick={() => {
                         this.onReportHandler();
                      }}
@@ -144,8 +153,18 @@ export default class ProductionAndSales extends Component {
                </Box>
             </Box>
             <Dialog fullWidth maxWidth='lg' open={this.state.ChartOpen}>
-               <DialogContent>
-                  <Charts ChartContent={this.state.ChartContent} />
+               <DialogContent style={{ padding: '20px' }}>
+                  <Box fontSize='30px' mb={3} textAlign='center'>
+                     Production and Sales report
+                  </Box>
+                  <Charts
+                     cancel={() => {
+                        this.setState({
+                           ChartOpen: false
+                        });
+                     }}
+                     ChartContent={this.state.ChartContent}
+                  />
                </DialogContent>
             </Dialog>
             {/* <Charts ChartContent={this.state.ChartContent} /> */}
