@@ -12,11 +12,9 @@ import {
 } from "@material-ui/core";
 // import PaperBoard from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-import { Datepick } from "../../Common_Files/Date/Datepick";
-import { Route, Link } from "react-router-dom";
-import ProductQC from "./Product_QC";
-import ManageQC from "./Manage_QC";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
+import { Link } from "react-router-dom";
 
 const styles = Styles;
 const style = {
@@ -98,7 +96,7 @@ export default class Qualitycheck extends Component {
     };
   }
   componentDidMount() {
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then(res => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
@@ -290,6 +288,7 @@ export default class Qualitycheck extends Component {
                               prodCode = product.product_code;
                               console.log("Procode: ", prodCode);
                             }
+                            return null;
                           });
                           this.setState({
                             Product_Name: event.target.value,
@@ -692,7 +691,7 @@ export default class Qualitycheck extends Component {
             </Button>
           </Box>
           <Box marginLeft="10px">
-            <Link to="/management/manage-qc">
+            <Link to="/home/production/manage-qc">
               <Button
                 fullWidth
                 variant="contained"

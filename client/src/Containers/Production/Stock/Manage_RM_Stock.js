@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, Button, DialogContent, Snackbar } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
+import { Box } from "@material-ui/core";
 import axios from "axios";
-import EditProductStock from "./Edit_Product_Stock";
-import Alert from "@material-ui/lab/Alert";
 
 export default class ManageRMStock extends Component {
   constructor(props) {
@@ -61,7 +58,7 @@ export default class ManageRMStock extends Component {
           res.data[i].id = i + 1;
           //Axios
           axios
-            .post("/measuring-unit/measuring-unit", {
+            .post("/measuring-units/measuring-unit", {
               _id: res.data[i].Measuring_Unit
             })
             .then(MeasuringUnit => {
@@ -85,7 +82,7 @@ export default class ManageRMStock extends Component {
           //end
           //Axios
           axios
-            .post("/raw-material", {
+            .post("/raw-materials/raw-material", {
               _id: res.data[i].Raw_Material_Id
               //_id: res.data[i].Product_ID
             })
@@ -119,13 +116,12 @@ export default class ManageRMStock extends Component {
   render() {
     return (
       <Box
-        width="80%"
+        width="100%"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        height="100vh"
       >
-        <Box fontSize="30px" mb={3} fontWeight="bold">
+        <Box fontSize="30px" mb={3}>
           Raw Material stock
         </Box>
 
@@ -133,7 +129,7 @@ export default class ManageRMStock extends Component {
           title=" "
           columns={this.state.columns}
           data={this.state.data}
-          style={{ width: "100%", overflow: "auto", alignItems: "left" }}
+          style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
           options={{
             sorting: true,
             headerStyle: {

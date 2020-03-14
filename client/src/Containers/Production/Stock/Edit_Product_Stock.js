@@ -8,10 +8,9 @@ import {
   InputLabel,
   MenuItem
 } from "@material-ui/core";
-import PaperBoard from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-import { Datepick } from "../../Common_Files/Date/Datepick";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 
 const styles = Styles;
 const style = {
@@ -57,7 +56,7 @@ export default class EditProductStock extends Component {
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then(res => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
@@ -105,210 +104,210 @@ export default class EditProductStock extends Component {
             Successful
           </Box>
         ) : null}
-        <PaperBoard>
-          <Box style={styles.root}>
-            <Box display="flex" justifyContent="center">
-              <Box style={styles.lbox}>
-                <Box style={styles.form}>
-                  <Box style={styles.boxSize2}>
-                    <Box width="50%" style={style}>
-                      <FormControl
-                        required
-                        variant="outlined"
-                        fullWidth
-                        size="small"
+
+        <Box style={styles.root}>
+          <Box display="flex" justifyContent="center">
+            <Box style={styles.lbox}>
+              <Box style={styles.form}>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
                       >
-                        <InputLabel
-                          style={{
-                            backgroundColor: "white",
-                            paddingLeft: "2px",
-                            paddingRight: "2px"
-                          }}
-                        >
-                          Product Name
-                        </InputLabel>
-                        <Select
-                          variant="outlined"
-                          required
-                          name="Product_Name"
-                          value={this.state.Product_Name}
-                          onChange={event => {
-                            let prodCode;
-                            this.state.products.map(product => {
-                              if (product._id === event.target.value) {
-                                prodCode = product.product_code;
-                                console.log("Procode: ", prodCode);
-                              }
-                            });
-                            this.setState({
-                              Product_Name: event.target.value,
-                              Product_ID: prodCode
-                            });
-                          }}
-                        >
-                          {this.state.products.map((product, index) => {
-                            return (
-                              <MenuItem
-                                //selected
-                                key={index}
-                                value={product._id}
-                              >
-                                {product.product_name}
-                              </MenuItem>
-                            );
-                          })}
-                          {/* <MenuItem value="Product Name" disabled>
+                        Product Name
+                      </InputLabel>
+                      <Select
+                        variant="outlined"
+                        required
+                        name="Product_Name"
+                        value={this.state.Product_Name}
+                        onChange={event => {
+                          let prodCode;
+                          this.state.products.map(product => {
+                            if (product._id === event.target.value) {
+                              prodCode = product.product_code;
+                              console.log("Procode: ", prodCode);
+                            }
+                          });
+                          this.setState({
+                            Product_Name: event.target.value,
+                            Product_ID: prodCode
+                          });
+                        }}
+                      >
+                        {this.state.products.map((product, index) => {
+                          return (
+                            <MenuItem
+                              //selected
+                              key={index}
+                              value={product._id}
+                            >
+                              {product.product_name}
+                            </MenuItem>
+                          );
+                        })}
+                        {/* <MenuItem value="Product Name" disabled>
                             Product Name
                           </MenuItem>
                           <MenuItem value="Orange Juice">Orange Juice</MenuItem>
                           <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
-                        </Select>
-                      </FormControl>
-                    </Box>
-                    <Box width="50%" style={style}>
-                      <TextField
-                        size="small"
-                        fullWidth
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Product_ID"
+                      required
+                      name="Product_ID"
+                      value={this.state.Product_ID}
+                      onChange={event => {
+                        this.setState({
+                          Product_ID: event.target.value
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+                </Box>
+
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Quantity"
+                      required
+                      name="Quantity"
+                      value={this.state.Quantity}
+                      onChange={event => {
+                        this.setState({
+                          Quantity: event.target.value
+                        });
+                      }}
+                    ></TextField>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
+                      >
+                        Measuring Unit
+                      </InputLabel>
+                      <Select
+                        name="Measuring_Unit"
                         variant="outlined"
-                        label="Product_ID"
                         required
-                        name="Product_ID"
-                        value={this.state.Product_ID}
+                        value={this.state.Measuring_Unit}
                         onChange={event => {
                           this.setState({
-                            Product_ID: event.target.value
+                            Measuring_Unit: event.target.value
                           });
                           console.log(event.target.value);
                         }}
-                      ></TextField>
-                    </Box>
-                  </Box>
-
-                  <Box style={styles.boxSize2}>
-                    <Box width="50%" style={style}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        variant="outlined"
-                        label="Quantity"
-                        required
-                        name="Quantity"
-                        value={this.state.Quantity}
-                        onChange={event => {
-                          this.setState({
-                            Quantity: event.target.value
-                          });
-                        }}
-                      ></TextField>
-                    </Box>
-                    <Box width="50%" style={style}>
-                      <FormControl
-                        required
-                        variant="outlined"
-                        fullWidth
-                        size="small"
                       >
-                        <InputLabel
-                          style={{
-                            backgroundColor: "white",
-                            paddingLeft: "2px",
-                            paddingRight: "2px"
-                          }}
-                        >
-                          Measuring Unit
-                        </InputLabel>
-                        <Select
-                          name="Measuring_Unit"
-                          variant="outlined"
-                          required
-                          value={this.state.Measuring_Unit}
-                          onChange={event => {
-                            this.setState({
-                              Measuring_Unit: event.target.value
-                            });
-                            console.log(event.target.value);
-                          }}
-                        >
-                          {this.state.measuring_units.map(
-                            (measuring_unit, index) => {
-                              return (
-                                <MenuItem
-                                  selected
-                                  key={index}
-                                  value={measuring_unit._id}
-                                >
-                                  {measuring_unit.measuring_unit_name}
-                                </MenuItem>
-                              );
-                            }
-                          )}
-                          {/* <MenuItem value="unit" disabled>
+                        {this.state.measuring_units.map(
+                          (measuring_unit, index) => {
+                            return (
+                              <MenuItem
+                                selected
+                                key={index}
+                                value={measuring_unit._id}
+                              >
+                                {measuring_unit.measuring_unit_name}
+                              </MenuItem>
+                            );
+                          }
+                        )}
+                        {/* <MenuItem value="unit" disabled>
                             unit
                           </MenuItem>
                           <MenuItem value="kg">kg</MenuItem>
                           <MenuItem value="box">box</MenuItem> */}
-                        </Select>
-                      </FormControl>
-                    </Box>
+                      </Select>
+                    </FormControl>
                   </Box>
+                </Box>
 
-                  <Box style={styles.boxSize2}>
-                    <Box width="50%" style={style}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        variant="outlined"
-                        label="Expiry_Duration_Days"
-                        required
-                        name="Expiry_Duration_Days"
-                        value={this.state.Expiry_Duration_Days}
-                        onChange={event => {
-                          this.setState({
-                            Expiry_Duration_Days: event.target.value
-                          });
-                          console.log(event.target.value);
-                        }}
-                      ></TextField>
-                    </Box>
-                    <Box width="50%" style={style}>
-                      <Datepick
-                        id="4"
-                        variant="outlined"
-                        Name="Manufacture_Date"
-                        value={this.state.Manufacture_Date}
-                        setDate={date => {
-                          this.setState({
-                            Manufacture_Date: date
-                          });
-                          console.log(date);
-                        }}
-                      />
-                    </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Expiry_Duration_Days"
+                      required
+                      name="Expiry_Duration_Days"
+                      value={this.state.Expiry_Duration_Days}
+                      onChange={event => {
+                        this.setState({
+                          Expiry_Duration_Days: event.target.value
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
                   </Box>
-                  <Box style={styles.boxSize2}>
-                    <Box width="100%" style={style}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        variant="outlined"
-                        label="Stock"
-                        required
-                        name="Stock"
-                        value={this.state.Stock}
-                        onChange={event => {
-                          this.setState({
-                            Stock: event.target.value
-                          });
-                          console.log(event.target.value);
-                        }}
-                      ></TextField>
-                    </Box>
+                  <Box width="50%" style={style}>
+                    <Datepick
+                      id="4"
+                      variant="outlined"
+                      Name="Manufacture_Date"
+                      value={this.state.Manufacture_Date}
+                      setDate={date => {
+                        this.setState({
+                          Manufacture_Date: date
+                        });
+                        console.log(date);
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Stock"
+                      required
+                      name="Stock"
+                      value={this.state.Stock}
+                      onChange={event => {
+                        this.setState({
+                          Stock: event.target.value
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
                   </Box>
                 </Box>
               </Box>
             </Box>
           </Box>
-        </PaperBoard>
+        </Box>
+
         <Box
           display=" flex"
           marginTop="20px"

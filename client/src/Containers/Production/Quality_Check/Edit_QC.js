@@ -9,10 +9,9 @@ import {
   MenuItem,
   Checkbox
 } from "@material-ui/core";
-// import PaperBoard from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-import { Datepick } from "../../Common_Files/Date/Datepick";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const styles = Styles;
@@ -90,7 +89,7 @@ export default class Qualitycheck extends Component {
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then(res => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
@@ -264,6 +263,7 @@ export default class Qualitycheck extends Component {
                               prodCode = product.product_code;
                               console.log("Procode: ", prodCode);
                             }
+                            return null;
                           });
                           this.setState({
                             Product_Name: event.target.value,
@@ -350,12 +350,6 @@ export default class Qualitycheck extends Component {
                           });
                         }}
                       >
-                        {/* <MenuItem value="Measuring Unit" disabled>
-                            Measuring Unit
-                          </MenuItem>
-                          <MenuItem value="kg">kg</MenuItem>
-                          <MenuItem value="ltr">ltr</MenuItem>
-                          <MenuItem value="Box">Box</MenuItem> */}
                         {this.state.measuring_units.map(
                           (measuring_unit, index) => {
                             return (
@@ -422,17 +416,16 @@ export default class Qualitycheck extends Component {
                       onChange={event => {
                         this.setState({ B_Capacity: event.target.value });
 
-                        let cap = [];
-                        let cal;
-                        for (let i = 1; i <= event.target.value; i++) {
-                          cal =
-                            this.state.boxprefixcode +
-                            (parseInt(this.state.boxlastid) + i);
-                          cap.push(cal);
-                        }
-                        this.setState({ Box_Id: cap });
-                        console.log("ids", cap);
+                        // let cap = [];
+                        // let cal;
+                        // for (let i = 1; i <= event.target.value; i++) {
+                        //   cal =
+                        //     this.state.boxprefixcode +
+                        //     (parseInt(this.state.boxlastid) + i);
+                        //   cap.push(cal);
                         // }
+                        // this.setState({ Box_Id: cap });
+                        // console.log("ids", cap);
                       }}
                     ></TextField>
                   </Box>
@@ -449,17 +442,16 @@ export default class Qualitycheck extends Component {
                       onChange={event => {
                         this.setState({ I_Capacity: event.target.value });
 
-                        let temp = [];
-                        let calc;
-                        for (let i = 1; i <= this.state.I_Capacity; i++) {
-                          calc =
-                            this.state.prefixcode +
-                            (parseInt(this.state.lastid) + i);
-                          temp.push(calc);
-                        }
-                        this.setState({ Id: temp });
-                        console.log("ids", temp);
+                        // let temp = [];
+                        // let calc;
+                        // for (let i = 1; i <= this.state.I_Capacity; i++) {
+                        //   calc =
+                        //     this.state.prefixcode +
+                        //     (parseInt(this.state.lastid) + i);
+                        //   temp.push(calc);
                         // }
+                        // this.setState({ Id: temp });
+                        // console.log("ids", temp);
                       }}
                     ></TextField>
                   </Box>

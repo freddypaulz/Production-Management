@@ -52,7 +52,7 @@ export default class ProductQC extends Component {
 
           //Axios
           axios
-            .post("/measuring-unit/measuring-unit", {
+            .post("/measuring-units/measuring-unit", {
               _id: res.data[i].Measuring_Unit
             })
             .then(MeasuringUnit => {
@@ -112,13 +112,12 @@ export default class ProductQC extends Component {
   render() {
     return (
       <Box
-        width="80%"
+        width="100%"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        height="100vh"
       >
-        <Box fontSize="30px" mb={3} fontWeight="bold">
+        <Box fontSize="30px" mb={3}>
           Product List for QC
         </Box>
         {/* <Box display="flex" alignSelf="start">
@@ -145,7 +144,7 @@ export default class ProductQC extends Component {
           title=" "
           columns={this.state.columns}
           data={this.state.data}
-          style={{ width: "100%", overflow: "auto", alignItems: "left" }}
+          style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
           options={{
             sorting: true,
             headerStyle: {

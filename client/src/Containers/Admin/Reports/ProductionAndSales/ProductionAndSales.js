@@ -48,6 +48,7 @@ export default class ProductionAndSales extends Component {
                      Sale.Quantity
                   ]);
                });
+               return null;
             });
             this.setState(prevState => {
                prevState.ChartContent.push({
@@ -77,6 +78,7 @@ export default class ProductionAndSales extends Component {
                            Production.Quantity
                         ]);
                      });
+                     return null;
                   });
                   this.setState(prevState => {
                      prevState.ChartContent.push({

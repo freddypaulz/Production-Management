@@ -10,8 +10,8 @@ import {
 } from "@material-ui/core";
 // import PaperBoard from "../../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-import { Datepick } from "../../Common_Files/Date/Datepick";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 
 const styles = Styles;
 const style = {
@@ -65,7 +65,7 @@ export default class EditProductionUnit extends Component {
       this.setState({
         materials: [...res.data.RawMaterials]
       });
-      axios.get("/measuring-unit/measuring-units").then(res => {
+      axios.get("/measuring-units/measuring-units").then(res => {
         console.log(res);
         this.setState({
           measuring_units: [...res.data.MeasuringUnits]
@@ -142,6 +142,7 @@ export default class EditProductionUnit extends Component {
                               materialCode = material.raw_material_code;
                               console.log("code: ", materialCode);
                             }
+                            return null;
                           });
                           this.setState({
                             Raw_Material_Id: event.target.value,
@@ -322,7 +323,6 @@ export default class EditProductionUnit extends Component {
                       label="Status"
                       required
                       name="Status"
-                      value="Requesting"
                       value={this.state.Status}
                       onChange={event => {
                         this.setState({

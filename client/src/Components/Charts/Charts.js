@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 //
-import { PaperBoard } from '../PaperBoard/PaperBoard';
 import styles from '../styles/FormStyles';
-import { Box, TextField, Select, MenuItem, Button } from '@material-ui/core';
+import { Box, Select, MenuItem, Button } from '@material-ui/core';
 import { Chart } from 'react-charts';
 export const Charts = props => {
    const [state, setState] = useState('line');

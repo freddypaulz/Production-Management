@@ -8,10 +8,10 @@ import {
   InputLabel,
   MenuItem
 } from "@material-ui/core";
-// import PaperBoard from "../../../Common_Files/PaperBoard/PaperBoard";
+
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-import { Datepick } from "../../Common_Files/Date/Datepick";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 
 const styles = Styles;
 const style = {
@@ -60,7 +60,7 @@ export default class AddProductionUnit extends Component {
     };
   }
   componentDidMount() {
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then(res => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
@@ -131,6 +131,7 @@ export default class AddProductionUnit extends Component {
                                 material.raw_material_measuring_unit;
                               console.log("code: ", materialCode);
                             }
+                            return null;
                           });
                           this.setState({
                             Raw_Material_Id: event.target.value,
@@ -244,7 +245,6 @@ export default class AddProductionUnit extends Component {
                     </FormControl>
                   </Box>
                 </Box>
-
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <FormControl
@@ -307,7 +307,6 @@ export default class AddProductionUnit extends Component {
                       label="Status"
                       required
                       name="Status"
-                      value="Requesting"
                       value={this.state.Status}
                       onChange={event => {
                         this.setState({

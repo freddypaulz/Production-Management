@@ -1,791 +1,738 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import {
-   Box,
-   TextField,
-   Button,
-   Select,
-   FormControl,
-   InputLabel,
-   MenuItem,
-   InputAdornment,
-   Dialog,
-   DialogContent
-} from '@material-ui/core';
-import axios from 'axios';
-import Styles from '../styles/FormStyles';
-import { Datepick } from '../../../Components/Date/Datepick';
-import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+  Box,
+  TextField,
+  Button,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  InputAdornment,
+  Dialog,
+  DialogContent
+} from "@material-ui/core";
+import axios from "axios";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 
 const styles = Styles;
 const style = {
-   marginRight: '6px',
-   marginLeft: '6px'
+  marginRight: "6px",
+  marginLeft: "6px"
 };
 export default class EditSales extends Component {
-   constructor(props) {
-      super();
-      this.state = {
-         _id: '',
-         Product_Name: 'Product_Name',
-         Product_ID: 'Product_ID',
-         Quantity: ' Quantity',
-         Measuring_Unit: 'Measuring_Unit',
-         Box_Id: [{ id: '' }],
-         Selling_Date: null,
-         Distributor: '',
-         Payment_Type: '',
-         Price: '',
-         Final_Price: '',
-         Discount: '',
-         Advance: '',
-         Balance: '',
-         errors: [],
-         success: false,
-         measuring_units: [],
-         products: [],
-         code: '',
-         b_id: '',
-         distributors: [],
-         DiscountValue: null,
-         distributorlist: [],
-         distributorInfo: false,
-         openDialog: false
-      };
-      this.onEditHandler = () => {
-         axios
-            .post('/sales/edit', {
-               _id: this.state._id,
-               Product_ID: this.state.Product_ID,
-               Product_Name: this.state.Product_Name,
-               Box_Id: this.state.Box_Id,
-               Quantity: this.state.Quantity,
-               Measuring_Unit: this.state.Measuring_Unit,
-               Selling_Date: this.state.Selling_Date,
-               Distributor: this.state.Distributor,
-               Payment_Type: this.state.Payment_Type,
-               Price: this.state.Price,
-               Final_Price: this.state.Final_Price,
-               Discount: this.state.Discount,
-               Advance: this.state.Advance,
-               Balance: this.state.Balance
-            })
-            .then(res => {
-               console.log(res.data);
-               // if (res.data.errors) {
-               //   if (res.data.errors.length > 0) {
-               //     console.log(res.data.errors);
-               //     this.setState({
-               //       errors: [...res.data.errors],
-               //       success: false
-               //     });
-               //   } else {
-               this.props.cancel();
-               //   }
-               // }
-            })
-            .catch(err => console.log(err));
-      };
-      this.distributorInfo = () => {
-         let temp = [];
-         this.state.distributorlist.map((distributor, index) => {
-            if (distributor._id === this.state.Distributor) {
-               console.log('matched');
-               temp.push(
-                  <Box key={index}>
-                     <h4 style={{ padding: '0px', margin: '0px' }}>
-                        Distributor:
-                     </h4>
-                     {`${distributor.distributor_name} - ${distributor.distributor_mobile_no} - ${distributor.distributor_email}`}{' '}
-                     <br />
-                     <h4 style={{ padding: '0px', margin: '0px' }}>
-                        Point of contacts:
-                     </h4>
-                     {distributor.distributor_point_of_contact.map(
-                        (poc, key) => (
-                           <Box key={key}>
-                              {poc.name +
-                                 ' ( ' +
-                                 poc.designation +
-                                 ' ) - ' +
-                                 poc.mobile_no}
-                           </Box>
-                        )
-                     )}
-                  </Box>
-               );
-            } else {
-               console.log('not match');
-            }
-         });
-         return temp;
-      };
-      this.openDialog = () => {
-         this.setState({ openDialog: true });
-      };
-      this.closeDialog = () => {
-         this.setState({ openDialog: false });
-      };
-   }
-   componentDidMount() {
-      // if (this.state.Wastage_Type === "") {
-      axios.get('/measuring-unit/measuring-units').then(res => {
-         console.log(res);
-         this.setState({
-            measuring_units: [...res.data.MeasuringUnits]
-         });
-      });
-      axios.get('/products/products').then(res => {
-         console.log(res);
-         this.setState({
-            products: [...res.data.Products]
-         });
-         // console.log("Product: ", this.state.products);
-      });
-      axios.get('/distributor').then(res => {
-         console.log(res);
-         this.setState({
-            distributors: [...res.data.Distributors]
-         });
-         console.log('distributors : ', res.data.Distributors);
-      });
-      axios.get('/distributor').then(res => {
-         console.log(res);
-         this.setState({
-            distributorlist: [...res.data.Distributors]
-         });
-         console.log('distributors : ', res.data.Distributors);
-      });
-
-      this.setState({
-         _id: this.props.sales._id,
-         Product_ID: this.props.sales.Product_ID,
-         Product_Name: this.props.sales.Product_Name,
-         Quantity: this.props.sales.Quantity,
-         Measuring_Unit: this.props.sales.Measuring_Unit,
-         Box_Id: this.props.sales.Box_Id,
-         Selling_Date: this.props.sales.Selling_Date,
-         Distributor: this.props.sales.Distributor,
-         Payment_Type: this.props.sales.Payment_Type,
-         Price: this.props.sales.Price,
-         Final_Price: this.props.sales.Final_Price,
-         Discount: this.props.sales.Discount,
-         Advance: this.props.sales.Advance,
-         Balance: this.props.sales.Balance
-      });
-      // }
-      //   onChange={event => {
-      //     this.setState({ country_name: event.target.value });
-      //   }}value={this.state.country_name}
-   }
-   render() {
-      return (
-         <Box style={styles.box}>
-            <Box fontSize='30px' mb={3}>
-               Edit Sales
+  constructor(props) {
+    super();
+    this.state = {
+      _id: "",
+      Product_Name: "Product_Name",
+      Product_ID: "Product_ID",
+      Quantity: " Quantity",
+      Measuring_Unit: "Measuring_Unit",
+      Box_Id: [{ id: "" }],
+      Selling_Date: null,
+      Distributor: "",
+      Payment_Type: "",
+      Price: "",
+      Final_Price: "",
+      Discount: "",
+      Advance: "",
+      Balance: "",
+      errors: [],
+      success: false,
+      measuring_units: [],
+      products: [],
+      code: "",
+      b_id: "",
+      distributors: [],
+      DiscountValue: null,
+      distributorlist: [],
+      distributorInfo: false,
+      openDialog: false
+    };
+    this.onEditHandler = () => {
+      axios
+        .post("/sales/edit", {
+          _id: this.state._id,
+          Product_ID: this.state.Product_ID,
+          Product_Name: this.state.Product_Name,
+          Box_Id: this.state.Box_Id,
+          Quantity: this.state.Quantity,
+          Measuring_Unit: this.state.Measuring_Unit,
+          Selling_Date: this.state.Selling_Date,
+          Distributor: this.state.Distributor,
+          Payment_Type: this.state.Payment_Type,
+          Price: this.state.Price,
+          Final_Price: this.state.Final_Price,
+          Discount: this.state.Discount,
+          Advance: this.state.Advance,
+          Balance: this.state.Balance
+        })
+        .then(res => {
+          console.log(res.data);
+          // if (res.data.errors) {
+          //   if (res.data.errors.length > 0) {
+          //     console.log(res.data.errors);
+          //     this.setState({
+          //       errors: [...res.data.errors],
+          //       success: false
+          //     });
+          //   } else {
+          this.props.cancel();
+          //   }
+          // }
+        })
+        .catch(err => console.log(err));
+    };
+    this.distributorInfo = () => {
+      let temp = [];
+      this.state.distributorlist.map((distributor, index) => {
+        if (distributor._id === this.state.Distributor) {
+          console.log("matched");
+          temp.push(
+            <Box key={index}>
+              <h4 style={{ padding: "0px", margin: "0px" }}>Distributor:</h4>
+              {`${distributor.distributor_name} - ${distributor.distributor_mobile_no} - ${distributor.distributor_email}`}{" "}
+              <br />
+              <h4 style={{ padding: "0px", margin: "0px" }}>
+                Point of contacts:
+              </h4>
+              {distributor.distributor_point_of_contact.map((poc, key) => (
+                <Box key={key}>
+                  {poc.name + " ( " + poc.designation + " ) - " + poc.mobile_no}
+                </Box>
+              ))}
             </Box>
-            {this.state.errors.length > 0 ? (
-               this.state.errors.map((error, index) => {
-                  return (
-                     <Box style={styles.box_msg} bgcolor='#f73067' key={index}>
-                        {error}
-                     </Box>
-                  );
-               })
-            ) : this.state.success === true ? (
-               <Box bgcolor='#3df45b' style={styles.box_msg}>
-                  Successful
-               </Box>
-            ) : null}
-            {/* <PaperBoard> */}
-            <Box style={styles.root}>
-               <Box display='flex' justifyContent='center'>
-                  <Box style={styles.lbox}>
-                     <Box style={styles.form}>
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <FormControl
-                                 required
-                                 variant='outlined'
-                                 fullWidth
-                                 size='small'
-                              >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Product Name
-                                 </InputLabel>
-                                 <Select
-                                    variant='outlined'
-                                    required
-                                    name='Product_Name'
-                                    disabled={this.props.disabled.Product_Name}
-                                    value={this.state.Product_Name}
-                                    onChange={event => {
-                                       let prodCode;
-                                       let prodMeasur;
-                                       this.state.products.map(product => {
-                                          if (
-                                             product._id === event.target.value
-                                          ) {
-                                             prodCode = product.product_code;
-                                             prodMeasur =
-                                                product.product_measuring_unit;
-                                             console.log('Procode: ', prodCode);
-                                          }
-                                       });
-                                       this.setState({
-                                          Product_Name: event.target.value,
-                                          Product_ID: prodCode,
-                                          Measuring_Unit: prodMeasur
-                                       });
-                                    }}
-                                 >
-                                    {this.state.products.map(
-                                       (product, index) => {
-                                          return (
-                                             <MenuItem
-                                                //selected
-                                                key={index}
-                                                value={product._id}
-                                             >
-                                                {product.product_name}
-                                             </MenuItem>
-                                          );
-                                       }
-                                    )}
-                                    {/* <MenuItem value="Product Name" disabled>
+          );
+        } else {
+          console.log("not match");
+        }
+        return null;
+      });
+      return temp;
+    };
+    this.openDialog = () => {
+      this.setState({ openDialog: true });
+    };
+    this.closeDialog = () => {
+      this.setState({ openDialog: false });
+    };
+  }
+  componentDidMount() {
+    // if (this.state.Wastage_Type === "") {
+    axios.get("/measuring-units/measuring-units").then(res => {
+      console.log(res);
+      this.setState({
+        measuring_units: [...res.data.MeasuringUnits]
+      });
+    });
+    axios.get("/products/products").then(res => {
+      console.log(res);
+      this.setState({
+        products: [...res.data.Products]
+      });
+      // console.log("Product: ", this.state.products);
+    });
+    axios.get("/distributors/distributors").then(res => {
+      console.log(res);
+      this.setState({
+        distributors: [...res.data.Distributors]
+      });
+      console.log("distributors : ", res.data.Distributors);
+    });
+    axios.get("/distributors/distributors").then(res => {
+      console.log(res);
+      this.setState({
+        distributorlist: [...res.data.Distributors]
+      });
+      console.log("distributors : ", res.data.Distributors);
+    });
+
+    this.setState({
+      _id: this.props.sales._id,
+      Product_ID: this.props.sales.Product_ID,
+      Product_Name: this.props.sales.Product_Name,
+      Quantity: this.props.sales.Quantity,
+      Measuring_Unit: this.props.sales.Measuring_Unit,
+      Box_Id: this.props.sales.Box_Id,
+      Selling_Date: this.props.sales.Selling_Date,
+      Distributor: this.props.sales.Distributor,
+      Payment_Type: this.props.sales.Payment_Type,
+      Price: this.props.sales.Price,
+      Final_Price: this.props.sales.Final_Price,
+      Discount: this.props.sales.Discount,
+      Advance: this.props.sales.Advance,
+      Balance: this.props.sales.Balance
+    });
+    // }
+    //   onChange={event => {
+    //     this.setState({ country_name: event.target.value });
+    //   }}value={this.state.country_name}
+  }
+  render() {
+    return (
+      <Box style={styles.box}>
+        <Box fontSize="30px" mb={3}>
+          Edit Sales
+        </Box>
+        {this.state.errors.length > 0 ? (
+          this.state.errors.map((error, index) => {
+            return (
+              <Box style={styles.box_msg} bgcolor="#f73067" key={index}>
+                {error}
+              </Box>
+            );
+          })
+        ) : this.state.success === true ? (
+          <Box bgcolor="#3df45b" style={styles.box_msg}>
+            Successful
+          </Box>
+        ) : null}
+        {/* <PaperBoard> */}
+        <Box style={styles.root}>
+          <Box display="flex" justifyContent="center">
+            <Box style={styles.lbox}>
+              <Box style={styles.form}>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
+                      >
+                        Product Name
+                      </InputLabel>
+                      <Select
+                        variant="outlined"
+                        required
+                        name="Product_Name"
+                        disabled={this.props.disabled.Product_Name}
+                        value={this.state.Product_Name}
+                        onChange={event => {
+                          let prodCode;
+                          let prodMeasur;
+                          this.state.products.map(product => {
+                            if (product._id === event.target.value) {
+                              prodCode = product.product_code;
+                              prodMeasur = product.product_measuring_unit;
+                              console.log("Procode: ", prodCode);
+                            }
+                            return null;
+                          });
+                          this.setState({
+                            Product_Name: event.target.value,
+                            Product_ID: prodCode,
+                            Measuring_Unit: prodMeasur
+                          });
+                        }}
+                      >
+                        {this.state.products.map((product, index) => {
+                          return (
+                            <MenuItem
+                              //selected
+                              key={index}
+                              value={product._id}
+                            >
+                              {product.product_name}
+                            </MenuItem>
+                          );
+                        })}
+                        {/* <MenuItem value="Product Name" disabled>
                             Product Name
                           </MenuItem>
                           <MenuItem value="Orange Juice">Orange Juice</MenuItem>
                           <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
-                                 </Select>
-                              </FormControl>
-                           </Box>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 disabled
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Product_ID'
-                                 required
-                                 name='Product_ID'
-                                 value={this.state.Product_ID}
-                                 onChange={event => {
-                                    this.setState({
-                                       Product_ID: event.target.value
-                                    });
-                                    console.log(event.target.value);
-                                 }}
-                              ></TextField>
-                           </Box>
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='100%' style={style}>
-                              <FormControl
-                                 required
-                                 variant='outlined'
-                                 fullWidth
-                                 size='small'
-                              >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Distributor
-                                 </InputLabel>
-                                 <Select
-                                    variant='outlined'
-                                    required
-                                    name='Distributor'
-                                    disabled={this.props.disabled.Distributor}
-                                    value={this.state.Distributor}
-                                    onChange={event => {
-                                       this.setState({
-                                          Distributor: event.target.value
-                                       });
-                                    }}
-                                 >
-                                    {this.state.distributors.map(
-                                       (distributor, index) => {
-                                          return (
-                                             <MenuItem
-                                                selected
-                                                key={index}
-                                                value={distributor._id}
-                                             >
-                                                {distributor.distributor_name}
-                                             </MenuItem>
-                                          );
-                                       }
-                                    )}
-                                 </Select>
-                              </FormControl>
-                           </Box>
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 disabled={true}
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Quantity'
-                                 required
-                                 name='Quantity'
-                                 value={this.state.Quantity}
-                                 onChange={event => {
-                                    let prodprice = 1;
-
-                                    this.state.products.map(product => {
-                                       console.log(
-                                          'Pro: ',
-                                          this.state.Product_Name
-                                       );
-                                       if (
-                                          product._id ===
-                                          this.state.Product_Name
-                                       ) {
-                                          prodprice = parseInt(
-                                             product.product_price
-                                          );
-                                          console.log(
-                                             'Procode123: ',
-                                             product.product_price
-                                          );
-                                       }
-                                    });
-                                    this.setState({
-                                       Quantity: event.target.value,
-                                       Price: event.target.value * prodprice
-                                       // DiscountValue:
-                                       //   this.state.Price * (this.state.Discount / 100),
-                                       // Final_Price:
-                                       //   this.state.Price - this.state.DiscountValue,
-                                       // Balance: this.state.Final_Price - this.state.Advance
-                                    });
-                                 }}
-                              ></TextField>
-                           </Box>
-                           <Box width='50%' style={style}>
-                              <FormControl
-                                 required
-                                 variant='outlined'
-                                 fullWidth
-                                 size='small'
-                              >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Measuring Unit
-                                 </InputLabel>
-                                 <Select
-                                    disabled
-                                    name='Measuring_Unit'
-                                    variant='outlined'
-                                    required
-                                    value={this.state.Measuring_Unit}
-                                    onChange={event => {
-                                       this.setState({
-                                          Measuring_Unit: event.target.value
-                                       });
-                                       console.log(event.target.value);
-                                    }}
-                                 >
-                                    {this.state.measuring_units.map(
-                                       (measuring_unit, index) => {
-                                          return (
-                                             <MenuItem
-                                                selected
-                                                key={index}
-                                                value={measuring_unit._id}
-                                             >
-                                                {
-                                                   measuring_unit.measuring_unit_name
-                                                }
-                                             </MenuItem>
-                                          );
-                                       }
-                                    )}
-                                 </Select>
-                              </FormControl>
-                           </Box>
-                        </Box>
-
-                        <Box
-                           style={styles.boxSize2}
-                           display='flex'
-                           flexDirection='row'
-                        >
-                           <Box
-                              width='100%'
-                              style={style}
-                              // style={styles.box_field}
-                              //padding="10px"
-                              //border="1px solid #3f51b5"
-                              //marginBottom="10px"
-                              flexDirection='row'
-                              display='flex'
-                           >
-                              {this.state.Box_Id.map((bid, index) => {
-                                 return (
-                                    <Box display='flex'>
-                                       <TextField
-                                          size='small'
-                                          fullWidth
-                                          variant='outlined'
-                                          label='Box_Id'
-                                          required
-                                          name='Box_Id'
-                                          disabled={this.props.disabled.Box_Id}
-                                          value={this.state.Box_Id[index].id}
-                                          onChange={event => {
-                                             this.setState({
-                                                b_id: event.target.value
-                                             });
-                                             console.log(event.target.value);
-                                             this.setState(prevState => {
-                                                prevState.Box_Id[index].id =
-                                                   prevState.b_id;
-
-                                                console.log(
-                                                   '====',
-                                                   prevState.Box_Id[index]
-                                                );
-                                             });
-                                          }}
-                                       ></TextField>
-
-                                       {this.state.Box_Id.length ===
-                                       index + 1 ? (
-                                          <AddBoxOutlinedIcon
-                                             color='secondary'
-                                             style={{
-                                                fontSize: '30px',
-                                                margin: '4px',
-                                                padding: '0px'
-                                             }}
-                                             onClick={() => {
-                                                this.setState({});
-                                                this.setState(prevState => {
-                                                   prevState.Box_Id.push({
-                                                      id: ''
-                                                   });
-                                                   console.log(
-                                                      prevState.Box_Id
-                                                   );
-                                                });
-                                             }}
-                                          />
-                                       ) : (
-                                          <DeleteOutlineIcon
-                                             color='secondary'
-                                             style={{
-                                                fontSize: '30px',
-                                                margin: '4px',
-                                                padding: '0px'
-                                             }}
-                                             onClick={() => {
-                                                this.setState({});
-                                                this.setState(prevState => {
-                                                   prevState.Box_Id.splice(
-                                                      index,
-                                                      1
-                                                   );
-                                                   console.log(
-                                                      prevState.Box_Id
-                                                   );
-                                                });
-                                             }}
-                                          />
-                                       )}
-                                    </Box>
-                                 );
-                              }).reverse()}
-                           </Box>
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='100%' style={style}>
-                              <Datepick
-                                 id='4'
-                                 variant='outlined'
-                                 Name='Selling_Date'
-                                 disabled={this.props.disabled.Selling_Date}
-                                 value={this.state.Selling_Date}
-                                 setDate={date => {
-                                    this.setState({
-                                       Selling_Date: date
-                                    });
-                                    console.log(date);
-                                 }}
-                              />
-                           </Box>
-                        </Box>
-
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Discount'
-                                 required
-                                 name='Discount'
-                                 InputProps={{
-                                    endAdornment: (
-                                       <InputAdornment position='end'>
-                                          %
-                                       </InputAdornment>
-                                    )
-                                 }}
-                                 disabled={this.props.disabled.Discount}
-                                 value={this.state.Discount}
-                                 onChange={event => {
-                                    event.persist();
-                                    this.setState({
-                                       Discount: event.target.value
-                                    });
-
-                                    this.setState(prev => {
-                                       prev.DiscountValue =
-                                          prev.Price *
-                                          (event.target.value / 100);
-                                       prev.Final_Price =
-                                          prev.Price - prev.DiscountValue;
-                                       prev.Balance =
-                                          prev.Final_Price - prev.Advance;
-                                    });
-
-                                    console.log(
-                                       'discount',
-                                       this.state.DiscountValue
-                                    );
-                                    console.log('price', this.state.Price);
-                                 }}
-                              ></TextField>
-                           </Box>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 disabled={true}
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Total Price'
-                                 required
-                                 name='Price'
-                                 value={this.state.Price}
-                                 // onChange={event => {
-                                 //   this.setState({
-                                 //     Price: event.target.value
-                                 //   });
-                                 //   //console.log(event.target.value);
-                                 // }}
-                              ></TextField>
-                           </Box>
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <FormControl
-                                 required
-                                 variant='outlined'
-                                 fullWidth
-                                 size='small'
-                              >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Payment Type
-                                 </InputLabel>
-                                 <Select
-                                    variant='outlined'
-                                    required
-                                    name='Payment_Type'
-                                    disabled={this.props.disabled.Payment_Type}
-                                    value={this.state.Payment_Type}
-                                    onChange={event => {
-                                       this.setState({
-                                          Payment_Type: event.target.value
-                                       });
-                                    }}
-                                 >
-                                    <MenuItem value='Payment Type' disabled>
-                                       Payment Type
-                                    </MenuItem>
-                                    <MenuItem value='By Cash'>By Cash</MenuItem>
-                                    <MenuItem value='By Cheque'>
-                                       By Cheque
-                                    </MenuItem>
-                                    <MenuItem value='Debit'>Debit</MenuItem>
-                                 </Select>
-                              </FormControl>
-                           </Box>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 disabled
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Final_Price'
-                                 required
-                                 name='Final_Price'
-                                 value={this.state.Final_Price}
-                                 // onChange={event => {
-                                 //   this.setState({
-                                 //     Final_Price: event.target.value
-                                 //   });
-                                 //   console.log(event.target.value);
-                                 // }}
-                              ></TextField>
-                           </Box>
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Advance Amount'
-                                 required
-                                 name='Advance'
-                                 disabled={this.props.disabled.Advance}
-                                 value={this.state.Advance}
-                                 onChange={event => {
-                                    this.setState({
-                                       Advance: event.target.value,
-                                       Balance:
-                                          this.state.Final_Price -
-                                          event.target.value
-                                    });
-                                    console.log(event.target.value);
-                                 }}
-                              ></TextField>
-                           </Box>
-
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 disabled
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Balance Amount'
-                                 required
-                                 name='Balance'
-                                 value={this.state.Balance}
-                                 // onChange={event => {
-                                 //   this.setState({
-                                 //     Balance: event.target.value
-                                 //   });
-                                 //   console.log(event.target.value);
-                                 // }}
-                              ></TextField>
-                           </Box>
-                        </Box>
-                     </Box>
+                      </Select>
+                    </FormControl>
                   </Box>
-               </Box>
-            </Box>
-            {/* </PaperBoard> */}
-            <Box
-               display=' flex'
-               pt={2}
-               pb={2}
-               m={0}
-               justifyContent='flex-end'
-               width='87%'
-            >
-               <Box
-                  marginRight='10px'
-                  display={this.state.Distributor !== '' ? 'flex' : 'none'}
-               >
-                  <Button
-                     variant='contained'
-                     color='primary'
-                     size='large'
-                     onClick={() => {
+                  <Box width="50%" style={style}>
+                    <TextField
+                      disabled
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Product_ID"
+                      required
+                      name="Product_ID"
+                      value={this.state.Product_ID}
+                      onChange={event => {
                         this.setState({
-                           distributorInfo: true
+                          Product_ID: event.target.value
                         });
-                        this.openDialog();
-                     }}
-                     // style={{ fontWeight: "bold" }}
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
+                      >
+                        Distributor
+                      </InputLabel>
+                      <Select
+                        variant="outlined"
+                        required
+                        name="Distributor"
+                        disabled={this.props.disabled.Distributor}
+                        value={this.state.Distributor}
+                        onChange={event => {
+                          this.setState({
+                            Distributor: event.target.value
+                          });
+                        }}
+                      >
+                        {this.state.distributors.map((distributor, index) => {
+                          return (
+                            <MenuItem
+                              selected
+                              key={index}
+                              value={distributor._id}
+                            >
+                              {distributor.distributor_name}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      disabled={true}
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Quantity"
+                      required
+                      name="Quantity"
+                      value={this.state.Quantity}
+                      onChange={event => {
+                        let prodprice = 1;
+
+                        this.state.products.map(product => {
+                          console.log("Pro: ", this.state.Product_Name);
+                          if (product._id === this.state.Product_Name) {
+                            prodprice = parseInt(product.product_price);
+                            console.log("Procode123: ", product.product_price);
+                          }
+                          return null;
+                        });
+                        this.setState({
+                          Quantity: event.target.value,
+                          Price: event.target.value * prodprice
+                          // DiscountValue:
+                          //   this.state.Price * (this.state.Discount / 100),
+                          // Final_Price:
+                          //   this.state.Price - this.state.DiscountValue,
+                          // Balance: this.state.Final_Price - this.state.Advance
+                        });
+                      }}
+                    ></TextField>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
+                      >
+                        Measuring Unit
+                      </InputLabel>
+                      <Select
+                        disabled
+                        name="Measuring_Unit"
+                        variant="outlined"
+                        required
+                        value={this.state.Measuring_Unit}
+                        onChange={event => {
+                          this.setState({
+                            Measuring_Unit: event.target.value
+                          });
+                          console.log(event.target.value);
+                        }}
+                      >
+                        {this.state.measuring_units.map(
+                          (measuring_unit, index) => {
+                            return (
+                              <MenuItem
+                                selected
+                                key={index}
+                                value={measuring_unit._id}
+                              >
+                                {measuring_unit.measuring_unit_name}
+                              </MenuItem>
+                            );
+                          }
+                        )}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Box>
+
+                <Box style={styles.boxSize2} display="flex" flexDirection="row">
+                  <Box
+                    width="100%"
+                    style={style}
+                    // style={styles.box_field}
+                    //padding="10px"
+                    //border="1px solid #3f51b5"
+                    //marginBottom="10px"
+                    flexDirection="row"
+                    display="flex"
                   >
-                     Distributor Info
-                  </Button>
-               </Box>
-               <Box display=' flex'>
-                  <Button
-                     fullWidth
-                     variant='contained'
-                     color='primary'
-                     size='large'
-                     fontWeight='Bold'
-                     onClick={() => {
-                        this.props.cancel();
-                     }}
-                  >
-                     Cancel
-                  </Button>
-               </Box>
-               <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
-                  <Button
-                     fullWidth
-                     variant='contained'
-                     color='primary'
-                     size='large'
-                     fontWeight='bold'
-                     onClick={this.onEditHandler}
-                  >
-                     Update
-                  </Button>
-               </Box>
-            </Box>
-            <Dialog
-               open={this.state.openDialog}
-               onBackdropClick={() => {
-                  return this.state.distributorInfo === true ? (
-                     this.closeDialog()
-                  ) : (
-                     <Box></Box>
-                  );
-               }}
-               maxWidth='sm'
-               fullWidth
-            >
-               <DialogContent>
-                  {this.state.distributorInfo === true ? (
-                     <Box display='flex' flexDirection='column'>
-                        <Box
-                           fontSize='25px'
-                           mb={3}
-                           textAlign='center'
-                           fontWeight='bold'
-                        >
-                           Distributor Information
+                    {this.state.Box_Id.map((bid, index) => {
+                      return (
+                        <Box display="flex">
+                          <TextField
+                            size="small"
+                            fullWidth
+                            variant="outlined"
+                            label="Box_Id"
+                            required
+                            name="Box_Id"
+                            disabled={this.props.disabled.Box_Id}
+                            value={this.state.Box_Id[index].id}
+                            onChange={event => {
+                              this.setState({
+                                b_id: event.target.value
+                              });
+                              console.log(event.target.value);
+                              this.setState(prevState => {
+                                prevState.Box_Id[index].id = prevState.b_id;
+
+                                console.log("====", prevState.Box_Id[index]);
+                              });
+                            }}
+                          ></TextField>
+
+                          {this.state.Box_Id.length === index + 1 ? (
+                            <AddBoxOutlinedIcon
+                              color="secondary"
+                              style={{
+                                fontSize: "30px",
+                                margin: "4px",
+                                padding: "0px"
+                              }}
+                              onClick={() => {
+                                this.setState({});
+                                this.setState(prevState => {
+                                  prevState.Box_Id.push({
+                                    id: ""
+                                  });
+                                  console.log(prevState.Box_Id);
+                                });
+                              }}
+                            />
+                          ) : (
+                            <DeleteOutlineIcon
+                              color="secondary"
+                              style={{
+                                fontSize: "30px",
+                                margin: "4px",
+                                padding: "0px"
+                              }}
+                              onClick={() => {
+                                this.setState({});
+                                this.setState(prevState => {
+                                  prevState.Box_Id.splice(index, 1);
+                                  console.log(prevState.Box_Id);
+                                });
+                              }}
+                            />
+                          )}
                         </Box>
-                        {this.distributorInfo()}
-                     </Box>
-                  ) : (
-                     (this.state.openDialog = false)
-                  )}
-               </DialogContent>
-            </Dialog>
-         </Box>
-      );
-   }
+                      );
+                    }).reverse()}
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
+                    <Datepick
+                      id="4"
+                      variant="outlined"
+                      Name="Selling_Date"
+                      disabled={this.props.disabled.Selling_Date}
+                      value={this.state.Selling_Date}
+                      setDate={date => {
+                        this.setState({
+                          Selling_Date: date
+                        });
+                        console.log(date);
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Discount"
+                      required
+                      name="Discount"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">%</InputAdornment>
+                        )
+                      }}
+                      disabled={this.props.disabled.Discount}
+                      value={this.state.Discount}
+                      onChange={event => {
+                        event.persist();
+                        this.setState({
+                          Discount: event.target.value
+                        });
+
+                        this.setState(prev => {
+                          prev.DiscountValue =
+                            prev.Price * (event.target.value / 100);
+                          prev.Final_Price = prev.Price - prev.DiscountValue;
+                          prev.Balance = prev.Final_Price - prev.Advance;
+                        });
+
+                        console.log("discount", this.state.DiscountValue);
+                        console.log("price", this.state.Price);
+                      }}
+                    ></TextField>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      disabled={true}
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Total Price"
+                      required
+                      name="Price"
+                      value={this.state.Price}
+                      // onChange={event => {
+                      //   this.setState({
+                      //     Price: event.target.value
+                      //   });
+                      //   //console.log(event.target.value);
+                      // }}
+                    ></TextField>
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <FormControl
+                      required
+                      variant="outlined"
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel
+                        style={{
+                          backgroundColor: "white",
+                          paddingLeft: "2px",
+                          paddingRight: "2px"
+                        }}
+                      >
+                        Payment Type
+                      </InputLabel>
+                      <Select
+                        variant="outlined"
+                        required
+                        name="Payment_Type"
+                        disabled={this.props.disabled.Payment_Type}
+                        value={this.state.Payment_Type}
+                        onChange={event => {
+                          this.setState({
+                            Payment_Type: event.target.value
+                          });
+                        }}
+                      >
+                        <MenuItem value="Payment Type" disabled>
+                          Payment Type
+                        </MenuItem>
+                        <MenuItem value="By Cash">By Cash</MenuItem>
+                        <MenuItem value="By Cheque">By Cheque</MenuItem>
+                        <MenuItem value="Debit">Debit</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      disabled
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Final_Price"
+                      required
+                      name="Final_Price"
+                      value={this.state.Final_Price}
+                      // onChange={event => {
+                      //   this.setState({
+                      //     Final_Price: event.target.value
+                      //   });
+                      //   console.log(event.target.value);
+                      // }}
+                    ></TextField>
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="50%" style={style}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Advance Amount"
+                      required
+                      name="Advance"
+                      disabled={this.props.disabled.Advance}
+                      value={this.state.Advance}
+                      onChange={event => {
+                        this.setState({
+                          Advance: event.target.value,
+                          Balance: this.state.Final_Price - event.target.value
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+
+                  <Box width="50%" style={style}>
+                    <TextField
+                      disabled
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Balance Amount"
+                      required
+                      name="Balance"
+                      value={this.state.Balance}
+                      // onChange={event => {
+                      //   this.setState({
+                      //     Balance: event.target.value
+                      //   });
+                      //   console.log(event.target.value);
+                      // }}
+                    ></TextField>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+        {/* </PaperBoard> */}
+        <Box
+          display=" flex"
+          pt={2}
+          pb={2}
+          m={0}
+          justifyContent="flex-end"
+          width="87%"
+        >
+          <Box
+            marginRight="10px"
+            display={this.state.Distributor !== "" ? "flex" : "none"}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => {
+                this.setState({
+                  distributorInfo: true
+                });
+                this.openDialog();
+              }}
+              // style={{ fontWeight: "bold" }}
+            >
+              Distributor Info
+            </Button>
+          </Box>
+          <Box display=" flex">
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              size="large"
+              fontWeight="Bold"
+              onClick={() => {
+                this.props.cancel();
+              }}
+            >
+              Cancel
+            </Button>
+          </Box>
+          <Box marginLeft="10px" display={this.props.disabled.btnDisplay}>
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              size="large"
+              fontWeight="bold"
+              onClick={this.onEditHandler}
+            >
+              Update
+            </Button>
+          </Box>
+        </Box>
+        <Dialog
+          open={this.state.openDialog}
+          onBackdropClick={() => {
+            return this.state.distributorInfo === true ? (
+              this.closeDialog()
+            ) : (
+              <Box></Box>
+            );
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogContent>
+            {this.state.distributorInfo === true ? (
+              <Box display="flex" flexDirection="column">
+                <Box
+                  fontSize="25px"
+                  mb={3}
+                  textAlign="center"
+                  fontWeight="bold"
+                >
+                  Distributor Information
+                </Box>
+                {this.distributorInfo()}
+              </Box>
+            ) : (
+              this.closeDialog()
+            )}
+          </DialogContent>
+        </Dialog>
+      </Box>
+    );
+  }
 }

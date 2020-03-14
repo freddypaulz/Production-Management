@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, Button, DialogContent } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
+import { Box } from "@material-ui/core";
 import axios from "axios";
-import EditProductStock from "./Edit_Product_Stock";
 
 export default class ManageProductStock extends Component {
   constructor(props) {
@@ -35,7 +33,7 @@ export default class ManageProductStock extends Component {
           console.log("hello", res.data);
           //Axios
           axios
-            .post("/measuring-unit/measuring-unit", {
+            .post("/measuring-units/measuring-unit", {
               _id: res.data[i].Measuring_Unit
             })
             .then(MeasuringUnit => {
@@ -91,13 +89,12 @@ export default class ManageProductStock extends Component {
   render() {
     return (
       <Box
-        width="80%"
+        width="100%"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        height="100vh"
       >
-        <Box fontSize="30px" mb={8} fontWeight="bold ">
+        <Box fontSize="30px" mb={8}>
           Production Stock
         </Box>
 
@@ -105,7 +102,7 @@ export default class ManageProductStock extends Component {
           title=" "
           columns={this.state.columns}
           data={this.state.data}
-          style={{ width: "100%", overflow: "auto", alignItems: "left" }}
+          style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
           options={{
             sorting: true,
             headerStyle: {
