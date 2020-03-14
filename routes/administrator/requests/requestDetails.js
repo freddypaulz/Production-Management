@@ -28,14 +28,14 @@ router.post('/upload', (req, res) => {
          fileType[1]
       }`;
       file.mv(
-         `${__dirname}/../../administrator/public/uploads/${fileName}`,
+         `${__dirname}/../../../client/public/uploads/${fileName}`,
          err => {
             if (err) {
                res.send(err);
             } else {
                res.json({
                   fileName: file.name,
-                  filePath: `/uploads/${fileName}`
+                  filePath: fileName
                });
             }
          }
