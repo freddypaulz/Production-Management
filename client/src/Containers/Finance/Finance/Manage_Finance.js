@@ -81,6 +81,7 @@ export default class Manage_Finance extends Component {
             if (material._id === id) {
                temp = material.raw_material_name;
             }
+            return null
          });
          return temp;
       };
@@ -90,6 +91,7 @@ export default class Manage_Finance extends Component {
             if (unit._id === id) {
                temp = unit.measuring_unit_name;
             }
+            return null
          });
          return temp;
       };
@@ -100,6 +102,7 @@ export default class Manage_Finance extends Component {
                if (vendor._id === id) {
                   temp = vendor.vendor_name;
                }
+               return null
             });
          } else {
             temp = 'undefined';

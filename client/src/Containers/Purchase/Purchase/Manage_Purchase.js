@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, DialogContent, Snackbar, Button } from '@material-ui/core';
+import { Box, DialogContent, Snackbar } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import EditPurchase from './Edit_Purchase';
@@ -63,6 +63,7 @@ export default class ManagePurchase extends Component {
             if (material._id === id) {
                temp = material.raw_material_name;
             }
+            return null
          });
          return temp;
       };
@@ -73,6 +74,7 @@ export default class ManagePurchase extends Component {
             if (unit._id === id) {
                temp = unit.measuring_unit_name;
             }
+            return null
          });
          return temp;
       };
@@ -84,6 +86,7 @@ export default class ManagePurchase extends Component {
                if (vendor._id === id) {
                   temp = vendor.vendor_name;
                }
+               return null
             });
          } else {
             temp = 'undefined';

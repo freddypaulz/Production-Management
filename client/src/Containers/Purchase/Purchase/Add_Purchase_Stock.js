@@ -6,6 +6,7 @@ import ProtectedRoute from '../../../Components/Auth/ProtectedRoute';
 import { Link as RefLink } from 'react-router-dom';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import moment from 'moment';
 import {
    Box,
    TextField,
@@ -87,7 +88,7 @@ class Add_Purchase_Stock extends Component {
                      </RefLink>
                      <ProtectedRoute
                         path='document'
-                        component={require(`../../../file storage/${file}`)}
+                        component={require(`../../../../public/uploads/${file}`)}
                      />
                   </Box>
                );
@@ -95,6 +96,7 @@ class Add_Purchase_Stock extends Component {
                //console.log('called')
                return temp.push('File not found');
             }
+            return null
          });
          return temp;
       };
@@ -112,13 +114,12 @@ class Add_Purchase_Stock extends Component {
          ) {
             alert('Some fields contain invalid value!');
          } else {
-            let date = Date.now();
             const formData = new FormData();
             for (let i = 0; i < this.state.file.length; i++) {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'i' + date + '-' + this.state.file[i].name
+                  'invoice ' + new moment().format('DD_MM_YYYY HH_m_s ') + this.state.file[i].name
                );
             }
             axios
@@ -181,8 +182,6 @@ class Add_Purchase_Stock extends Component {
                .catch(err => {
                   console.log('File not added', err);
                });
-
-            //this.props.closeDialog()
          }
       };
    }
@@ -408,20 +407,20 @@ class Add_Purchase_Stock extends Component {
                                  }}
                               />
                            ) : (
-                              <DeleteOutlineIcon
-                                 color='secondary'
-                                 style={{
-                                    display: 'flex'
-                                 }}
-                                 onClick={() => {
-                                    this.setState({});
-                                    this.setState(prevState => {
-                                       prevState.Id.splice(index, 1);
-                                       console.log(prevState.Id);
-                                    });
-                                 }}
-                              />
-                           )}
+                                 <DeleteOutlineIcon
+                                    color='secondary'
+                                    style={{
+                                       display: 'flex'
+                                    }}
+                                    onClick={() => {
+                                       this.setState({});
+                                       this.setState(prevState => {
+                                          prevState.Id.splice(index, 1);
+                                          console.log(prevState.Id);
+                                       });
+                                    }}
+                                 />
+                              )}
                         </Box>
                      );
                   }).reverse()}
@@ -430,7 +429,6 @@ class Add_Purchase_Stock extends Component {
             <Box style={styles.boxSize2}>
                <Box
                   display={this.props.uploadFile}
-                  display='flex'
                   flexDirection='column'
                >
                   <input

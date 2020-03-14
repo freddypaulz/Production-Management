@@ -12,12 +12,12 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
-import { Datepick } from './Date/Datepick';
+import { Datepick } from '../../../Components/Date/Datepick';
 import ProtectedRoute from '../../../Components/Auth/ProtectedRoute';
 import { Link as RefLink } from 'react-router-dom';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Stock from './Add_Purchase_Stock';
-
+import moment from 'moment'
 const styles = Styles;
 const style = {
    marginRight: '6px',
@@ -59,55 +59,62 @@ export default class EditPurchase extends Component {
       };
 
       this.onEditHandler = () => {
-         this.checkTo();
-         let date = Date.now();
-         const formData = new FormData();
-         console.log('fileLength: ', this.state.file);
-         for (let i = 0; i < this.state.file.length; i++) {
-            let file = this.state.file[i];
-            formData.append(
-               'file',
-               this.state.file[i],
-               'q' + date + '-' + this.state.file[i].name
-            );
+         if (this.state.Quantity !== null && this.state.Vendor !== ''
+            && this.state.Total_Price !== null && this.state.file.length !== 0
+            && this.state.Measuring_Unit !== '' && this.state.Status !== ''
+         ) {
+            this.checkTo();
+            const formData = new FormData();
+            console.log('fileLength: ', this.state.file);
+            for (let i = 0; i < this.state.file.length; i++) {
+               let file = this.state.file[i].name;
+               formData.append(
+                  'file',
+                  this.state.file[i],
+                  'quotation ' + new moment().format('DD_MM_YYYY HH_m_s ') + file
+               );
+            }
+            axios
+               .post('/files', formData, {
+                  headers: {
+                     'content-type': 'multipart/form-data'
+                  }
+               })
+               .then(res => {
+                  console.log('file: ', res);
+                  axios
+                     .post('/log/comment', {
+                        logs: {
+                           reqId: props.Purchase._id,
+                           from: 'Purchase',
+                           to: 'Finance',
+                           comments: this.state.Comments
+                        }
+                     })
+                     .then(comments => {
+                        console.log('Comments: ', comments);
+                        axios.post('/request-details/edit', {
+                           _id: this.state._id,
+                           Raw_Material_Id: this.state.Raw_Material_Id,
+                           Raw_Material_Code: this.state.Raw_Material_Code,
+                           Quantity: this.state.Quantity,
+                           Measuring_Unit: this.state.Measuring_Unit,
+                           Priority: this.state.Priority,
+                           Due_Date: this.state.Due_Date,
+                           Status: this.state.Status,
+                           Comments: this.state.Comments,
+                           Vendor: this.state.Vendor,
+                           Total_Price: this.state.Total_Price,
+                           Quotation_Document_URL: res.data
+                        });
+                     })
+                     .then(this.props.cancel());
+               })
+               .catch(err => console.log(err));
          }
-         axios
-            .post('/files', formData, {
-               headers: {
-                  'content-type': 'multipart/form-data'
-               }
-            })
-            .then(res => {
-               console.log('file: ', res);
-               axios
-                  .post('/logs/comment', {
-                     logs: {
-                        reqId: props.Purchase._id,
-                        from: 'Purchase',
-                        to: 'Finance',
-                        comments: this.state.Comments
-                     }
-                  })
-                  .then(comments => {
-                     console.log('Comments: ', comments);
-                     axios.post('/request-details/edit', {
-                        _id: this.state._id,
-                        Raw_Material_Id: this.state.Raw_Material_Id,
-                        Raw_Material_Code: this.state.Raw_Material_Code,
-                        Quantity: this.state.Quantity,
-                        Measuring_Unit: this.state.Measuring_Unit,
-                        Priority: this.state.Priority,
-                        Due_Date: this.state.Due_Date,
-                        Status: this.state.Status,
-                        Comments: this.state.Comments,
-                        Vendor: this.state.Vendor,
-                        Total_Price: this.state.Total_Price,
-                        Quotation_Document_URL: res.data
-                     });
-                  })
-                  .then(this.props.cancel());
-            })
-            .catch(err => console.log(err));
+         else {
+            alert('please check all fields are entered properly')
+         }
       };
 
       this.checkTo = () => {
@@ -150,14 +157,15 @@ export default class EditPurchase extends Component {
                      </RefLink>
                      <ProtectedRoute
                         path='document'
-                        component={require(`../../../file storage/${file}`)}
+                        component={require(`../../../../public/uploads/${file}`)}
                      />
                   </Box>
                );
             } catch (err) {
-               //console.log('called')
+               console.log('upload failure:', err)
                return temp.push('File not found');
             }
+            //return null
          });
          return temp;
       };
@@ -215,6 +223,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('not match');
             }
+            return null
          });
          return temp;
       };
@@ -315,6 +324,7 @@ export default class EditPurchase extends Component {
                                                 materialCode
                                              );
                                           }
+                                          return null
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
@@ -592,7 +602,6 @@ export default class EditPurchase extends Component {
                         <Box style={styles.boxSize2}>
                            <Box
                               width='100%'
-                              display={this.props.uploadFile}
                               display='flex'
                            >
                               <input
@@ -735,8 +744,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                     <Box></Box>
-                  );
+                        <Box></Box>
+                     );
                }}
                maxWidth='sm'
                fullWidth
@@ -755,12 +764,12 @@ export default class EditPurchase extends Component {
                         {this.vendorInfo()}
                      </Box>
                   ) : (
-                     <Stock
-                        Purchase={this.props.Purchase}
-                        closeDialog={this.closeDialog}
-                        upload={this.props.uploadFile}
-                     />
-                  )}
+                        <Stock
+                           Purchase={this.props.Purchase}
+                           closeDialog={this.closeDialog}
+                           upload={this.props.uploadFile}
+                        />
+                     )}
                </DialogContent>
             </Dialog>
          </Box>

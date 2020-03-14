@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
-import { Datepick } from './Date/Datepick';
+import { Datepick } from '../../../Components/Date/Datepick';
 import { Link as RefLink, Route } from 'react-router-dom';
 
 const styles = Styles;
@@ -42,7 +42,7 @@ export default class EditPurchase extends Component {
          vendorList: [],
          vendorInfo: false,
          logComments: 'no comments',
-         To: 'Admin',
+         To: '',
          file: ''
       };
 
@@ -90,8 +90,11 @@ export default class EditPurchase extends Component {
       this.checkTo = () => {
          if (this.state.Status === 'ForwardedToAdmin') {
             this.setState({ To: 'Admin' });
-         } else if (this.state.Status === 'ForwardedToFinance') {
-            this.setState({ To: 'Finance' });
+         } else if (this.state.Status === 'ForwardedToPurchase'
+            || this.state.Status === 'Finance-Accepted'
+            || this.state.Status === 'Finance-Rejected'
+         ) {
+            this.setState({ To: 'Purchase' });
          }
       };
 
@@ -122,6 +125,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('not match');
             }
+            return null
          });
          return temp;
       };
@@ -161,33 +165,18 @@ export default class EditPurchase extends Component {
       };
 
       this.loadStatus = () => {
-         let status = [];
-         if (this.props.dept === 'Finance') {
-            status = [
-               'ForwardedToFinance',
-               'Finance-Accepted',
-               'Finance-Rejected',
-               'ForwardedToAdmin',
-               'ForwardedToPurchase'
-            ];
-         } else {
-            status = [
-               'Requesting',
-               'ForwardedToFinance',
-               'Purchase-Delivered',
-               'Purchase-Rejected',
-               'Purchase-Inprogress'
-            ];
-         }
+         let status = [
+            'ForwardedToFinance',
+            'Finance-Accepted',
+            'Finance-Rejected',
+            'ForwardedToAdmin',
+            'ForwardedToPurchase'
+         ];
          return status.map((msg, index) => (
             <MenuItem
                key={index}
                value={msg}
-               disabled={
-                  (msg === 'ForwardedToFinance' &&
-                     props.action === 'Finance') ||
-                  msg === 'Requesting'
-               }
+               disabled={msg === 'ForwardedToFinance'}
             >
                {msg}
             </MenuItem>
@@ -196,7 +185,6 @@ export default class EditPurchase extends Component {
    }
 
    componentDidMount() {
-      console.log('Props: ', this.props.Purchase);
       axios.get('/raw-materials/raw-materials').then(res => {
          console.log(res);
          this.setState({
@@ -291,6 +279,7 @@ export default class EditPurchase extends Component {
                                                 materialCode
                                              );
                                           }
+                                          return null;
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
@@ -641,8 +630,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                     <Box></Box>
-                  );
+                        <Box></Box>
+                     );
                }}
                maxWidth='sm'
                fullWidth
