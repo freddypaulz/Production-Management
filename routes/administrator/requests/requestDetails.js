@@ -27,19 +27,16 @@ router.post('/upload', (req, res) => {
       const fileName = `quotation_${new moment().format('DD_MM_YYYY_HH_m_s')}.${
          fileType[1]
       }`;
-      file.mv(
-         `${__dirname}/../../../client/public/uploads/${fileName}`,
-         err => {
-            if (err) {
-               res.send(err);
-            } else {
-               res.json({
-                  fileName: file.name,
-                  filePath: fileName
-               });
-            }
+      file.mv(`${__dirname}/../../../client/build/uploads/${fileName}`, err => {
+         if (err) {
+            res.send(err);
+         } else {
+            res.json({
+               fileName: file.name,
+               filePath: fileName
+            });
          }
-      );
+      });
    }
 });
 

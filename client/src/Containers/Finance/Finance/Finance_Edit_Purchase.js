@@ -90,9 +90,10 @@ export default class EditPurchase extends Component {
       this.checkTo = () => {
          if (this.state.Status === 'ForwardedToAdmin') {
             this.setState({ To: 'Admin' });
-         } else if (this.state.Status === 'ForwardedToPurchase'
-            || this.state.Status === 'Finance-Accepted'
-            || this.state.Status === 'Finance-Rejected'
+         } else if (
+            this.state.Status === 'ForwardedToPurchase' ||
+            this.state.Status === 'Finance-Accepted' ||
+            this.state.Status === 'Finance-Rejected'
          ) {
             this.setState({ To: 'Purchase' });
          }
@@ -125,7 +126,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('not match');
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -134,7 +135,7 @@ export default class EditPurchase extends Component {
          var temp = [];
          this.props.Finance.Quotation_Document_URL.map((file, index) => {
             try {
-               require(`../../../../public/uploads/${file}`);
+               require(`../../../../build/uploads/${file}`);
                return temp.push(
                   <Box key={index}>
                      <RefLink
@@ -143,7 +144,7 @@ export default class EditPurchase extends Component {
                         onClick={event => {
                            event.preventDefault();
                            window.open(
-                              require(`../../../../public/uploads/${file}`)
+                              require(`../../../../build/uploads/${file}`)
                            );
                         }}
                         style={{ textDecoration: 'none', color: 'black' }}
@@ -152,7 +153,7 @@ export default class EditPurchase extends Component {
                      </RefLink>
                      <Route
                         path='document'
-                        component={require(`../../../../public/uploads/${file}`)}
+                        component={require(`../../../../build/uploads/${file}`)}
                      />
                   </Box>
                );
@@ -630,8 +631,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                        <Box></Box>
-                     );
+                     <Box></Box>
+                  );
                }}
                maxWidth='sm'
                fullWidth

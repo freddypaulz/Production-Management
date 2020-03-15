@@ -70,7 +70,7 @@ class Add_Purchase_Stock extends Component {
          var temp = [];
          this.props.Purchase.Quotation_Document_URL.map((file, index) => {
             try {
-               require(`../../../../public/uploads/${file}`);
+               require(`../../../../build/uploads/${file}`);
                temp.push(
                   <Box key={index}>
                      <RefLink
@@ -79,7 +79,7 @@ class Add_Purchase_Stock extends Component {
                         onClick={event => {
                            event.preventDefault();
                            window.open(
-                              require(`../../../../public/uploads/${file}`)
+                              require(`../../../../build/uploads/${file}`)
                            );
                         }}
                         style={{ textDecoration: 'none', color: 'black' }}
@@ -88,7 +88,7 @@ class Add_Purchase_Stock extends Component {
                      </RefLink>
                      <ProtectedRoute
                         path='document'
-                        component={require(`../../../../public/uploads/${file}`)}
+                        component={require(`../../../../build/uploads/${file}`)}
                      />
                   </Box>
                );
