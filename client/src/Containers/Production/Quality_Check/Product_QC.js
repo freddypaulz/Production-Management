@@ -184,7 +184,7 @@ export default class ProductQC extends Component {
           //   this.OnEditHandler(event, rowData);
           // }}
         />
-        <Dialog open={this.state.openEdit} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openEdit} maxWidth="lg" fullWidth>
           <DialogContent>
             <Qualitycheck
               qualitycheck={this.EditData}

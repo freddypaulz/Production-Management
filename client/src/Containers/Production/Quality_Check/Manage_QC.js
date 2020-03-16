@@ -245,7 +245,7 @@ export default class ManageQC extends Component {
             this.OnEditHandler(event, rowData);
           }}
         />
-        <Dialog open={this.state.openAdd} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openAdd} maxWidth="lg" fullWidth>
           <DialogContent>
             <AddQC
               qualitycheck={this.EditData}
@@ -258,7 +258,7 @@ export default class ManageQC extends Component {
             />
           </DialogContent>
         </Dialog>
-        <Dialog open={this.state.openEdit} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openEdit} maxWidth="lg" fullWidth>
           <DialogContent>
             <EditQC
               disabled={this.state.fieldDisabled}
@@ -277,18 +277,19 @@ export default class ManageQC extends Component {
           marginTop="20px"
           justifyContent="flex-end"
           width="94%"
-          marginLeft="40px"
+          marginRight="40px"
         >
           <Box width="100px">
-            <Link to="/management/product-qc">
+            <Link to="/home/production/manage-quality-check">
               <Button
                 fullWidth
                 variant="contained"
                 color="primary"
                 size="large"
                 fontWeight="Bold"
+                style={{ textDecoration: "none" }}
               >
-                Cancel
+                Back
               </Button>
             </Link>
             {/* <Route exact path="/management/product-qc" component={ProductQC} /> */}

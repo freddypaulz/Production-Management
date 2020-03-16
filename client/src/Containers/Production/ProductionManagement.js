@@ -16,6 +16,7 @@ import ProductQC from "./Quality_Check/Product_QC";
 import ManageProductStock from "./Stock/Manage_Product_Stock";
 import ManageRMStock from "./Stock/Manage_RM_Stock";
 import ManageProductionUnit from "./Production_Unit/Manage_Production_Unit";
+import ManageMethod from "./QCMaster/Manage_Method";
 
 export default class ProductionManagement extends Component {
   constructor(props) {
@@ -35,7 +36,8 @@ export default class ProductionManagement extends Component {
       "Manage Unit Request",
       "Manage Raw Material Request",
       "Manage Raw Material Stock",
-      "Manage Unit"
+      "Manage Unit",
+      "Manage Method"
     ];
     this.logout = () => {
       if (auth.logout()) {
@@ -150,6 +152,11 @@ export default class ProductionManagement extends Component {
               exact
               path="/home/production/manage-unit"
               component={ManageProductionUnit}
+            />
+            <Route
+              exact
+              path="/home/production/manage-method"
+              component={ManageMethod}
             />
           </Box>
         </Box>

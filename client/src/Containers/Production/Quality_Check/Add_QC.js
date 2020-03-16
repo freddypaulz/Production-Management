@@ -67,7 +67,7 @@ export default class Qualitycheck extends Component {
           Batch_Id: this.state.Batch_Id,
           Measuring_Unit: this.state.Measuring_Unit,
           Quantity: this.state.Quantity,
-          Method: this.state.Method,
+          Method: this.state.methods,
           Id_Type: this.state.Id_Type,
           Id: this.state.Id,
           Box_Id: this.state.Box_Id,
@@ -172,12 +172,11 @@ export default class Qualitycheck extends Component {
       I_Capacity: this.props.qualitycheck.I_Capacity,
       B_Capacity: this.props.qualitycheck.B_Capacity,
       Measuring_Unit: this.props.qualitycheck.Measuring_Unit,
-      // Method: this.props.qualitycheck.Method,
+      Method: this.props.qualitycheck.Method,
       QC_Date: this.state.QC_Date,
       Result: this.props.qualitycheck.Result,
       Comments: this.props.qualitycheck.Comments,
-      Status: this.props.qualitycheck.Status,
-      _id: this.props.qualitycheck._id
+      Status: this.props.qualitycheck.Status
     });
   }
   render() {
@@ -586,7 +585,7 @@ export default class Qualitycheck extends Component {
                                   method.Value = !method.Value;
                                   this.setState({
                                     methods: [...this.state.methods],
-                                    Method: event.target.checked
+                                    Method: event.target.value
                                   });
                                   console.log("methods", this.state.methods);
                                 }}

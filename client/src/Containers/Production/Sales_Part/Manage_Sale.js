@@ -46,7 +46,6 @@ export default class ManageSales extends Component {
           _id: rowData._id
         })
         .then(res => {
-          //console.log(Wastage);
           this.EditData = { ...res.data[0] };
           console.log(this.EditData);
           this.setState({
@@ -259,7 +258,7 @@ export default class ManageSales extends Component {
             this.OnEditHandler(event, rowData);
           }}
         />
-        <Dialog open={this.state.openAdd} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openAdd} maxWidth="lg" fullWidth>
           <DialogContent>
             <AddSales
               cancel={() => {
@@ -271,7 +270,7 @@ export default class ManageSales extends Component {
             />
           </DialogContent>
         </Dialog>
-        <Dialog open={this.state.openEdit} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openEdit} maxWidth="lg" fullWidth>
           <DialogContent>
             <EditSales
               sales={this.EditData}

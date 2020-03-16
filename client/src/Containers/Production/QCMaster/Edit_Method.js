@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import { Box, TextField, Button } from "@material-ui/core";
 // import { PaperBoard } from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-// import permissionCheck from "../../Components/Auth/permissionCheck";
-// import errorCheck from "./MeasuringUnitValidation";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 
 const styles = Styles;
 export default class EditMethod extends Component {
@@ -13,7 +12,7 @@ export default class EditMethod extends Component {
     this.state = {
       _id: "",
       Method_Name: "",
-
+      Value: false,
       description: "",
       errors: [],
       //   fieldError: {
@@ -27,6 +26,7 @@ export default class EditMethod extends Component {
         .post("/qc-method/edit", {
           _id: this.state._id,
           Method_Name: this.state.Method_Name,
+          Value: this.state.Value,
 
           Description: this.state.Description
         })
@@ -54,7 +54,7 @@ export default class EditMethod extends Component {
     if (this.state.Method_Name === "") {
       this.setState({
         Method_Name: this.props.Method.Method_Name,
-
+        Value: this.props.Method.Value,
         Description: this.props.Method.Description,
         _id: this.props.Method._id
       });
@@ -106,7 +106,24 @@ export default class EditMethod extends Component {
             // helperText={this.state.fieldError.measuring_unit_name.msg}
           ></TextField>
         </Box>
-
+        <Box style={styles.box_field}>
+          <TextField
+            name="Value"
+            fullWidth
+            size="small"
+            required
+            value={this.state.Value}
+            variant="outlined"
+            label="Value"
+            type="text"
+            onChange={event => {
+              this.setState({
+                Value: event.target.value
+              });
+              console.log(event);
+            }}
+          ></TextField>
+        </Box>
         <Box style={styles.box_field}>
           <TextField
             name="Description"

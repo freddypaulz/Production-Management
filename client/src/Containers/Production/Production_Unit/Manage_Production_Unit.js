@@ -233,7 +233,7 @@ export default class ManageProductionUnit extends Component {
             this.OnEditHandler(event, rowData);
           }}
         />
-        <Dialog open={this.state.openAdd} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openAdd} maxWidth="lg" fullWidth>
           <DialogContent>
             <AddProductionUnit
               cancel={() => {
@@ -245,7 +245,7 @@ export default class ManageProductionUnit extends Component {
             />
           </DialogContent>
         </Dialog>
-        <Dialog open={this.state.openEdit} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openEdit} maxWidth="lg" fullWidth>
           <DialogContent>
             <EditProductionUnit
               disabled={this.state.fieldDisabled}

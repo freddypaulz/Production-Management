@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import { Box, TextField, Button } from "@material-ui/core";
 // import { PaperBoard } from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../styles/FormStyles";
-// import permissionCheck from "../../Components/Auth/permissionCheck";
-// import errorCheck from "./MeasuringUnitValidation";
+import Styles from "../styles/FormStyles";
+import { Datepick } from "../../../Components/Date/Datepick";
 
 const styles = Styles;
 export default class AddMethod extends Component {
@@ -12,13 +11,8 @@ export default class AddMethod extends Component {
     super();
     this.state = {
       Method_Name: "",
-      Description: ""
-      //   errors: [],
-      //   fieldError: {
-      //     measuring_unit_name: { status: false, msg: "" },
-      //     description: { status: false, msg: "" }
-      //   },
-      //   isValid: false
+      Description: "",
+      Value: false
     };
 
     this.onAddHandler = () => {
@@ -26,7 +20,7 @@ export default class AddMethod extends Component {
       axios
         .post("/qc-method/add", {
           Method_Name: this.state.Method_Name,
-
+          Value: this.state.Value,
           Description: this.state.Description
         })
         .then(res => {
@@ -81,15 +75,25 @@ export default class AddMethod extends Component {
                 Method_Name: event.target.value
               });
               console.log(event);
-              // const { status, msg, isValid } = errorCheck(event);
-              // this.setState(prevState => {
-              //   prevState.fieldError.measuring_unit_name.status = status;
-              //   prevState.fieldError.measuring_unit_name.msg = msg;
-              //   prevState.isValid = isValid;
-              // });
             }}
-            // error={this.state.fieldError.measuring_unit_name.status}
-            // helperText={this.state.fieldError.measuring_unit_name.msg}
+          ></TextField>
+        </Box>
+        <Box style={styles.box_field}>
+          <TextField
+            name="Value"
+            fullWidth
+            size="small"
+            required
+            value={this.state.Value}
+            variant="outlined"
+            label="Value"
+            type="text"
+            onChange={event => {
+              this.setState({
+                Value: event.target.value
+              });
+              console.log(event);
+            }}
           ></TextField>
         </Box>
 

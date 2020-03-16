@@ -270,10 +270,12 @@ export default class AddPreProduction extends Component {
                     </FormControl>
                   </Box>
                 </Box>
-
-                <Box style={style} width="100%">
-                  <h4>Raw Material Required:</h4>
+                <Box style={styles.boxSize2}>
+                  <Box style={style} width="100%">
+                    <h3>Raw Material Required:</h3>
+                  </Box>
                 </Box>
+
                 <Box
                   display="flex"
                   flexWrap="wrap"
@@ -288,7 +290,8 @@ export default class AddPreProduction extends Component {
                 >
                   {this.state.Raw_Material_Details.map((poc, index) => {
                     return (
-                      <Box style={styles.box_field}>
+                      <Box style={styles.boxSize2}>
+                        {/* <Box style={styles.box_field}> */}
                         <Box style={styles.box} marginRight="10px">
                           <FormControl
                             required

@@ -130,26 +130,26 @@ export default class Qualitycheck extends Component {
         res.data.BoxCode[0].code_prefix + res.data.BoxCode[0].code_separator
       );
     });
-    axios.get("/quality-check/lastcode").then(res => {
-      console.log("Lastcodes", res);
+    // axios.get("/quality-check/lastcode").then(res => {
+    //   console.log("Lastcodes", res);
 
-      if (res.data.length !== 0) {
-        this.setState({
-          lastid: res.data.Id[res.data.Id.length - 1].split("-")[1]
-        });
-      }
-      console.log("Lastid", this.state.lastid);
-    });
-    axios.get("/quality-check/blcode").then(res => {
-      console.log("BoxLastcodes", res);
-      console.log("boxid", res.data.Box_Id);
-      if (res.data.length !== 0) {
-        this.setState({
-          boxlastid: res.data.Box_Id[res.data.Box_Id.length - 1].split("-")[1]
-        });
-      }
-      console.log("boxLastid", this.state.boxlastid);
-    });
+    //   if (res.data.length !== 0) {
+    //     this.setState({
+    //       lastid: res.data.Id[res.data.Id.length - 1].split("-")[1]
+    //     });
+    //   }
+    //   console.log("Lastid", this.state.lastid);
+    // });
+    // axios.get("/quality-check/blcode").then(res => {
+    //   console.log("BoxLastcodes", res);
+    //   console.log("boxid", res.data.Box_Id);
+    //   if (res.data.length !== 0) {
+    //     this.setState({
+    //       boxlastid: res.data.Box_Id[res.data.Box_Id.length - 1].split("-")[1]
+    //     });
+    //   }
+    //   console.log("boxLastid", this.state.boxlastid);
+    // });
     this.setState({
       _id: this.props.qualitycheck._id,
       QC_Type: this.props.qualitycheck.QC_Type,
@@ -523,7 +523,7 @@ export default class Qualitycheck extends Component {
                     alignSelf="center"
                     style={style}
                   >
-                    {this.state.methods.map((method, index) => {
+                    {this.state.Method.map((method, index) => {
                       return (
                         <Box display="flex" key={index}>
                           <FormControlLabel
@@ -536,7 +536,7 @@ export default class Qualitycheck extends Component {
                                   method.Value = !method.Value;
                                   this.setState({
                                     methods: [...this.state.methods],
-                                    Method: event.target.checked
+                                    Method: event.target.value
                                   });
                                   console.log(this.state.methods);
                                 }}

@@ -88,6 +88,7 @@ export default class EditSales extends Component {
     };
     this.distributorInfo = () => {
       let temp = [];
+      console.log("Distributor Details");
       this.state.distributorlist.map((distributor, index) => {
         if (distributor._id === this.state.Distributor) {
           console.log("matched");
@@ -138,13 +139,7 @@ export default class EditSales extends Component {
     axios.get("/distributors/distributors").then(res => {
       console.log(res);
       this.setState({
-        distributors: [...res.data.Distributors]
-      });
-      console.log("distributors : ", res.data.Distributors);
-    });
-    axios.get("/distributors/distributors").then(res => {
-      console.log(res);
-      this.setState({
+        distributors: [...res.data.Distributors],
         distributorlist: [...res.data.Distributors]
       });
       console.log("distributors : ", res.data.Distributors);
@@ -152,9 +147,9 @@ export default class EditSales extends Component {
 
     this.setState({
       _id: this.props.sales._id,
-      Product_ID: this.props.sales.Product_ID,
       Product_Name: this.props.sales.Product_Name,
       Quantity: this.props.sales.Quantity,
+      Product_ID: this.props.sales.Product_ID,
       Measuring_Unit: this.props.sales.Measuring_Unit,
       Box_Id: this.props.sales.Box_Id,
       Selling_Date: this.props.sales.Selling_Date,
@@ -197,12 +192,7 @@ export default class EditSales extends Component {
               <Box style={styles.form}>
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
+                    <FormControl variant="outlined" fullWidth size="small">
                       <InputLabel
                         style={{
                           backgroundColor: "white",
@@ -276,12 +266,7 @@ export default class EditSales extends Component {
                 </Box>
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
+                    <FormControl variant="outlined" fullWidth size="small">
                       <InputLabel
                         style={{
                           backgroundColor: "white",
@@ -353,12 +338,7 @@ export default class EditSales extends Component {
                     ></TextField>
                   </Box>
                   <Box width="50%" style={style}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
+                    <FormControl variant="outlined" fullWidth size="small">
                       <InputLabel
                         style={{
                           backgroundColor: "white",
@@ -548,12 +528,7 @@ export default class EditSales extends Component {
                 </Box>
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
+                    <FormControl variant="outlined" fullWidth size="small">
                       <InputLabel
                         style={{
                           backgroundColor: "white",
@@ -669,6 +644,7 @@ export default class EditSales extends Component {
                   distributorInfo: true
                 });
                 this.openDialog();
+                // this.state.openDialog = true;
               }}
               // style={{ fontWeight: "bold" }}
             >
@@ -702,6 +678,12 @@ export default class EditSales extends Component {
             </Button>
           </Box>
         </Box>
+        {/* <Dialog
+          open={this.state.openDialog}
+          onBackdropClick={(this.state.openDialog = false)}
+          maxWidth="sm"
+          fullWidth
+        > */}
         <Dialog
           open={this.state.openDialog}
           onBackdropClick={() => {
@@ -725,12 +707,13 @@ export default class EditSales extends Component {
                 >
                   Distributor Information
                 </Box>
-                {this.distributorInfo()}
+                <Box>{this.distributorInfo()}</Box>
               </Box>
             ) : (
               this.closeDialog()
             )}
           </DialogContent>
+          {/* </Dialog> */}
         </Dialog>
       </Box>
     );

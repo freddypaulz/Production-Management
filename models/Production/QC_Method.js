@@ -11,8 +11,7 @@ const MethodSchema = mongoose.Schema({
   },
   Value: {
     type: Boolean,
-    value: false
-    // default: false
+    default: false
   }
 });
 

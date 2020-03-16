@@ -15,6 +15,7 @@ export default class ManageMethod extends Component {
       columns: [
         { title: "ID", field: "id" },
         { title: "Method Name", field: "Method_Name" },
+        { title: "Value", field: "Value" },
         { title: "Description", field: "Description" }
       ],
       data: [],

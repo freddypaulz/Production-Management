@@ -203,7 +203,7 @@ export default class ManageUnitRequest extends Component {
           }}
         />
 
-        <Dialog open={this.state.openEdit} maxWidth="md" fullWidth>
+        <Dialog open={this.state.openEdit} maxWidth="lg" fullWidth>
           <DialogContent>
             <EditUnitRequest
               unit={this.EditData}

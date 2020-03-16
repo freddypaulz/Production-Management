@@ -293,7 +293,7 @@ export default class EditPreProduction extends Component {
                 >
                   {this.state.Raw_Material_Details.map((poc, index) => {
                     return (
-                      <Box style={styles.box_field}>
+                      <Box style={styles.boxSize2}>
                         <Box style={styles.box} marginRight="10px">
                           <FormControl
                             required
