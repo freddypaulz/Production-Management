@@ -21,7 +21,6 @@ router.post('/production', (req, res) => {
       };
    }
    Production.find(filters).then(Production => {
-      //console.log(Production);
       Production.map(production => {
          flag = false;
          if (temp.length === 0) {
@@ -44,23 +43,19 @@ router.post('/production', (req, res) => {
                   new moment(value.Manufacture_Date).format('YYYYMM') ===
                      new moment(production.Manufacture_Date).format('YYYYMM')
                ) {
-                  //   console.log(
-                  //      new moment(production.Manufacture_Date).format('YYYYMM')
-                  //   );
                   if (!flag) {
                      flag = true;
                   }
                   return (value.Quantity += production.Quantity);
                }
             });
-            // console.log('Hello', flag);
             if (!flag) {
                temp.push(production);
             }
          }
       });
       console.log(temp);
-      res.send({ Production: temp });
+      res.send({ Production: temp.sort() });
    });
 });
 

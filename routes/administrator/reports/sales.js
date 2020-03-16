@@ -59,7 +59,7 @@ router.post('/sale', (req, res) => {
          }
       });
       // console.log(temp);
-      res.send({ Sale: temp });
+      res.send({ Sale: temp.sort() });
    });
 });
 

@@ -167,7 +167,10 @@ export default class ManagePurchases extends Component {
                   this.setState({
                      data: [...this.req]
                   });
-
+                  this.setState({
+                     openEdit: false,
+                     openAdd: false
+                  });
                   return null;
                });
             } else {
@@ -332,6 +335,8 @@ export default class ManagePurchases extends Component {
                         this.setState({
                            openEdit: false
                         });
+                     }}
+                     close={() => {
                         this.handleClose();
                      }}
                   />
@@ -346,6 +351,8 @@ export default class ManagePurchases extends Component {
                         this.setState({
                            openAdd: false
                         });
+                     }}
+                     close={() => {
                         this.handleClose();
                      }}
                   />

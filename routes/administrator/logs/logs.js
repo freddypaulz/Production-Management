@@ -24,28 +24,34 @@ router.post('/logs', (req, res) => {
 });
 
 router.post('/comment', (req, res) => {
+   let errors = [];
    console.log('Req: ', req.body);
    if (req.body.logs) {
       var reqId = req.body.logs.reqId;
       var from = req.body.logs.from;
       var to = req.body.logs.to;
       var comments = req.body.logs.comments;
-      const log = new logs({
-         Request_Id: reqId,
-         Address: {
-            From: from,
-            To: to
-         },
-         Comments: comments
-      });
-      log.save(function(err, data) {
-         if (err) {
-            throw err;
-         } else {
-            res.send(data);
-            console.log(data._id);
-         }
-      });
+      if (!reqId || !from || !to) {
+         errors.push('Enter All required fields');
+         res.send({ errors });
+      } else {
+         const log = new logs({
+            Request_Id: reqId,
+            Address: {
+               From: from,
+               To: to
+            },
+            Comments: comments
+         });
+         log.save(function(err, data) {
+            if (err) {
+               throw err;
+            } else {
+               res.send({ data, errors });
+               console.log(data._id);
+            }
+         });
+      }
    }
 });
 module.exports = router;

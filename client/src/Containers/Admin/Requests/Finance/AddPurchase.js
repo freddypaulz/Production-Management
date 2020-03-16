@@ -73,7 +73,7 @@ export default class AddPurchase extends Component {
       this.onAddHandler = file => {
          console.log('Add:', file);
          axios
-            .post('/request-details/add', {
+            .post('/request-details/request-detail-add', {
                Raw_Material_Id: this.state.Raw_Material_Id,
                Raw_Material_Code: this.state.Raw_Material_Code,
                Quantity: this.state.Quantity,
@@ -90,7 +90,7 @@ export default class AddPurchase extends Component {
                   Role_Id: sessionStorage.getItem('Role ID')
                },
                logs: {
-                  from: 'Admin',
+                  from: sessionStorage.getItem('Role ID'),
                   to: this.state.to,
                   comments: this.state.Comments
                }
@@ -105,7 +105,7 @@ export default class AddPurchase extends Component {
                   this.setState({
                      errors: [...res.data.errors]
                   });
-                  this.props.cancel();
+                  this.props.close();
                }
             })
             .catch(err => {
@@ -559,7 +559,6 @@ export default class AddPurchase extends Component {
                      color='primary'
                      size='large'
                      fontWeight='bold'
-                     // onClick={this.onAddHandler}
                      onClick={this.onUploadHandler}
                      style={{ fontWeight: 'bold' }}
                   >

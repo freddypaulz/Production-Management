@@ -47,41 +47,58 @@ export default class EditPurchase extends Component {
          to: '',
          quotation: '',
          openLog: false,
-         logs: []
+         logs: [],
+         disabled: false,
+         label: 'Submit'
       };
       this.onEditHandler = () => {
+         this.setState({
+            disabled: true,
+            label: 'wait...'
+         });
          axios
             .post('/logs/comment', {
                logs: {
                   reqId: props.Purchase._id,
-                  from: 'Admin',
+                  from: sessionStorage.getItem('Role ID'),
                   to: this.state.to,
                   comments: this.state.Comments
                }
             })
             .then(comments => {
                console.log('Comments: ', comments);
-               axios
-                  .post('/request-details/edit', {
-                     _id: this.state._id,
-                     Raw_Material_Id: this.state.Raw_Material_Id,
-                     Raw_Material_Code: this.state.Raw_Material_Code,
-                     Quantity: this.state.Quantity,
-                     Measuring_Unit: this.state.Measuring_Unit,
-                     Quotation_Document_URL: [],
-                     Priority: this.state.Priority,
-                     Due_Date: this.state.Due_Date,
-                     Status: this.state.Status,
-                     Comments: comments.data.Comments,
-                     Vendor: this.state.Vendor,
-                     Total_Price: this.state.Total_Price
-                  })
-                  .then(res => {
-                     console.log(res.data);
+               if (comments.data.errors.length > 0) {
+                  this.setState({
+                     errors: [...comments.data.errors],
+                     disabled: false,
+                     label: 'Submit'
                   });
+               } else {
+                  axios
+                     .post('/request-details/request-detail-edit', {
+                        _id: this.state._id,
+                        Quantity: this.state.Quantity,
+                        Measuring_Unit: this.state.Measuring_Unit,
+                        Status: this.state.Status,
+                        Vendor: this.state.Vendor,
+                        Comments: this.state.Comments,
+                        Total_Price: this.state.Total_Price
+                     })
+                     .then(res => {
+                        console.log(res.data);
+                        if (comments.data.errors.length > 0) {
+                           this.setState({
+                              errors: [...comments.data.errors],
+                              disabled: false,
+                              label: 'Submit'
+                           });
+                        } else {
+                           this.props.close();
+                        }
+                     });
+               }
             })
             .catch(err => console.log(err));
-         this.props.cancel();
       };
 
       this.loadStatus = () => {
@@ -564,6 +581,7 @@ export default class EditPurchase extends Component {
                   </Box>
                   <Box marginLeft='10px'>
                      <Button
+                        disabled={this.state.disabled}
                         variant='contained'
                         color='primary'
                         size='large'
@@ -571,7 +589,7 @@ export default class EditPurchase extends Component {
                         onClick={this.onEditHandler}
                         style={{ fontWeight: 'bold' }}
                      >
-                        Submit
+                        {this.state.label}
                      </Button>
                   </Box>
                   <Dialog open={this.state.openLog} maxWidth='lg' fullWidth>

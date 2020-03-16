@@ -9,14 +9,14 @@ router.get('/', (req, res) => {
    request_details.find({}, function(err, data) {
       if (err) throw err;
       res.send(data);
-      console.log(data);
+      // console.log(data);
    });
 });
 router.post('/', (req, res) => {
    request_details.find({ _id: req.body._id }, function(err, data) {
       if (err) throw err;
       res.send(data);
-      console.log(data);
+      // console.log(data);
    });
 });
 router.post('/upload', (req, res) => {
@@ -40,7 +40,7 @@ router.post('/upload', (req, res) => {
    }
 });
 
-router.post('/add', (req, res) => {
+router.post('/request-detail-add', (req, res) => {
    const errors = [];
    const {
       // _id,
@@ -119,53 +119,56 @@ router.post('/add', (req, res) => {
          });
    }
 });
-router.post('/delete', (req, res, next) => {
+router.post('/request-detail-delete', (req, res, next) => {
    request_details
       .findOneAndDelete({ _id: req.body._id })
       .then(requestdetails => {
          res.send(request_details);
       });
 });
-router.post('/edit', (req, res) => {
+router.post('/request-detail-edit', (req, res) => {
+   let errors = [];
+   console.log('req.body: ', req.body);
    const {
       _id,
-      Raw_Material_Id,
-      Raw_Material_Code,
       Quantity,
       Measuring_Unit,
-      Priority,
-      Due_Date,
       Status,
       Comments,
       Total_Price,
-      Vendor,
-      Quotation_Document_URL
+      Vendor
    } = req.body;
 
-   request_details
-      .findOneAndUpdate(
-         { _id },
-         {
-            Raw_Material_Id,
-            Raw_Material_Code,
-            Quantity,
-            Measuring_Unit,
-            Priority,
-            Due_Date,
-            Status,
-            Comments,
-            Total_Price,
-            Vendor,
-            Quotation_Document_URL
-         }
-      )
-      .then(request_details => {
-         res.send(request_details);
-         console.log(request_details);
-      })
-      .catch(err => {
-         console.log(err);
-      });
+   if (
+      !Quantity ||
+      !Measuring_Unit ||
+      !Status ||
+      !Vendor ||
+      !Comments ||
+      !Total_Price
+   ) {
+      errors.push('Enter all required field');
+   }
+   if (errors.length > 0) {
+      return res.send({ errors });
+   } else {
+      request_details
+         .findOneAndUpdate(
+            { _id },
+            {
+               Quantity,
+               Measuring_Unit,
+               Status,
+               Comments,
+               Total_Price,
+               Vendor
+            }
+         )
+         .then(request_details => {
+            res.send({ request_details, errors });
+         })
+         .catch(err => {});
+   }
 });
 
 router.post('/request-details-filter', (req, res) => {

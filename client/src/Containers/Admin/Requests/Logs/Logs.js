@@ -5,6 +5,7 @@ import CardContent from '@material-ui/core/CardContent';
 import { Box } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
+import axios from 'axios';
 const useStyles = makeStyles({
    root: {
       minWidth: 275
@@ -23,10 +24,33 @@ const useStyles = makeStyles({
 });
 
 const Logs = props => {
-   const [data] = useState(props.data);
+   const [logs] = useState(props.data);
+   const [data, setData] = useState([]);
    useEffect(() => {
-      console.log(data);
-   }, [data]);
+      let i = 0;
+      logs.map(log => {
+         console.log(log.Address.From);
+         axios
+            .post('/roles/role', {
+               _id: log.Address.From
+            })
+            .then(res => {
+               log.Address.From_Name = res.data.Role[0].role_name;
+               console.log(res.data.Role[0].role_name);
+               console.log('i: ', i, 'logs.length: ', logs.length);
+               if (i === logs.length - 1) {
+                  setData(logs);
+                  console.log('if: ', data);
+               } else {
+                  i++;
+               }
+            });
+         return null;
+      });
+      //setData(logs);
+      console.log('out if: ', data);
+   }, [data, logs]);
+
    const classes = useStyles();
    return (
       <Box
@@ -49,13 +73,15 @@ const Logs = props => {
          >
             {data.map((data, index) => {
                let bgcolor =
-                  data.Address.From === 'Admin' ? '#ccffd2' : 'white';
+                  data.Address.From === sessionStorage.getItem('Role ID')
+                     ? '#ccffd2'
+                     : 'white';
                return (
                   <Box
                      key={index}
                      display='flex'
                      alignItems={
-                        data.Address.From === 'Admin'
+                        data.Address.From === sessionStorage.getItem('Role ID')
                            ? 'flex-end'
                            : 'flex-start'
                      }
@@ -78,7 +104,7 @@ const Logs = props => {
                               color='textSecondary'
                               gutterBottom
                            >
-                              {data.Address.From} To {data.Address.To}
+                              {data.Address.From_Name} To {data.Address.To}
                            </Typography>
                            <Typography
                               className={classes.pos}
@@ -92,9 +118,6 @@ const Logs = props => {
                               {data.Comments}
                            </Typography>
                         </CardContent>
-                        {/* <CardActions>
-               <Button size='small'>Learn More</Button>
-            </CardActions> */}
                      </Card>
                   </Box>
                );

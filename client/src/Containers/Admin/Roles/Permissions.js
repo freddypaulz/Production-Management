@@ -36,7 +36,7 @@ const Permissions = [
    { name: 'Manage Unit Request', value: false, component: 'production' },
    { name: 'Manage Quality Check', value: false, component: 'production' },
    { name: 'Manage Sales', value: false, component: 'production' },
-   { name: 'Manage Production Stock', value: false, component: 'production' },
+   { name: 'Manage Product Stock', value: false, component: 'production' },
    { name: 'Manage Raw Material Stock', value: false, component: 'production' },
    { name: 'Manage Unit', value: false, component: 'production' }
 ];
