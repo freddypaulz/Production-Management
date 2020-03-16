@@ -96,7 +96,7 @@ class Add_Purchase_Stock extends Component {
                //console.log('called')
                return temp.push('File not found');
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -119,9 +119,7 @@ class Add_Purchase_Stock extends Component {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'invoice_' +
-                     new moment().format('DD_MM_YYYY_HH_m_s_') +
-                     this.state.file[i].name
+                  'invoice ' + new moment().format('DD_MM_YYYY HH_m_s ') + this.state.file[i].name
                );
             }
             axios
@@ -131,6 +129,7 @@ class Add_Purchase_Stock extends Component {
                   }
                })
                .then(file => {
+                  console.log('invoice called')
                   axios
                      .post('/request-details/invoice', {
                         _id: this.props.Purchase._id,
@@ -144,6 +143,7 @@ class Add_Purchase_Stock extends Component {
                         Status: this.state.status
                      })
                      .then(res => {
+                        console.log('add stock called')
                         axios
                            .post('/purchase-stocks/add', {
                               Purchase_List: this.props.Purchase._id,
@@ -153,6 +153,7 @@ class Add_Purchase_Stock extends Component {
                               Total_Quantity: res.data
                            })
                            .then(stock => {
+                              console.log('add production stock called')
                               axios
                                  .post('/purchase-stocks/add-production', {
                                     _id: this.props.Purchase._id,
@@ -194,11 +195,11 @@ class Add_Purchase_Stock extends Component {
             unitList: [...res.data.MeasuringUnits]
          });
       });
-      axios.get('/vendors').then(res => {
-         this.setState({
-            vendors: [...res.data.Vendors]
-         });
-      });
+      // axios.get('vendors/vendors').then(res => {
+      //    this.setState({
+      //       vendors: [...res.data.Vendors]
+      //    });
+      // });
    }
 
    render() {
@@ -365,21 +366,24 @@ class Add_Purchase_Stock extends Component {
             </Box>
             <Box style={styles.boxSize2}>
                <Box
-                  width='100%'
+                  width="100%"
+                  maxHeight='100px'
                   style={style}
-                  display='flex'
-                  flexWrap='wrap'
-                  flexDirection='row'
+                  flexDirection="row"
+                  display="flex"
+                  flexWrap="wrap"
+                  overflow='auto'
                >
                   {this.state.Id.map((poc, index) => {
                      return (
-                        <Box display='flex' alignItems='center' width='100%'>
+                        <Box display="flex" width='33.33%' pt={1}>
                            <TextField
-                              size='small'
+                              size="small"
                               fullWidth
-                              variant='outlined'
-                              label='Id'
+                              variant="outlined"
+                              label="Id"
                               required
+                              name="Id"
                               value={this.state.Id[index].id}
                               onChange={event => {
                                  this.setState({
@@ -388,48 +392,58 @@ class Add_Purchase_Stock extends Component {
                                  console.log(event.target.value);
                                  this.setState(prevState => {
                                     prevState.Id[index].id = prevState.a_id;
+
+                                    console.log("====", prevState.Id[index]);
                                  });
                               }}
                            ></TextField>
 
                            {this.state.Id.length === index + 1 ? (
                               <AddBoxOutlinedIcon
-                                 color='secondary'
+                                 color="secondary"
                                  style={{
-                                    display: 'flex'
+                                    fontSize: "30px",
+                                    margin: "4px",
+                                    padding: "0px"
                                  }}
                                  onClick={() => {
                                     this.setState({});
                                     this.setState(prevState => {
                                        prevState.Id.push({
-                                          id: ''
+                                          id: ""
                                        });
                                        console.log(prevState.Id);
                                     });
                                  }}
                               />
                            ) : (
-                              <DeleteOutlineIcon
-                                 color='secondary'
-                                 style={{
-                                    display: 'flex'
-                                 }}
-                                 onClick={() => {
-                                    this.setState({});
-                                    this.setState(prevState => {
-                                       prevState.Id.splice(index, 1);
-                                       console.log(prevState.Id);
-                                    });
-                                 }}
-                              />
-                           )}
+                                 <DeleteOutlineIcon
+                                    color="secondary"
+                                    style={{
+                                       fontSize: "30px",
+                                       padding: "0px",
+
+                                       margin: "4px"
+                                    }}
+                                    onClick={() => {
+                                       this.setState({});
+                                       this.setState(prevState => {
+                                          prevState.Id.splice(index, 1);
+                                          console.log(prevState.Id);
+                                       });
+                                    }}
+                                 />
+                              )}
                         </Box>
                      );
                   }).reverse()}
                </Box>
             </Box>
             <Box style={styles.boxSize2}>
-               <Box display={this.props.uploadFile} flexDirection='column'>
+               <Box
+                  display={this.props.uploadFile}
+                  flexDirection='column'
+               >
                   <input
                      style={{ display: 'none' }}
                      id='#file2'

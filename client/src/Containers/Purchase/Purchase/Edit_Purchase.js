@@ -17,7 +17,7 @@ import ProtectedRoute from '../../../Components/Auth/ProtectedRoute';
 import { Link as RefLink } from 'react-router-dom';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Stock from './Add_Purchase_Stock';
-import moment from 'moment';
+import moment from 'moment'
 const styles = Styles;
 const style = {
    marginRight: '6px',
@@ -44,7 +44,7 @@ export default class EditPurchase extends Component {
          materials: [],
          vendorList: [],
          logComments: 'no comments',
-         To: 'Finance',
+         To: '',
          file: '',
          openDialog: false,
          vendorInfo: false
@@ -59,15 +59,10 @@ export default class EditPurchase extends Component {
       };
 
       this.onEditHandler = () => {
-         if (
-            this.state.Quantity !== null &&
-            this.state.Vendor !== '' &&
-            this.state.Total_Price !== null &&
-            this.state.file.length !== 0 &&
-            this.state.Measuring_Unit !== '' &&
-            this.state.Status !== ''
+         if (this.state.Quantity !== null && this.state.Vendor !== ''
+            && this.state.Total_Price !== null && this.state.file.length !== 0
+            && this.state.Measuring_Unit !== '' && this.state.Status !== ''
          ) {
-            this.checkTo();
             const formData = new FormData();
             console.log('fileLength: ', this.state.file);
             for (let i = 0; i < this.state.file.length; i++) {
@@ -75,9 +70,7 @@ export default class EditPurchase extends Component {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'quotation_' +
-                     new moment().format('DD_MM_YYYY_HH_m_s_') +
-                     file
+                  'quotation ' + new moment().format('DD_MM_YYYY HH_m_s ') + file
                );
             }
             axios
@@ -92,7 +85,7 @@ export default class EditPurchase extends Component {
                      .post('/log/comment', {
                         logs: {
                            reqId: props.Purchase._id,
-                           from: 'Purchase',
+                           from: sessionStorage.getItem('Role ID'),
                            to: 'Finance',
                            comments: this.state.Comments
                         }
@@ -117,18 +110,9 @@ export default class EditPurchase extends Component {
                      .then(this.props.cancel());
                })
                .catch(err => console.log(err));
-         } else {
-            alert('please check all fields are entered properly');
          }
-      };
-
-      this.checkTo = () => {
-         if (this.state.Status === 'ForwardedToProduction') {
-            this.setState({ To: 'Production' });
-         } else if (this.state.Status === 'ForwardedToFinance') {
-            this.setState({ To: 'Finance' });
-         } else {
-            this.setState({ To: this.props.To });
+         else {
+            alert('please check all fields are entered properly')
          }
       };
 
@@ -167,10 +151,10 @@ export default class EditPurchase extends Component {
                   </Box>
                );
             } catch (err) {
-               console.log('upload failure:', err);
+               console.log('upload failure:', err)
                return temp.push('File not found');
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -183,7 +167,6 @@ export default class EditPurchase extends Component {
             'ForwardedToFinance',
             'Purchase-Accepted',
             'Purchase-Rejected',
-            'Purchase-Completed',
             'ForwardedToProduction'
          ];
          return status.map((msg, index) => (
@@ -228,7 +211,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('not match');
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -329,7 +312,7 @@ export default class EditPurchase extends Component {
                                                 materialCode
                                              );
                                           }
-                                          return null;
+                                          return null
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
@@ -574,6 +557,18 @@ export default class EditPurchase extends Component {
                                        this.setState({
                                           Status: event.target.value
                                        });
+                                       if (event.target.value === 'ForwardedToFinance') {
+                                          this.setState(prevState => {
+                                             prevState.To = 'Finance'
+                                          });
+                                       } else if (event.target.value === 'ForwardedToProduction'
+                                          || event.target.value === 'Purchase-Accepted'
+                                          || event.target.value === 'Purchase-Rejected'
+                                       ) {
+                                          this.setState(prevState => {
+                                             prevState.To = 'Purchase'
+                                          });
+                                       }
                                     }}
                                  >
                                     {this.loadStatus()}
@@ -605,7 +600,10 @@ export default class EditPurchase extends Component {
                            </Box>
                         </Box>
                         <Box style={styles.boxSize2}>
-                           <Box width='100%' display='flex'>
+                           <Box
+                              width='100%'
+                              display='flex'
+                           >
                               <input
                                  style={{ display: 'none' }}
                                  accept='image/*,application/pdf'
@@ -746,8 +744,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                     <Box></Box>
-                  );
+                        <Box></Box>
+                     );
                }}
                maxWidth='sm'
                fullWidth
@@ -766,12 +764,12 @@ export default class EditPurchase extends Component {
                         {this.vendorInfo()}
                      </Box>
                   ) : (
-                     <Stock
-                        Purchase={this.props.Purchase}
-                        closeDialog={this.closeDialog}
-                        upload={this.props.uploadFile}
-                     />
-                  )}
+                        <Stock
+                           Purchase={this.props.Purchase}
+                           closeDialog={this.closeDialog}
+                           upload={this.props.uploadFile}
+                        />
+                     )}
                </DialogContent>
             </Dialog>
          </Box>

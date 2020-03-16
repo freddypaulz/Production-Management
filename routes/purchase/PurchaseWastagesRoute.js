@@ -5,13 +5,13 @@ const purchaseStocks = require('../../models/Purchase/Purchase_Stocks');
 const reqDetails = require('../../models/Purchase/Request_Details');
 
 router.get('/', (req, res) => {
-   purchaseWastages.find({}, function(err, data) {
+   purchaseWastages.find({}, function (err, data) {
       if (err) throw err;
       res.send(data);
    });
 });
 router.post('/', (req, res) => {
-   purchaseWastages.find({ _id: req.body._id }, function(err, data) {
+   purchaseWastages.find({ _id: req.body._id }, function (err, data) {
       if (err) throw err;
       res.send(data);
    });
@@ -28,7 +28,7 @@ router.post('/add', (req, res) => {
       Wastage_Date,
       Description
    } = req.body;
-   console.log(req.body);
+   //console.log(req.body);
 
    const new_Purchase_Wastages = new purchaseWastages({
       Raw_Material_Id,

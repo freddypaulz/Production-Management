@@ -15,7 +15,7 @@ export default class Manage_Finance extends Component {
             { title: 'Material Name', field: 'Raw_Material_Id' },
             { title: 'Quantity', field: 'Quantity' },
             { title: 'Measuring Unit', field: 'Measuring_Unit' },
-            { title: 'Priority', field: 'Priority' },
+            // { title: 'Priority', field: 'Priority' },
             { title: 'Status', field: 'Status' },
             { title: 'Comments', field: 'Comments' }
          ],
@@ -179,7 +179,7 @@ export default class Manage_Finance extends Component {
             alignItems='center'
             flexDirection='column'
          >
-            <Box fontSize='30px' mb={3} fontWeight='bold'>
+            <Box fontSize='30px' mb={2} fontWeight='bold'>
                Request Details
             </Box>
             <Box width='90%' display='flex' flexDirection='row'>
@@ -187,7 +187,7 @@ export default class Manage_Finance extends Component {
                   variant='contained'
                   color='primary'
                   style={{
-                     marginBottom: '20px',
+                     marginBottom: '10px',
                      display: 'flex',
                      marginRight: '10px'
                   }}
@@ -201,7 +201,7 @@ export default class Manage_Finance extends Component {
                   color='primary'
                   size='small'
                   style={{
-                     marginBottom: '20px',
+                     marginBottom: '10px',
                      display: 'flex'
                   }}
                   onClick={this.handleClose}

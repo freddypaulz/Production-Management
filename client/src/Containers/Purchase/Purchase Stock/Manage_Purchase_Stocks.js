@@ -30,7 +30,7 @@ export default class ManageProductStock extends Component {
                   try {
                      var store = [];
                      temp.map((file, index) => {
-                        var tempFile = require(`../../../../public/uploads/${file}`);
+                        var tempFile = require(`../../../../build/uploads/${file}`);
                         //console.log('Else: ', file);
                         store.push(<Box key={index}>
                            <RefLink

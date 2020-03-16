@@ -55,12 +55,11 @@ export default class EditPurchase extends Component {
       };
 
       this.onEditHandler = () => {
-         this.checkTo();
          axios
-            .post('/logs/comment', {
+            .post('/log/comment', {
                logs: {
                   reqId: props.Finance._id,
-                  from: 'Finance',
+                  from: sessionStorage.getItem('Role ID'),
                   to: this.state.To,
                   comments: this.state.Comments
                }
@@ -87,23 +86,10 @@ export default class EditPurchase extends Component {
             .catch(err => console.log(err));
       };
 
-      this.checkTo = () => {
-         if (this.state.Status === 'ForwardedToAdmin') {
-            this.setState({ To: 'Admin' });
-         } else if (
-            this.state.Status === 'ForwardedToPurchase' ||
-            this.state.Status === 'Finance-Accepted' ||
-            this.state.Status === 'Finance-Rejected'
-         ) {
-            this.setState({ To: 'Purchase' });
-         }
-      };
-
       this.vendorInfo = () => {
          let temp = [];
          this.state.vendorList.map((vendor, index) => {
             if (vendor._id === this.state.Vendor) {
-               console.log('matched');
                temp.push(
                   <Box key={index}>
                      <h4 style={{ padding: '0px', margin: '0px' }}>Vendor:</h4>
@@ -124,9 +110,9 @@ export default class EditPurchase extends Component {
                   </Box>
                );
             } else {
-               console.log('not match');
+               console.log('vendor not match');
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -150,6 +136,7 @@ export default class EditPurchase extends Component {
                         style={{ textDecoration: 'none', color: 'black' }}
                      >
                         {file}
+                        {console.log('file:', file)}
                      </RefLink>
                      <Route
                         path='document'
@@ -158,9 +145,10 @@ export default class EditPurchase extends Component {
                   </Box>
                );
             } catch (err) {
-               console.log('called');
+               console.log('File not found', err);
                return temp.push('File not found');
             }
+            return null
          });
          return temp;
       };
@@ -533,6 +521,19 @@ export default class EditPurchase extends Component {
                                        this.setState({
                                           Status: event.target.value
                                        });
+                                       if (event.target.value === 'ForwardedToAdmin') {
+                                          this.setState(prevState => {
+                                             prevState.To = 'Admin'
+                                          });
+                                          console.log('if To state setted: ', this.state.To)
+                                       } else if (event.target.value === 'ForwardedToPurchase'
+                                          || event.target.value === 'Finance-Accepted'
+                                          || event.target.value === 'Finance-Rejected'
+                                       ) {
+                                          this.setState(prevState => {
+                                             prevState.To = 'Purchase'
+                                          });
+                                       }
                                     }}
                                  >
                                     {this.loadStatus()}
@@ -631,8 +632,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                     <Box></Box>
-                  );
+                        <Box></Box>
+                     );
                }}
                maxWidth='sm'
                fullWidth
@@ -651,7 +652,7 @@ export default class EditPurchase extends Component {
                   </Box>
                </DialogContent>
             </Dialog>
-         </Box>
+         </Box >
       );
    }
 }

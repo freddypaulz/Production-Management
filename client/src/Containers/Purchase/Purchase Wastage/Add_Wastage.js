@@ -39,24 +39,32 @@ export default class AddWastage extends Component {
       a_id: ""
     };
     this.onAddHandler = () => {
-      console.log("Ready to add");
-      axios
-        .post("/purchase-wastages/add", {
-          // _id: this.state._id,
-          Raw_Material_Id: this.state.Raw_Material_Id,
-          Quantity: this.state.Quantity,
-          Product_ID: this.state.Product_ID,
-          Raw_Material_Code: this.state.raw_material_code,
-          Id_Type: this.state.Id_Type,
-          Id: this.state.Id,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Wastage_Date: this.state.Wastage_Date,
-          Description: this.state.Description
-        })
-        .then(res => {
-          console.log(res);
-          this.props.cancel();
-        });
+      if (this.state.Raw_Material_Id !== '' && this.state.Quantity !== ''
+        && this.state.raw_material_code !== '' && this.state.Id_Type !== ''
+        && this.state.Id[0].id !== '' && this.state.Wastage_Date !== null
+        && this.state.Description !== ''
+      ) {
+        axios
+          .post("/purchase-wastages/add", {
+            // _id: this.state._id,
+            Raw_Material_Id: this.state.Raw_Material_Id,
+            Quantity: this.state.Quantity,
+            Product_ID: this.state.Product_ID,
+            Raw_Material_Code: this.state.raw_material_code,
+            Id_Type: this.state.Id_Type,
+            Id: this.state.Id,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Wastage_Date: this.state.Wastage_Date,
+            Description: this.state.Description
+          })
+          .then(res => {
+            console.log(res);
+            this.props.cancel();
+          });
+      }
+      else {
+        alert('Please check all the fields are entered properly')
+      }
     };
   }
   componentDidMount() {
@@ -351,7 +359,6 @@ export default class AddWastage extends Component {
             </Box>
           </Box>
         </Box>
-        {/* </PaperBoard> */}
         <Box
           display=" flex"
           pt={2}

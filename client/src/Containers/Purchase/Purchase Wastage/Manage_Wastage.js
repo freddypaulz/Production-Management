@@ -114,7 +114,7 @@ export default class ManageWastage extends Component {
             alignItems='center'
             flexDirection='column'
          >
-            <Box fontSize='30px' mb={3} fontWeight='bold'>
+            <Box fontSize='30px' mb={1} fontWeight='bold'>
                Wastage Details
             </Box>
             <Box width='90%' display='flex' flexDirection='row'>
@@ -122,12 +122,11 @@ export default class ManageWastage extends Component {
                   variant='contained'
                   color='primary'
                   style={{
-                     marginBottom: '20px',
+                     marginBottom: '10px',
                      display: 'flex',
                      marginRight: '10px',
-                     fontWeight: 'bold'
                   }}
-                  size='large'
+                  size='small'
                   onClick={() => {
                      this.setState({
                         openAdd: true

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, DialogContent, Snackbar } from '@material-ui/core';
+import { Box, DialogContent, Snackbar, Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import EditPurchase from './Edit_Purchase';
@@ -25,6 +25,7 @@ export default class ManagePurchase extends Component {
          vendorList: [],
          unitList: [],
          materialList: [],
+         reqDetails: [],
          fieldDisabled: {
             quantity: false,
             unit: false,
@@ -41,9 +42,11 @@ export default class ManagePurchase extends Component {
          logComments: '',
          temp: []
       };
+
       this.closeAlert = () => {
          this.setState({ alert: false });
       };
+
       this.OnEditHandler = (event, rowData) => {
          axios
             .post('/request-details', {
@@ -93,6 +96,54 @@ export default class ManagePurchase extends Component {
          }
          return temp;
       };
+
+      this.loadFinanceAccepted = () => {
+         let temp = [];
+         console.log('reqDetails:', this.state.reqDetails);
+         this.state.reqDetails.map(details => {
+            if (details.Status === 'Finance-Accepted') {
+               details.Raw_Material_Id = this.getMaterialName(details.Raw_Material_Id);
+               details.Measuring_Unit = this.getUnit(details.Measuring_Unit);
+               temp.push(details)
+            }
+            this.setState({
+               data: temp
+            })
+            return null
+         })
+      }
+
+      this.loadFinanceAccepted = () => {
+         let temp = [];
+         console.log('reqDetails:', this.state.reqDetails);
+         this.state.reqDetails.map(details => {
+            if (details.Status === 'Finance-Accepted') {
+               details.Raw_Material_Id = this.getMaterialName(details.Raw_Material_Id);
+               details.Measuring_Unit = this.getUnit(details.Measuring_Unit);
+               temp.push(details)
+            }
+            this.setState({
+               data: temp
+            })
+            return null
+         })
+      }
+
+      this.loadRequest = () => {
+         let temp = [];
+         console.log('reqDetails:', this.state.reqDetails);
+         this.state.reqDetails.map(details => {
+            if (details.Status === 'Requesting' || details.Status === 'ForwardedToPurchase') {
+               details.Raw_Material_Id = this.getMaterialName(details.Raw_Material_Id);
+               details.Measuring_Unit = this.getUnit(details.Measuring_Unit);
+               temp.push(details)
+            }
+            this.setState({
+               data: temp
+            })
+            return null
+         })
+      }
 
       this.handleClose = () => {
          //get Material List
@@ -146,11 +197,13 @@ export default class ManagePurchase extends Component {
                temp.push(res.data[i]);
             }
             this.setState({
-               data: temp
+               data: temp,
+               reqDetails: [...res.data]
             });
          });
       };
    }
+
    componentDidMount() {
       this.handleClose();
    }
@@ -162,8 +215,48 @@ export default class ManagePurchase extends Component {
             alignItems='center'
             flexDirection='column'
          >
-            <Box fontSize='30px' mb={3} fontWeight='bold'>
+            <Box fontSize='30px' mb={2} fontWeight='bold'>
                Request Details
+            </Box>
+            <Box width='90%' display='flex' flexDirection='row'>
+               <Button
+                  variant='contained'
+                  color='primary'
+                  style={{
+                     marginBottom: '10px',
+                     display: 'flex',
+                     marginRight: '10px'
+                  }}
+                  size='small'
+                  onClick={this.loadFinanceAccepted}
+               >
+                  Finance Accepted
+               </Button>
+               <Button
+                  variant='contained'
+                  color='primary'
+                  size='small'
+                  style={{
+                     marginBottom: '10px',
+                     display: 'flex'
+                  }}
+                  onClick={this.loadRequest}
+               >
+                  Request
+               </Button>
+               <Button
+                  variant='contained'
+                  color='primary'
+                  size='small'
+                  style={{
+                     marginBottom: '10px',
+                     display: 'flex',
+                     marginLeft: '10px'
+                  }}
+                  onClick={this.handleClose}
+               >
+                  All
+               </Button>
             </Box>
             <Box width='90%' display='flex' flexDirection='row'>
                <MaterialTable
