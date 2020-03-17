@@ -17,6 +17,12 @@ const Production_Stock_Schema = mongoose.Schema({
     type: String,
     required: true
   },
+  Id: {
+    type: Array
+  },
+  Box_Id: {
+    type: Array
+  },
 
   date: { type: Date, default: Date.now }
 });

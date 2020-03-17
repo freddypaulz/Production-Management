@@ -14,8 +14,7 @@ router.post('/add', (req, res) => {
    reqDetails.find({ _id: req.body.Purchase_Id }).then(details => {
       let flag = false;
       stocks
-         .find({})
-         .then(stock => {
+         .find({}).then(stock => {
             for (let i = 0; i < stock.length && flag != true; i++) {
                for (let j = 0; j < stock[i].Purchase_List.length && flag != true; j++) {
                   reqDetails
@@ -33,7 +32,6 @@ router.post('/add', (req, res) => {
                               .findOneAndUpdate(
                                  {
                                     Purchase_Id: stockDetails[0]._id
-                                    //_id: "5e662febe00b5284b8180123"
                                  },
                                  {
                                     $set: {
@@ -54,7 +52,10 @@ router.post('/add', (req, res) => {
                                  res.send(err);
                               });
                         } else {
-                           if (i === stock.length - 1 && flag !== true) {
+                           if (i === stock.length - 1
+                              && j === stock[stock.length - 1].Purchase_List.length - 1
+                              && flag !== true
+                           ) {
                               const {
                                  Purchase_List,
                                  Purchase_Id,
@@ -116,7 +117,7 @@ router.post('/add', (req, res) => {
 
 router.post('/add-production', (req, res) => {
    const {
-      _id,
+      Id,
       Raw_Material_Id,
       Raw_Material_Code,
       Quantity,
@@ -124,7 +125,7 @@ router.post('/add-production', (req, res) => {
    } = req.body;
 
    let flag = false;
-   stocks.find({ Purchase_List: { $in: _id } }).then(data => {
+   stocks.find({ Purchase_List: { $in: Id } }).then(data => {
       console.log('stock:', req.body);
       let stockReduce = (data[0].Total_Quantity -= req.body.Quantity);
       if (stockReduce < 0) {
@@ -132,7 +133,7 @@ router.post('/add-production', (req, res) => {
       }
       stocks.findOneAndUpdate(
          {
-            Purchase_List: { $in: _id }
+            Purchase_List: { $in: Id }
          },
          {
             $set: {
@@ -160,7 +161,7 @@ router.post('/add-production', (req, res) => {
                         },
                         {
                            $push: {
-                              Id: _id
+                              Id: Id
                            }
                         }
                      )
@@ -175,11 +176,11 @@ router.post('/add-production', (req, res) => {
                      if (i === stock_entry.length - 1 && flag !== true) {
                         const new_Production_Raw_Material_Stock = new Production_Raw_Material_Stock(
                            {
+                              Id,
                               Raw_Material_Id,
                               Raw_Material_Code,
                               Quantity,
-                              Measuring_Unit,
-                              Id
+                              Measuring_Unit
                            }
                         );
                         new_Production_Raw_Material_Stock
@@ -196,12 +197,11 @@ router.post('/add-production', (req, res) => {
                   console.log('add');
                   const new_Production_Raw_Material_Stock = new Production_Raw_Material_Stock(
                      {
+                        Id,
                         Raw_Material_Id,
                         Raw_Material_Code,
                         Quantity,
                         Measuring_Unit
-                        // Id_Type, 
-                        // Id: []
                      }
                   );
                   new_Production_Raw_Material_Stock

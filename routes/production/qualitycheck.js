@@ -104,12 +104,14 @@ router.post("/add", (req, res) => {
                 res.send(err);
               });
           } else {
-            if (i === stock_entry.length - 1 && flag !== true) {
+            if (i === stock_entry.length - 1 && Add !== true) {
               const new_Production_Stock = new Production_Stock({
                 Product_ID,
                 Product_Name,
                 Quantity,
-                Measuring_Unit
+                Measuring_Unit,
+                Id,
+                Box_Id
               });
               new_Production_Stock.save().then(Production_Stock => {
                 console.log("stock added");
@@ -125,7 +127,9 @@ router.post("/add", (req, res) => {
             Product_ID,
             Product_Name,
             Quantity,
-            Measuring_Unit
+            Measuring_Unit,
+            Id,
+            Box_Id
           });
           new_Production_Stock.save().then(Production_Stock => {
             console.log("stock added");

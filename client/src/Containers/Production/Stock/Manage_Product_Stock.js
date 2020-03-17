@@ -112,23 +112,23 @@ export default class ManageProductStock extends Component {
               fontWeight: "bold"
             }
           }}
-          // editable={{
-          //   onRowDelete: oldData =>
-          //     axios
-          //       .post("/production-stock/delete", {
-          //         _id: oldData._id
-          //       })
-          //       .then(Production => {
-          //         console.log(Production);
-          //         if (Production) {
-          //           this.setState(prevState => {
-          //             const data = [...prevState.data];
-          //             data.splice(data.indexOf(oldData), 1);
-          //             return { ...prevState, data };
-          //           });
-          //         }
-          //       })
-          // }}
+          editable={{
+            onRowDelete: oldData =>
+              axios
+                .post("/production-stock/delete", {
+                  _id: oldData._id
+                })
+                .then(Production => {
+                  console.log(Production);
+                  if (Production) {
+                    this.setState(prevState => {
+                      const data = [...prevState.data];
+                      data.splice(data.indexOf(oldData), 1);
+                      return { ...prevState, data };
+                    });
+                  }
+                })
+          }}
         />
       </Box>
     );
