@@ -112,7 +112,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('vendor not match');
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -148,6 +148,7 @@ export default class EditPurchase extends Component {
                console.log('File not found', err);
                return temp.push('File not found');
             }
+            return null
          });
          return temp;
       };
@@ -520,27 +521,17 @@ export default class EditPurchase extends Component {
                                        this.setState({
                                           Status: event.target.value
                                        });
-                                       if (
-                                          event.target.value ===
-                                          'ForwardedToAdmin'
-                                       ) {
+                                       if (event.target.value === 'ForwardedToAdmin') {
                                           this.setState(prevState => {
-                                             prevState.To = 'Admin';
+                                             prevState.To = 'Admin'
                                           });
-                                          console.log(
-                                             'if To state setted: ',
-                                             this.state.To
-                                          );
-                                       } else if (
-                                          event.target.value ===
-                                             'ForwardedToPurchase' ||
-                                          event.target.value ===
-                                             'Finance-Accepted' ||
-                                          event.target.value ===
-                                             'Finance-Rejected'
+                                          console.log('if To state setted: ', this.state.To)
+                                       } else if (event.target.value === 'ForwardedToPurchase'
+                                          || event.target.value === 'Finance-Accepted'
+                                          || event.target.value === 'Finance-Rejected'
                                        ) {
                                           this.setState(prevState => {
-                                             prevState.To = 'Purchase';
+                                             prevState.To = 'Purchase'
                                           });
                                        }
                                     }}
@@ -641,8 +632,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                     <Box></Box>
-                  );
+                        <Box></Box>
+                     );
                }}
                maxWidth='sm'
                fullWidth
@@ -661,7 +652,7 @@ export default class EditPurchase extends Component {
                   </Box>
                </DialogContent>
             </Dialog>
-         </Box>
+         </Box >
       );
    }
 }

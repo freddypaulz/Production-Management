@@ -30,7 +30,7 @@ export default class AddProductionUnit extends Component {
       Priority: "",
       Due_Date: null,
       Status: "Requesting",
-      Comments: "",
+      Comments: "-",
       errors: [],
       openAdd: false,
       success: false,
@@ -50,7 +50,16 @@ export default class AddProductionUnit extends Component {
           Priority: this.state.Priority,
           Due_Date: this.state.Due_Date,
           Status: this.state.Status,
-          Comments: this.state.Comments
+          Comments: this.state.Comments,
+          Created_By: {
+            Employee_Id: sessionStorage.getItem("User ID"),
+            Role_Id: sessionStorage.getItem("Role ID")
+          },
+          logs: {
+            from: "Production Unit",
+            to: "Production",
+            comments: this.state.Comments
+          }
         })
         .then(res => {
           console.log(res);

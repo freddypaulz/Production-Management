@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import MaterialTable from 'material-table';
-import { Box, DialogContent, Snackbar, Button } from '@material-ui/core';
+import MaterialTable, { MTableBody } from 'material-table';
+import { Box, DialogContent, Snackbar, Button, Chip } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import EditPurchase from './EditPurchase';

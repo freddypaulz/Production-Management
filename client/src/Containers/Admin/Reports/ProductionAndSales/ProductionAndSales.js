@@ -15,7 +15,8 @@ export default class ProductionAndSales extends Component {
       ProductionData: [],
       SalesData: [],
       ChartContent: [],
-      ChartOpen: false
+      ChartOpen: false,
+      end_date_disabled: true
    };
    onReportHandler = () => {
       this.setState({
@@ -112,7 +113,8 @@ export default class ProductionAndSales extends Component {
                         maxDate={new Date()}
                         setDate={date => {
                            this.setState({
-                              start_date: date.startOf('month')
+                              start_date: date.startOf('month'),
+                              end_date_disabled: false
                            });
                         }}
                      />
@@ -122,6 +124,7 @@ export default class ProductionAndSales extends Component {
                         id='2'
                         Name='Select End Month'
                         Req={true}
+                        disabled={this.state.start_date !== null ? false : true}
                         value={this.state.end_date}
                         minDate={this.state.start_date}
                         maxDate={new moment() + 1000 * 60 * 60 * 24 * 30}
