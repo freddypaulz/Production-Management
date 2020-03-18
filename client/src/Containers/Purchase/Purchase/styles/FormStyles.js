@@ -108,7 +108,7 @@ const styles = {
   },
   table: {
     overflow: "auto"
-  }
+  },
 };
 
 export default styles;

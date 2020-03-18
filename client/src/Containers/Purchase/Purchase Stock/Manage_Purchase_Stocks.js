@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, DialogContent } from '@material-ui/core';
-import ProtectedRoute from '../../../Components/Auth/ProtectedRoute';
-import { Link as RefLink } from 'react-router-dom';
+import { Box, DialogContent, Link } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 
@@ -23,37 +21,27 @@ export default class ManageProductStock extends Component {
             { title: 'Stock Type', field: 'Id_Type' },
             { title: 'Stock Id', field: 'id' },
             {
-               title: 'Invoice Doument', field: 'Invoice_Document',
+               title: 'Invoice Doument',
+               field: 'Invoice_Document',
                render: rowData => {
                   var temp = rowData.Invoice_Document;
-                  //console.log(`Temp: ${temp}`)
-                  try {
-                     var store = [];
-                     temp.map((file, index) => {
-                        var tempFile = require(`../../../../build/uploads/${file}`);
-                        //console.log('Else: ', file);
-                        store.push(<Box key={index}>
-                           <RefLink
-                              to='document'
-                              target='_blank'
-                              onClick={(event) => {
-                                 event.preventDefault();
-                                 window.open(tempFile);
-                              }}
+                  var store = [];
+                  temp.map((file, index) => {
+                     store.push(
+                        <Box display='flex' key={index}>
+                           <Link
                               style={{ textDecoration: 'none', color: 'black' }}
+                              href={`/uploads/${file}`}
+                              target='_blank'
+                              rel='noreferrer'
                            >
                               {file}
-                              {console.log('File: ', file)}
-                           </RefLink>
-                           <ProtectedRoute path='document' component={tempFile} />
+                           </Link>
                         </Box>
-                        )
-                        return null
-                     }
-                     )
-                     return store;
-                  }
-                  catch (err) { console.log(err); return ('File not found') }
+                     );
+                     return null;
+                  });
+                  return store;
                }
             },
             { title: 'Invoice Date', field: 'Invoice_Date' }
@@ -70,8 +58,8 @@ export default class ManageProductStock extends Component {
       this.closeDialog = () => {
          this.setState({
             openDialog: false
-         })
-      }
+         });
+      };
 
       this.getMaterialDetails = (id, field) => {
          let temp = id;
@@ -81,7 +69,7 @@ export default class ManageProductStock extends Component {
                   console.log('name called');
                   temp = material.raw_material_name;
                }
-               return null
+               return null;
             });
          } else {
             this.state.materialList.map(material => {
@@ -89,7 +77,7 @@ export default class ManageProductStock extends Component {
                   console.log('code called');
                   temp = material.raw_material_code;
                }
-               return null
+               return null;
             });
          }
          return temp;
@@ -101,7 +89,7 @@ export default class ManageProductStock extends Component {
             if (unit._id === id) {
                temp = unit.measuring_unit_name;
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -113,7 +101,7 @@ export default class ManageProductStock extends Component {
             if (details._id === id) {
                temp = this.getMaterialDetails(details.Raw_Material_Id, field);
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -125,7 +113,7 @@ export default class ManageProductStock extends Component {
             if (details._id === id) {
                temp = details;
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -138,7 +126,7 @@ export default class ManageProductStock extends Component {
                let str = this.getFullDetails(id);
                console.log(id);
                temp.push(str);
-               return null
+               return null;
             });
          }
          this.setState({
@@ -240,28 +228,40 @@ export default class ManageProductStock extends Component {
                   onRowClick={(event, rowData) => {
                      let temp = [];
                      this.state.reqDetails.map(details => {
-                        if (details.Status === 'Purchase-Completed'
-                           && details.Raw_Material_Code === rowData.Raw_Material_Code
+                        if (
+                           details.Status === 'Purchase-Completed' &&
+                           details.Raw_Material_Code ===
+                              rowData.Raw_Material_Code
                         ) {
-                           details.Measuring_Unit = this.getUnit(details.Measuring_Unit)
-                           temp.push(details)
+                           details.Measuring_Unit = this.getUnit(
+                              details.Measuring_Unit
+                           );
+                           temp.push(details);
                         }
-                        return null
-                     })
+                        return null;
+                     });
                      this.setState({
                         xtraData: temp,
                         openDialog: true
-                     })
+                     });
                   }}
                />
             </Box>
             <Dialog
                open={this.state.openDialog}
-               onBackdropClick={() => { this.closeDialog() }}
+               onBackdropClick={() => {
+                  this.closeDialog();
+               }}
                maxWidth='md'
             >
                <DialogContent>
-                  <Box fontSize='30px' mb={2} fontWeight='bold' display='flex' justifyContent='center'>
+                  <Box
+                     fontSize='30px'
+                     mb={2}
+                     fontWeight='bold'
+                     display='flex'
+                     justifyContent='center'
+                  >
                      Stock Details
                   </Box>
                   <MaterialTable

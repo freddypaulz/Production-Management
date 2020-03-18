@@ -143,6 +143,7 @@ export default class EditPreProduction extends Component {
                         Product Name
                       </InputLabel>
                       <Select
+                        disabled={this.props.disabled.Product_Name}
                         variant="outlined"
                         required
                         name="Product_Name"
@@ -207,6 +208,7 @@ export default class EditPreProduction extends Component {
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <TextField
+                      disabled={this.props.disabled.Quantity}
                       size="small"
                       fullWidth
                       variant="outlined"
@@ -268,28 +270,16 @@ export default class EditPreProduction extends Component {
                   </Box>
                 </Box>
 
-                <Box
-                  fontWeight="bold"
-                  fontSize="1.2vw"
-                  mt={1}
-                  mb={1}
-                  display="flex"
-                  justifyContent="flex-start"
-                  width="100%"
-                >
-                  Raw_Material_Details
+                <Box style={styles.boxSize2}>
+                  <Box style={style} width="100%">
+                    <h3>Raw Material Required:</h3>
+                  </Box>
                 </Box>
                 <Box
-                  display="flex"
                   flexWrap="wrap"
                   maxHeight="200px"
                   overflow="auto"
-                  border="1px solid #cfcccc"
-                  padding="5px"
-                  marginLeft="5px"
-                  borderRadius="4px"
-                  alignSelf="center"
-                  style={style}
+                  style={styles.boxSize2}
                 >
                   {this.state.Raw_Material_Details.map((poc, index) => {
                     return (

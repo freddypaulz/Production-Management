@@ -14,8 +14,6 @@ import {
 import axios from 'axios';
 import Styles from './styles/FormStyles';
 import { Datepick } from '../../../Components/Date/Datepick';
-import ProtectedRoute from '../../../Components/Auth/ProtectedRoute';
-import GetAppOutlinedIcon from '@material-ui/icons/GetAppOutlined';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Stock from './Add_Purchase_Stock';
 import moment from 'moment';
@@ -72,12 +70,13 @@ export default class EditPurchase extends Component {
             console.log('fileLength: ', this.state.file);
             for (let i = 0; i < this.state.file.length; i++) {
                let file = this.state.file[i].name;
+               let fileType = file.split('.');
                formData.append(
                   'file',
                   this.state.file[i],
-                  'quotation ' +
-                     new moment().format('DD_MM_YYYY HH_m_s ') +
-                     file
+                  'quotation_' +
+                     new moment().format('DD_MM_YYYY_HH_m_s') +
+                     fileType[1]
                );
             }
             axios
@@ -134,15 +133,14 @@ export default class EditPurchase extends Component {
          var temp = [];
          this.props.Purchase.Quotation_Document_URL.map((file, index) => {
             temp.push(
-               <Box display='flex'>
+               <Box display='flex' key={index}>
                   <Link
-                     style={styles.link}
+                     // style={styles.link}
                      href={`/uploads/${file}`}
                      target='_blank'
                      rel='noreferrer'
                   >
-                     <GetAppOutlinedIcon color='secondary' />
-                     Quotation
+                     {file}
                   </Link>
                </Box>
             );

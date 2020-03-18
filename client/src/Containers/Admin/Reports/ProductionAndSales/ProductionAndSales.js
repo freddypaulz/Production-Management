@@ -127,7 +127,7 @@ export default class ProductionAndSales extends Component {
                         disabled={this.state.start_date !== null ? false : true}
                         value={this.state.end_date}
                         minDate={this.state.start_date}
-                        maxDate={new moment() + 1000 * 60 * 60 * 24 * 30}
+                        maxDate={new moment().endOf('month')}
                         setDate={date => {
                            this.setState({
                               end_date: date.endOf('month')

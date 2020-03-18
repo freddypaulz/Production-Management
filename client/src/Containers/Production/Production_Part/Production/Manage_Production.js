@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, Button, DialogContent } from "@material-ui/core";
+import { Box, Button, DialogContent, Snackbar } from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import axios from "axios";
 import AddProduction from "./Add_Production";
 import EditProduction from "./Edit_Production";
+import Alert from "@material-ui/lab/Alert";
 
 export default class ManageProduction extends Component {
   constructor(props) {
@@ -26,8 +27,10 @@ export default class ManageProduction extends Component {
         }
       ],
       data: [],
+      open: false,
       openAdd: false,
       openEdit: false,
+      alert: false,
       fieldDisabled: {
         Product_Name: false,
         Product_ID: false,
@@ -36,6 +39,7 @@ export default class ManageProduction extends Component {
         Measuring_Unit: false,
         Expiry_Duration_Days: false,
         Manufacture_Date: false,
+        Status: false,
         btnDisplay: "none",
         btnText: "Close"
       }
@@ -167,20 +171,25 @@ export default class ManageProduction extends Component {
               tooltip: "Edit User",
 
               onClick: (event, rowData) => {
-                this.setState({
-                  fieldDisabled: {
-                    Product_Name: false,
-                    Product_ID: false,
-                    Batch_Id: false,
-                    Quantity: false,
-                    Measuring_Unit: false,
-                    Expiry_Duration_Days: false,
-                    Manufacture_Date: false,
-                    btnDisplay: "flex",
-                    btnText: "Cancel"
-                  }
-                });
-                this.OnEditHandler(event, rowData);
+                if (this.Status === "Product QC Success") {
+                  this.setState({
+                    fieldDisabled: {
+                      Product_Name: false,
+                      Product_ID: false,
+                      Batch_Id: false,
+                      Quantity: false,
+                      Measuring_Unit: false,
+                      Expiry_Duration_Days: false,
+                      Manufacture_Date: false,
+                      Status: false,
+                      btnDisplay: "flex",
+                      btnText: "Cancel"
+                    }
+                  });
+                  this.OnEditHandler(event, rowData);
+                } else {
+                  this.setState({ alert: true });
+                }
               }
             }
           ]}
@@ -244,6 +253,17 @@ export default class ManageProduction extends Component {
             />
           </DialogContent>
         </Dialog>
+        <Snackbar
+          open={this.state.alert}
+          autoHideDuration={3000}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          onClose={this.closeAlert}
+          // style={{ paddingLeft: "20%", fontWeight: "bold" }}
+        >
+          <Alert variant="filled" severity="error" onClose={this.closeAlert}>
+            You cannot Modify this Record
+          </Alert>
+        </Snackbar>
       </Box>
     );
   }

@@ -6,11 +6,12 @@ const router = express.Router();
 const moment = require('moment');
 router.use(fileupload());
 router.get('/', (req, res) => {
-   request_details.find({}, function(err, data) {
-      if (err) throw err;
-      res.send(data);
-      // console.log(data);
-   });
+   request_details
+      .find({})
+      .sort({ date: -1 })
+      .then(data => {
+         res.send(data);
+      });
 });
 router.post('/', (req, res) => {
    request_details.find({ _id: req.body._id }, function(err, data) {

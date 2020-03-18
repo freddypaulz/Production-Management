@@ -179,11 +179,6 @@ export default class AddPreProduction extends Component {
                             </MenuItem>
                           );
                         })}
-                        {/* <MenuItem value="Product Name" disabled>
-                            Product Name
-                          </MenuItem>
-                          <MenuItem value="Orange Juice">Orange Juice</MenuItem>
-                          <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
                       </Select>
                     </FormControl>
                   </Box>
@@ -277,16 +272,11 @@ export default class AddPreProduction extends Component {
                 </Box>
 
                 <Box
-                  display="flex"
                   flexWrap="wrap"
                   maxHeight="200px"
                   overflow="auto"
+                  style={styles.boxSize2}
                   // border="1px solid #cfcccc"
-                  padding="5px"
-                  marginLeft="5px"
-                  borderRadius="4px"
-                  alignSelf="center"
-                  style={style}
                 >
                   {this.state.Raw_Material_Details.map((poc, index) => {
                     return (

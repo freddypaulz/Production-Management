@@ -13,6 +13,8 @@ export default class ManagePreProduction extends Component {
     this.state = {
       columns: [
         { title: "Product Name", field: "Product_Name" },
+        { title: "Product Code", field: "Product_ID" },
+
         { title: "Quantity", field: "Quantity" },
         {
           title: "Measuring Unit",
@@ -21,7 +23,17 @@ export default class ManagePreProduction extends Component {
       ],
       data: [],
       openAdd: false,
-      openEdit: false
+      openEdit: false,
+      fieldDisabled: {
+        Product_Name: false,
+        Product_ID: false,
+        Batch_Id: false,
+        Quantity: false,
+        Measuring_Unit: false,
+        Raw_Material_Details: false,
+        btnDisplay: "none",
+        btnText: "Close"
+      }
     };
     this.OnEditHandler = (event, rowData) => {
       axios
@@ -102,16 +114,15 @@ export default class ManagePreProduction extends Component {
   render() {
     return (
       <Box
-        width="80%"
+        width="100%"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        height="100vh"
       >
-        <Box fontSize="30px" mb={3} fontWeight="bold">
+        <Box fontSize="30px" mb={3}>
           Manage PreProduction
         </Box>
-        <Box display="flex" alignSelf="start">
+        <Box width="90%" display="flex" flexDirection="row">
           <Button
             variant="contained"
             color="primary"
@@ -135,7 +146,7 @@ export default class ManagePreProduction extends Component {
           title=" "
           columns={this.state.columns}
           data={this.state.data}
-          style={{ width: "100%", overflow: "auto", alignItems: "left" }}
+          style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
           options={{
             sorting: true,
             headerStyle: {
@@ -145,46 +156,46 @@ export default class ManagePreProduction extends Component {
               fontWeight: "bold"
             }
           }}
-          actions={[
-            {
-              icon: "edit",
-              tooltip: "Edit User",
+          // actions={[
+          //   {
+          //     icon: "edit",
+          //     tooltip: "Edit User",
 
-              onClick: (event, rowData) => {
-                this.setState({
-                  fieldDisabled: {
-                    Product_Name: false,
-                    Product_ID: false,
-                    Batch_Id: false,
-                    Quantity: false,
-                    Measuring_Unit: false,
-                    Expiry_Duration_Days: false,
-                    Manufacture_Date: false,
-                    btnDisplay: "flex",
-                    btnText: "Cancel"
-                  }
-                });
-                this.OnEditHandler(event, rowData);
-              }
-            }
-          ]}
-          editable={{
-            onRowDelete: oldData =>
-              axios
-                .post("/pre-production/delete", {
-                  _id: oldData._id
-                })
-                .then(Production => {
-                  console.log(Production);
-                  if (Production) {
-                    this.setState(prevState => {
-                      const data = [...prevState.data];
-                      data.splice(data.indexOf(oldData), 1);
-                      return { ...prevState, data };
-                    });
-                  }
-                })
-          }}
+          //     onClick: (event, rowData) => {
+          //       this.setState({
+          //         fieldDisabled: {
+          //           Product_Name: false,
+          //           Product_ID: false,
+          //           Batch_Id: false,
+          //           Quantity: false,
+          //           Measuring_Unit: false,
+          //           Expiry_Duration_Days: false,
+          //           Manufacture_Date: false,
+          //           btnDisplay: "flex",
+          //           btnText: "Cancel"
+          //         }
+          //       });
+          //       this.OnEditHandler(event, rowData);
+          //     }
+          //   }
+          // ]}
+          // editable={{
+          //   onRowDelete: oldData =>
+          //     axios
+          //       .post("/pre-production/delete", {
+          //         _id: oldData._id
+          //       })
+          //       .then(Production => {
+          //         console.log(Production);
+          //         if (Production) {
+          //           this.setState(prevState => {
+          //             const data = [...prevState.data];
+          //             data.splice(data.indexOf(oldData), 1);
+          //             return { ...prevState, data };
+          //           });
+          //         }
+          //       })
+          // }}
           onRowClick={(event, rowData) => {
             this.setState({
               fieldDisabled: {
@@ -192,9 +203,7 @@ export default class ManagePreProduction extends Component {
                 Product_ID: true,
                 Batch_Id: true,
                 Quantity: true,
-                Measuring_Unit: true,
-                Expiry_Duration_Days: true,
-                Manufacture_Date: true,
+                Raw_Material_Details: true,
                 btnDisplay: "none",
                 btnText: "Close"
               }

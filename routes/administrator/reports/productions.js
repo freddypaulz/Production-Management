@@ -20,43 +20,47 @@ router.post('/production', (req, res) => {
          $lte: req.body.end_date
       };
    }
-   Production.find(filters).then(Production => {
-      Production.map(production => {
-         flag = false;
-         if (temp.length === 0) {
-            temp.push(production);
-         } else {
-            temp.find(value => {
-               console.log(
-                  'Production',
-                  value.Product_ID,
-                  new moment(value.Manufacture_Date).format('YYYY-MM-DD'),
-                  new moment(value.Manufacture_Date).format('YYYYMM'),
-                  production.Product_ID,
-                  new moment(production.Manufacture_Date).format('YYYY-MM-DD'),
-                  new moment(production.Manufacture_Date).format('YYYYMM'),
-                  new moment(value.Manufacture_Date).format('YYYYMM') ===
-                     new moment(production.Manufacture_Date).format('YYYYMM')
-               );
-               if (
-                  value.Product_ID === production.Product_ID &&
-                  new moment(value.Manufacture_Date).format('YYYYMM') ===
-                     new moment(production.Manufacture_Date).format('YYYYMM')
-               ) {
-                  if (!flag) {
-                     flag = true;
-                  }
-                  return (value.Quantity += production.Quantity);
-               }
-            });
-            if (!flag) {
+   Production.find(filters)
+      .sort({ date: -1 })
+      .then(Production => {
+         Production.map(production => {
+            flag = false;
+            if (temp.length === 0) {
                temp.push(production);
+            } else {
+               temp.find(value => {
+                  console.log(
+                     'Production',
+                     value.Product_ID,
+                     new moment(value.Manufacture_Date).format('YYYY-MM-DD'),
+                     new moment(value.Manufacture_Date).format('YYYYMM'),
+                     production.Product_ID,
+                     new moment(production.Manufacture_Date).format(
+                        'YYYY-MM-DD'
+                     ),
+                     new moment(production.Manufacture_Date).format('YYYYMM'),
+                     new moment(value.Manufacture_Date).format('YYYYMM') ===
+                        new moment(production.Manufacture_Date).format('YYYYMM')
+                  );
+                  if (
+                     value.Product_ID === production.Product_ID &&
+                     new moment(value.Manufacture_Date).format('YYYYMM') ===
+                        new moment(production.Manufacture_Date).format('YYYYMM')
+                  ) {
+                     if (!flag) {
+                        flag = true;
+                     }
+                     return (value.Quantity += production.Quantity);
+                  }
+               });
+               if (!flag) {
+                  temp.push(production);
+               }
             }
-         }
+         });
+         console.log(temp);
+         res.send({ Production: temp });
       });
-      console.log(temp);
-      res.send({ Production: temp.sort() });
-   });
 });
 
 module.exports = router;

@@ -8,12 +8,12 @@ import {
    InputLabel,
    MenuItem,
    Dialog,
-   DialogContent
+   DialogContent,
+   Link
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
 import { Datepick } from '../../../Components/Date/Datepick';
-import { Link as RefLink, Route } from 'react-router-dom';
 
 const styles = Styles;
 const style = {
@@ -120,34 +120,19 @@ export default class EditPurchase extends Component {
       this.loadFile = () => {
          var temp = [];
          this.props.Finance.Quotation_Document_URL.map((file, index) => {
-            try {
-               require(`../../../../build/uploads/${file}`);
-               return temp.push(
-                  <Box key={index}>
-                     <RefLink
-                        to='document'
-                        target='_blank'
-                        onClick={event => {
-                           event.preventDefault();
-                           window.open(
-                              require(`../../../../build/uploads/${file}`)
-                           );
-                        }}
-                        style={{ textDecoration: 'none', color: 'black' }}
-                     >
-                        {file}
-                        {console.log('file:', file)}
-                     </RefLink>
-                     <Route
-                        path='document'
-                        component={require(`../../../../build/uploads/${file}`)}
-                     />
-                  </Box>
-               );
-            } catch (err) {
-               console.log('File not found', err);
-               return temp.push('File not found');
-            }
+            temp.push(
+               <Box display='flex' key={index}>
+                  <Link
+                     style={{ textDecoration: 'none', color: 'black' }}
+                     href={`/uploads/${file}`}
+                     target='_blank'
+                     rel='noreferrer'
+                  >
+                     {file}
+                  </Link>
+               </Box>
+            );
+            return null;
          });
          return temp;
       };

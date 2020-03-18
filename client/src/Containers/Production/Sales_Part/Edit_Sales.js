@@ -117,9 +117,9 @@ export default class EditSales extends Component {
     this.openDialog = () => {
       this.setState({ openDialog: true });
     };
-    this.closeDialog = () => {
-      this.setState({ openDialog: false });
-    };
+    // this.closeDialog = () => {
+    //   this.setState({ openDialog: false });
+    // };
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
@@ -172,7 +172,7 @@ export default class EditSales extends Component {
         <Box fontSize="30px" mb={3}>
           Edit Sales
         </Box>
-        {this.state.errors.length > 0 ? (
+        {/* {this.state.errors.length > 0 ? (
           this.state.errors.map((error, index) => {
             return (
               <Box style={styles.box_msg} bgcolor="#f73067" key={index}>
@@ -184,7 +184,7 @@ export default class EditSales extends Component {
           <Box bgcolor="#3df45b" style={styles.box_msg}>
             Successful
           </Box>
-        ) : null}
+        ) : null} */}
         {/* <PaperBoard> */}
         <Box style={styles.root}>
           <Box display="flex" justifyContent="center">
@@ -390,7 +390,7 @@ export default class EditSales extends Component {
                     flexDirection="row"
                     display="flex"
                   >
-                    {this.state.Box_Id.map((bid, index) => {
+                    {this.state.Box_Id.map((id, index) => {
                       return (
                         <Box display="flex">
                           <TextField
@@ -410,7 +410,7 @@ export default class EditSales extends Component {
                               this.setState(prevState => {
                                 prevState.Box_Id[index].id = prevState.b_id;
 
-                                console.log("====", prevState.Box_Id[index]);
+                                // console.log( prevState.Box_Id[index]);
                               });
                             }}
                           ></TextField>
@@ -686,32 +686,43 @@ export default class EditSales extends Component {
         > */}
         <Dialog
           open={this.state.openDialog}
-          onBackdropClick={() => {
-            return this.state.distributorInfo === true ? (
-              this.closeDialog()
-            ) : (
-              <Box></Box>
-            );
-          }}
+          // onBackdropClick={() => {
+          //   return this.state.distributorInfo === true ? (
+          //     this.closeDialog()
+          //   ) : (
+          //     //(this.state.openDialog = false)
+          //     <Box></Box>
+          //   );
+          // }}
           maxWidth="sm"
           fullWidth
         >
           <DialogContent>
-            {this.state.distributorInfo === true ? (
-              <Box display="flex" flexDirection="column">
-                <Box
-                  fontSize="25px"
-                  mb={3}
-                  textAlign="center"
-                  fontWeight="bold"
-                >
-                  Distributor Information
-                </Box>
-                <Box>{this.distributorInfo()}</Box>
+            {/* {this.state.distributorInfo === true ? ( */}
+            <Box display="flex" flexDirection="column">
+              <Box fontSize="25px" mb={3} textAlign="center" fontWeight="bold">
+                Distributor Information
               </Box>
-            ) : (
+              <Box>{this.distributorInfo()}</Box>
+              <Box display=" flex" alignContent="end" pt={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    this.props.cancel();
+                  }}
+                >
+                  Back
+                </Button>
+              </Box>
+            </Box>
+            {/* ) : (
+              // (this.state.openDialog = false)
+
               this.closeDialog()
-            )}
+            )} */}
           </DialogContent>
           {/* </Dialog> */}
         </Dialog>

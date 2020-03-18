@@ -70,14 +70,16 @@ export default class ManagePurchases extends Component {
                   RawMaterial.data.RawMaterial[0].raw_material_name;
                this.req.push(RequestDetail);
                this.setState({
-                  data: [...this.req]
+                  data: [...this.req],
+                  msg: 'No Data Found!'
                });
             })
             .catch(err => {
                RequestDetail.Raw_Material_Name = 'Problem Loading Raw Material';
                this.req.push(RequestDetail);
                this.setState({
-                  data: [...this.req]
+                  data: [...this.req],
+                  msg: 'No Data Found!'
                });
             });
       };

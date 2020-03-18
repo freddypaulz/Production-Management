@@ -10,79 +10,83 @@ router.get('/', (req, res) => {
    });
 });
 
+router.post('/test', (req, res) => {
+   stocks.find({ Purchase_List: { $in: req.body._id } }).then(result => {
+      res.send(result);
+   }).catch(err => {
+      console.log('errpr')
+      res.send(err);
+   })
+})
+
 router.post('/add', (req, res) => {
-   reqDetails.find({ _id: req.body.Purchase_Id }).then(details => {
+   reqDetails.find({ _id: req.body.Purchase_Id }).then(newStock => {
       let flag = false;
       stocks
          .find({}).then(stock => {
-            for (let i = 0; i < stock.length && flag != true; i++) {
-               for (let j = 0; j < stock[i].Purchase_List.length && flag != true; j++) {
-                  reqDetails
-                     .find({ _id: stock[i].Purchase_List[j] })
-                     .then(stockDetails => {
-                        if (
-                           details[0].Raw_Material_Code ===
-                           stockDetails[0].Raw_Material_Code
-                        ) {
-                           let new_stock =
-                              stock[i].Total_Quantity +
-                              details[0].Invoice_Quantity;
-                           console.log('_id: ', stockDetails[0]._id);
-                           stocks
-                              .findOneAndUpdate(
-                                 {
-                                    Purchase_Id: stockDetails[0]._id
+            for (let i = 0; i < stock.length; i++) {
+               reqDetails
+                  .find({ _id: stock[i].Purchase_Id })
+                  .then(stockDetails => {
+                     if (
+                        newStock[0].Raw_Material_Code ===
+                        stockDetails[0].Raw_Material_Code
+                     ) {
+                        let new_stock =
+                           stock[i].Total_Quantity +
+                           newStock[0].Invoice_Quantity;
+                        console.log('_id: ', stockDetails[0]._id);
+                        stocks
+                           .findOneAndUpdate(
+                              {
+                                 _id: stock[i]._id
+                              },
+                              {
+                                 $set: {
+                                    Total_Quantity: new_stock,
+                                    Purchase_Id: req.body.Purchase_Id
                                  },
-                                 {
-                                    $set: {
-                                       Total_Quantity: new_stock,
-                                       Purchase_Id: req.body.Purchase_Id
-                                    },
-                                    $push: {
-                                       Purchase_List: req.body.Purchase_Id
-                                    }
+                                 $push: {
+                                    Purchase_List: req.body.Purchase_Id
                                  }
-                              )
-                              .then(Response => {
-                                 flag = true;
-                                 console.log('Stock added Successful', Response);
-                                 return res.send('Updated Successful');
-                              })
-                              .catch(err => {
-                                 res.send(err);
-                              });
-                        } else {
-                           if (i === stock.length - 1
-                              && j === stock[stock.length - 1].Purchase_List.length - 1
-                              && flag !== true
-                           ) {
-                              const {
-                                 Purchase_List,
-                                 Purchase_Id,
-                                 Total_Quantity,
-                                 Measuring_Unit
-                              } = req.body;
-                              const new_stocks = new stocks({
-                                 Purchase_List,
-                                 Purchase_Id,
-                                 Total_Quantity,
-                                 Measuring_Unit
-                              });
-                              new_stocks.save().then(stocks => {
-                                 console.log('new stock added');
-                                 return res.send(stocks);
-                              }).catch(err => {
-                                 console.log('new stock not added', err);
-                                 return res.send('stock not added');
-                              });
-                           }
+                              }
+                           )
+                           .then(Response => {
+                              flag = true;
+                              console.log('Stock added Successful', Response);
+                              return res.send('Updated Successful');
+                           })
+                           .catch(err => {
+                              res.send(err);
+                           });
+                     } else {
+                        if (i === stock.length - 1 && flag !== true) {
+                           const {
+                              Purchase_List,
+                              Purchase_Id,
+                              Total_Quantity,
+                              Measuring_Unit
+                           } = req.body;
+                           const new_stocks = new stocks({
+                              Purchase_List,
+                              Purchase_Id,
+                              Total_Quantity,
+                              Measuring_Unit
+                           });
+                           new_stocks.save().then(stocks => {
+                              console.log('new stock added');
+                              return res.send(stocks);
+                           }).catch(err => {
+                              console.log('new stock not added', err);
+                              return res.send('stock not added');
+                           });
                         }
-                     })
-                     .catch(err => {
-                        res.send('stock not matched');
-                        console.log('stock not added', err);
-                     });
-               }
+                     }
+                  })
+                  .catch(err => {
+                     res.send('stock not matched');
+                     console.log('stock not added', err);
+                  });
             }
             if (stock.length === 0) {
                const {
