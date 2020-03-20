@@ -3,6 +3,7 @@ import { Box, TextField, Button } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './MaterialTypeValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -13,27 +14,40 @@ export default class AddMaterialType extends Component {
          material_type_name: '',
          description: '',
          errors: [],
-         success: false
+         success: false,
+         fieldError: {
+            material_type_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onAddHandler = () => {
-         axios
-            .post('/material-types/add-material-type', {
-               material_type_name: this.state.material_type_name,
-               description: this.state.description
-            })
-            .then(res => {
-               console.log(res);
-               if (res.data.errors.length > 0) {
-                  console.log(res.data.errors);
-                  this.setState({
-                     errors: [...res.data.errors],
-                     success: false
-                  });
-               } else {
-                  this.props.cancel();
-               }
-            })
-            .catch(err => console.log(err));
+         this.setState({});
+         if (this.state.material_type_name === '') {
+            this.setState(prevState => {
+               prevState.fieldError.material_type_name.status = true;
+               prevState.fieldError.material_type_name.msg = 'Name required';
+            });
+         } else {
+            axios
+               .post('/material-types/add-material-type', {
+                  material_type_name: this.state.material_type_name,
+                  description: this.state.description
+               })
+               .then(res => {
+                  console.log(res);
+                  if (res.data.errors.length > 0) {
+                     console.log(res.data.errors);
+                     this.setState({
+                        errors: [...res.data.errors],
+                        success: false
+                     });
+                  } else {
+                     this.props.cancel();
+                  }
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -63,6 +77,7 @@ export default class AddMaterialType extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      fullWidth
+                     name='material_type_name'
                      required
                      value={this.state.material_type_name}
                      variant='outlined'
@@ -72,12 +87,21 @@ export default class AddMaterialType extends Component {
                         this.setState({
                            material_type_name: event.target.value
                         });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.material_type_name.status = status;
+                           prevState.fieldError.material_type_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.material_type_name.status}
+                     helperText={this.state.fieldError.material_type_name.msg}
                   ></TextField>
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
                      fullWidth
                      required
                      value={this.state.description}
@@ -86,7 +110,15 @@ export default class AddMaterialType extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -115,6 +147,7 @@ export default class AddMaterialType extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onAddHandler}
                   >
                      Add

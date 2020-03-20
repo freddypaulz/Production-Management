@@ -12,7 +12,7 @@ import {
    Select,
    FormControl,
    InputLabel,
-   MenuItem
+   MenuItem,
 } from '@material-ui/core';
 import axios from 'axios';
 
@@ -28,6 +28,7 @@ class Add_Purchase_Stock extends Component {
       this.state = {
          invoice_quantity: null,
          unitList: [],
+         roleList: [],
          munit: '',
          vendors: [],
          vendor: '',
@@ -40,14 +41,10 @@ class Add_Purchase_Stock extends Component {
          a_id: '',
          idType: ''
       };
+
       this.loadStatus = () => {
          let status = [
-            'ForwardedToFinance',
-            'Purchase-Accepted',
-            'Purchase-Rejected',
-            'Purchase-Inprogress',
             'Purchase-Completed',
-            'ForwardedToProduction'
          ];
          return status.map((msg, index) => (
             <MenuItem key={index} value={msg}>
@@ -64,48 +61,19 @@ class Add_Purchase_Stock extends Component {
          return temp;
       };
 
-      // this.loadFile = () => {
-      //    var temp = [];
-      //    this.props.Purchase.Quotation_Document_URL.map((file, index) => {
-      //       try {
-      //          require(`../../../../build/uploads/${file}`);
-      //          temp.push(
-      //             <Box key={index}>
-      //                <RefLink
-      //                   to='document'
-      //                   target='_blank'
-      //                   onClick={event => {
-      //                      event.preventDefault();
-      //                      window.open(
-      //                         require(`../../../../build/uploads/${file}`)
-      //                      );
-      //                   }}
-      //                   style={{ textDecoration: 'none', color: 'black' }}
-      //                >
-      //                   {file}
-      //                </RefLink>
-      //                <ProtectedRoute
-      //                   path='document'
-      //                   component={require(`../../../../build/uploads/${file}`)}
-      //                />
-      //             </Box>
-      //          );
-      //       } catch (err) {
-      //          //console.log('called')
-      //          return temp.push('File not found');
-      //       }
-      //       return null
-      //    });
-      //    return temp;
-      // };
+      this.getRoles = (id) => {
+         let temp = id;
+         this.state.roleList.map(role => {
+            if (role._id === id) {
+               temp = role.role_name;
+            }
+            return null
+         })
+         return temp;
+      }
 
       this.onSubmit = () => {
          if (
-            isNaN(this.state.invoice_quantity) ||
-            this.state.invoice_quantity === null ||
-            isNaN(this.state.invoice_amount) ||
-            this.state.invoice_amount === null ||
-            this.state.munit === '' ||
             this.state.invoice_date === null ||
             this.state.file.length === 0 ||
             this.state.status === ''
@@ -119,9 +87,7 @@ class Add_Purchase_Stock extends Component {
                formData.append(
                   'file',
                   this.state.file[i],
-                  'invoice_' +
-                     new moment().format('DD_MM_YYYY_HH_m_s.') +
-                     fileType[1]
+                  'invoice_' + new moment().format('DD_MM_YYYY_HH_m_s.') + fileType[1]
                );
             }
             axios
@@ -131,13 +97,13 @@ class Add_Purchase_Stock extends Component {
                   }
                })
                .then(file => {
-                  console.log('invoice called');
+                  console.log('invoice called', file.data)
                   axios
                      .post('/request-details/invoice', {
                         _id: this.props.Purchase._id,
-                        Invoice_Quantity: this.state.invoice_quantity,
-                        Invoice_Measuring_Unit: this.state.munit,
-                        Invoice_Amount: this.state.invoice_amount,
+                        Invoice_Quantity: this.props.Purchase.Quantity,
+                        Invoice_Measuring_Unit: this.props.Purchase.Measuring_Unit,
+                        Invoice_Amount: this.props.Purchase.Total_Price,
                         Invoice_Date: this.state.invoice_date,
                         Invoice_Document: file.data,
                         Id_Type: this.state.idType,
@@ -145,36 +111,43 @@ class Add_Purchase_Stock extends Component {
                         Status: this.state.status
                      })
                      .then(res => {
-                        console.log('add stock called');
+                        console.log('add stock called')
                         axios
                            .post('/purchase-stocks/add', {
                               Purchase_List: this.props.Purchase._id,
                               Purchase_Id: this.props.Purchase._id,
                               Measuring_Unit: this.props.Purchase
                                  .Measuring_Unit,
-                              Total_Quantity: res.data
+                              Total_Quantity: this.props.Purchase.Quantity
                            })
                            .then(stock => {
-                              console.log('add production stock called');
-                              axios
-                                 .post('/purchase-stocks/add-production', {
-                                    _id: this.props.Purchase._id,
-                                    Raw_Material_Id: this.props.Purchase
-                                       .Raw_Material_Id,
-                                    Raw_Material_Code: this.props.Purchase
-                                       .Raw_Material_Code,
-                                    Quantity: this.props.Purchase.Quantity,
-                                    Measuring_Unit: this.props.Purchase
-                                       .Measuring_Unit,
-                                    Id: this.props.Purchase._id
-                                 })
-                                 .then(response => {
-                                    console.log('response: ', response);
-                                    this.props.closeDialog();
-                                 })
-                                 .catch(err => {
-                                    console.log('stock not reduced', err);
-                                 });
+                              console.log('add production stock called:', stock)
+                              let temp = this.getRoles(this.props.Purchase.Created_By.Role_Id);
+                              console.log('role:', temp);
+                              if (temp === 'Production Manager') {
+                                 axios
+                                    .post('/purchase-stocks/add-production', {
+                                       _id: this.props.Purchase._id,
+                                       Raw_Material_Id: this.props.Purchase
+                                          .Raw_Material_Id,
+                                       Raw_Material_Code: this.props.Purchase
+                                          .Raw_Material_Code,
+                                       Quantity: this.props.Purchase.Quantity,
+                                       Measuring_Unit: this.props.Purchase
+                                          .Measuring_Unit,
+                                       Id: this.props.Purchase._id
+                                    })
+                                    .then(response => {
+                                       console.log('response: ', response);
+                                       this.props.closeDialog();
+                                    })
+                                    .catch(err => {
+                                       console.log('stock not reduced', err);
+                                    });
+                              }
+                              else {
+                                 this.props.closeDialog();
+                              }
                            })
                            .catch(err => {
                               console.log('Stock not added', err);
@@ -197,6 +170,11 @@ class Add_Purchase_Stock extends Component {
             unitList: [...res.data.MeasuringUnits]
          });
       });
+      axios.get('/roles/roles').then(res => {
+         this.setState({
+            roleList: [...res.data.Roles]
+         });
+      });
    }
 
    render() {
@@ -208,12 +186,13 @@ class Add_Purchase_Stock extends Component {
             <Box style={styles.boxSize2}>
                <Box width='100%' style={style}>
                   <TextField
+                     disabled
                      size='small'
                      fullWidth
                      variant='outlined'
                      label='Invoice_Quantity'
                      required
-                     value={this.state.invoice_quantity}
+                     value={this.props.Purchase.Quantity}
                      onChange={event => {
                         this.setState({
                            invoice_quantity: event.target.value
@@ -238,10 +217,11 @@ class Add_Purchase_Stock extends Component {
                         Measuring Unit
                      </InputLabel>
                      <Select
+                        disabled
                         name='Measuring_Unit'
                         variant='outlined'
                         required
-                        value={this.state.munit}
+                        value={this.props.Purchase.Measuring_Unit}
                         onChange={event => {
                            this.setState({
                               munit: event.target.value
@@ -267,12 +247,13 @@ class Add_Purchase_Stock extends Component {
             <Box style={styles.boxSize2}>
                <Box width='100%' style={style}>
                   <TextField
+                     disabled
                      size='small'
                      fullWidth
                      variant='outlined'
                      label='Invoice_Amount'
                      required
-                     value={this.state.invoice_amount}
+                     value={this.props.Purchase.Total_Price}
                      onChange={event => {
                         this.setState({
                            invoice_amount: event.target.value
@@ -363,24 +344,24 @@ class Add_Purchase_Stock extends Component {
             </Box>
             <Box style={styles.boxSize2}>
                <Box
-                  width='100%'
+                  width="100%"
                   maxHeight='100px'
                   style={style}
-                  flexDirection='row'
-                  display='flex'
-                  flexWrap='wrap'
+                  flexDirection="row"
+                  display="flex"
+                  flexWrap="wrap"
                   overflow='auto'
                >
                   {this.state.Id.map((poc, index) => {
                      return (
-                        <Box display='flex' width='33.33%' pt={1}>
+                        <Box display="flex" width='33.33%' pt={1}>
                            <TextField
-                              size='small'
+                              size="small"
                               fullWidth
-                              variant='outlined'
-                              label='Id'
+                              variant="outlined"
+                              label="Id"
                               required
-                              name='Id'
+                              name="Id"
                               value={this.state.Id[index].id}
                               onChange={event => {
                                  this.setState({
@@ -390,54 +371,57 @@ class Add_Purchase_Stock extends Component {
                                  this.setState(prevState => {
                                     prevState.Id[index].id = prevState.a_id;
 
-                                    console.log('====', prevState.Id[index]);
+                                    console.log("====", prevState.Id[index]);
                                  });
                               }}
                            ></TextField>
 
                            {this.state.Id.length === index + 1 ? (
                               <AddBoxOutlinedIcon
-                                 color='secondary'
+                                 color="secondary"
                                  style={{
-                                    fontSize: '30px',
-                                    margin: '4px',
-                                    padding: '0px'
+                                    fontSize: "30px",
+                                    margin: "4px",
+                                    padding: "0px"
                                  }}
                                  onClick={() => {
                                     this.setState({});
                                     this.setState(prevState => {
                                        prevState.Id.push({
-                                          id: ''
+                                          id: ""
                                        });
                                        console.log(prevState.Id);
                                     });
                                  }}
                               />
                            ) : (
-                              <DeleteOutlineIcon
-                                 color='secondary'
-                                 style={{
-                                    fontSize: '30px',
-                                    padding: '0px',
+                                 <DeleteOutlineIcon
+                                    color="secondary"
+                                    style={{
+                                       fontSize: "30px",
+                                       padding: "0px",
 
-                                    margin: '4px'
-                                 }}
-                                 onClick={() => {
-                                    this.setState({});
-                                    this.setState(prevState => {
-                                       prevState.Id.splice(index, 1);
-                                       console.log(prevState.Id);
-                                    });
-                                 }}
-                              />
-                           )}
+                                       margin: "4px"
+                                    }}
+                                    onClick={() => {
+                                       this.setState({});
+                                       this.setState(prevState => {
+                                          prevState.Id.splice(index, 1);
+                                          console.log(prevState.Id);
+                                       });
+                                    }}
+                                 />
+                              )}
                         </Box>
                      );
                   }).reverse()}
                </Box>
             </Box>
             <Box style={styles.boxSize2}>
-               <Box display={this.props.uploadFile} flexDirection='column'>
+               <Box
+                  display={this.props.uploadFile}
+                  flexDirection='column'
+               >
                   <input
                      style={{ display: 'none' }}
                      id='#file2'
@@ -465,17 +449,6 @@ class Add_Purchase_Stock extends Component {
                   </label>
                   <Box style={{ marginLeft: '10px', paddingTop: '5px' }}>
                      {this.showFile()}
-                  </Box>
-                  <Box
-                     display={
-                        this.state.invoice_document_url.length > 0
-                           ? 'flex'
-                           : 'none'
-                     }
-                     marginLeft='10px'
-                     alignSelf='center'
-                  >
-                     {/* {this.loadFile()} */}
                   </Box>
                </Box>
             </Box>

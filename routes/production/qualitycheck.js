@@ -11,7 +11,8 @@ router.get("/", (req, res) => {
   });
 });
 router.get("/lastcode", (req, res) => {
-  Qualitycheck.findOne()
+  Qualitycheck.findOne({ QC_Type: "Packing" })
+    .sort({ _id: -1 })
     .sort({ Id: -1 })
     .exec(function(err, data) {
       res.send(data);
@@ -19,6 +20,7 @@ router.get("/lastcode", (req, res) => {
 });
 router.get("/blcode", (req, res) => {
   Qualitycheck.findOne()
+    .sort({ _id: -1 })
     .sort({ Box_Id: -1 })
     .exec(function(err, data) {
       res.send(data);
@@ -42,6 +44,7 @@ router.post("/add", (req, res) => {
     Quantity,
     Id_Type,
     Id,
+    QC_Id,
     Box_Id,
     I_Capacity,
     B_Capacity,
@@ -63,6 +66,7 @@ router.post("/add", (req, res) => {
     Quantity,
     Id_Type,
     Id,
+    QC_Id,
     Box_Id,
     I_Capacity,
     B_Capacity,
@@ -174,6 +178,8 @@ router.post("/edit", (req, res) => {
     Quantity,
     Id_Type,
     Id,
+    QC_Id,
+
     Box_Id,
     I_Capacity,
     B_Capacity,
@@ -195,6 +201,7 @@ router.post("/edit", (req, res) => {
       Measuring_Unit,
       Quantity,
       Id_Type,
+      QC_Id,
       Id,
       Box_Id,
       I_Capacity,

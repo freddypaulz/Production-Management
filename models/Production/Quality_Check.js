@@ -21,11 +21,13 @@ const Qualitycheck_Schema = mongoose.Schema({
     required: true
   },
   Id_Type: {
-    type: String,
-    required: true
+    type: String
   },
   Id: {
     type: Array
+  },
+  QC_Id: {
+    type: String
   },
   Box_Id: {
     type: Array

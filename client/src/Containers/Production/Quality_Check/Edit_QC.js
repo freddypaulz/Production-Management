@@ -31,6 +31,7 @@ export default class Qualitycheck extends Component {
       Quantity: "",
       Id_Type: "",
       Id: "",
+      QC_Id: "",
       Box_Id: "",
       I_Capacity: "",
       B_Capacity: "",
@@ -48,7 +49,8 @@ export default class Qualitycheck extends Component {
       boxlastid: "",
       prefixcode: "",
       boxprefixcode: "",
-      boxcodes: []
+      boxcodes: [],
+      display: "none"
     };
     this.onEditHandler = () => {
       axios
@@ -62,6 +64,7 @@ export default class Qualitycheck extends Component {
           Method: this.state.Method,
           Id_Type: this.state.Id_Type,
           Id: this.state.Id,
+          QC_Id: this.state.QC_Id,
           Box_Id: this.state.Box_Id,
           I_Capacity: this.state.I_Capacity,
           B_Capacity: this.state.B_Capacity,
@@ -158,6 +161,7 @@ export default class Qualitycheck extends Component {
       Quantity: this.props.qualitycheck.Quantity,
       Id_Type: this.props.qualitycheck.Id_Type,
       Id: this.props.qualitycheck.Id,
+      QC_Id: this.props.qualitycheck.QC_Id,
       Box_Id: this.props.qualitycheck.Box_Id,
       I_Capacity: this.props.qualitycheck.I_Capacity,
       B_Capacity: this.props.qualitycheck.B_Capacity,
@@ -306,7 +310,7 @@ export default class Qualitycheck extends Component {
                 </Box>
 
                 <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <TextField
                       disabled={this.props.disabled.Quantity}
                       size="small"
@@ -322,7 +326,7 @@ export default class Qualitycheck extends Component {
                     ></TextField>
                     {/* */}
                   </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -367,132 +371,158 @@ export default class Qualitycheck extends Component {
                     </FormControl>
                   </Box>
                 </Box>
-
-                <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
-                      <InputLabel
-                        style={{
-                          backgroundColor: "white",
-                          paddingLeft: "2px",
-                          paddingRight: "2px"
-                        }}
-                      >
-                        Id Type
-                      </InputLabel>
-                      <Select
-                        disabled={this.props.disabled.Id_Type}
-                        variant="outlined"
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="50%" style={style}>
+                      <FormControl
                         required
-                        name="Id_Type"
-                        value={this.state.Id_Type}
-                        onChange={event => {
-                          this.setState({ Id_Type: event.target.value });
-                        }}
+                        variant="outlined"
+                        fullWidth
+                        size="small"
                       >
-                        <MenuItem value="Id Type" disabled>
+                        <InputLabel
+                          style={{
+                            backgroundColor: "white",
+                            paddingLeft: "2px",
+                            paddingRight: "2px"
+                          }}
+                        >
                           Id Type
-                        </MenuItem>
-                        <MenuItem value="Individual">Individual</MenuItem>
-                        <MenuItem value="Box">Box</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      disabled={this.props.disabled.B_Capacity}
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Box Capacity"
-                      required
-                      name="B_Capacity"
-                      value={this.state.B_Capacity}
-                      onChange={event => {
-                        this.setState({ B_Capacity: event.target.value });
+                        </InputLabel>
+                        <Select
+                          disabled={this.props.disabled.Id_Type}
+                          variant="outlined"
+                          required
+                          name="Id_Type"
+                          value={this.state.Id_Type}
+                          onChange={event => {
+                            this.setState({ Id_Type: event.target.value });
+                          }}
+                        >
+                          <MenuItem value="Id Type" disabled>
+                            Id Type
+                          </MenuItem>
+                          <MenuItem value="Individual">Individual</MenuItem>
+                          <MenuItem value="Box">Box</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box width="50%" style={style}>
+                      <TextField
+                        disabled={this.props.disabled.B_Capacity}
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Box Capacity"
+                        required
+                        name="B_Capacity"
+                        value={this.state.B_Capacity}
+                        onChange={event => {
+                          this.setState({ B_Capacity: event.target.value });
 
-                        // let cap = [];
-                        // let cal;
-                        // for (let i = 1; i <= event.target.value; i++) {
-                        //   cal =
-                        //     this.state.boxprefixcode +
-                        //     (parseInt(this.state.boxlastid) + i);
-                        //   cap.push(cal);
-                        // }
-                        // this.setState({ Box_Id: cap });
-                        // console.log("ids", cap);
-                      }}
-                    ></TextField>
-                  </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      disabled={this.props.disabled.I_Capacity}
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Indivitual Capacity"
-                      required
-                      name="I_Capacity"
-                      value={this.state.I_Capacity}
-                      onChange={event => {
-                        this.setState({ I_Capacity: event.target.value });
+                          // let cap = [];
+                          // let cal;
+                          // for (let i = 1; i <= event.target.value; i++) {
+                          //   cal =
+                          //     this.state.boxprefixcode +
+                          //     (parseInt(this.state.boxlastid) + i);
+                          //   cap.push(cal);
+                          // }
+                          // this.setState({ Box_Id: cap });
+                          // console.log("ids", cap);
+                        }}
+                      ></TextField>
+                    </Box>
+                    {/* {this.state.QC_Type === "Packing" ? ( */}
+                    <Box width="50%" style={style}>
+                      <TextField
+                        disabled={this.props.disabled.I_Capacity}
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Individual Capacity"
+                        required
+                        name="I_Capacity"
+                        value={this.state.I_Capacity}
+                        onChange={event => {
+                          this.setState({ I_Capacity: event.target.value });
 
-                        // let temp = [];
-                        // let calc;
-                        // for (let i = 1; i <= this.state.I_Capacity; i++) {
-                        //   calc =
-                        //     this.state.prefixcode +
-                        //     (parseInt(this.state.lastid) + i);
-                        //   temp.push(calc);
-                        // }
-                        // this.setState({ Id: temp });
-                        // console.log("ids", temp);
-                      }}
-                    ></TextField>
+                          // let temp = [];
+                          // let calc;
+                          // for (let i = 1; i <= this.state.I_Capacity; i++) {
+                          //   calc =
+                          //     this.state.prefixcode +
+                          //     (parseInt(this.state.lastid) + i);
+                          //   temp.push(calc);
+                          // }
+                          // this.setState({ Id: temp });
+                          // console.log("ids", temp);
+                        }}
+                      ></TextField>
+                    </Box>
+                    {/* ) : (
+                    (this.state.display = "")
+                  )} */}
                   </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      disabled={this.props.disabled.Box_Id}
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Box Id"
-                      required
-                      name="Box_Id"
-                      value={this.state.Box_Id}
-                      onChange={event => {
-                        this.setState({
-                          Box_Id: event.target.value
-                        });
-                      }}
-                    ></TextField>
+                ) : null}
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        disabled={this.props.disabled.Box_Id}
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Box Id"
+                        required
+                        name="Box_Id"
+                        value={this.state.Box_Id}
+                        onChange={event => {
+                          this.setState({
+                            Box_Id: event.target.value
+                          });
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      disabled={this.props.disabled.Id}
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Individual Id"
-                      required
-                      name="Id"
-                      value={this.state.Id}
-                      onChange={event => {
-                        this.setState({ Id: event.target.value });
-                      }}
-                    ></TextField>
+                ) : null}
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        disabled={this.props.disabled.Id}
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Individual Id"
+                        required
+                        name="Id"
+                        value={this.state.Id}
+                        onChange={event => {
+                          this.setState({ Id: event.target.value });
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                </Box>
-
+                ) : (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        disabled={this.props.disabled.QC_Id}
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="QC Id"
+                        required
+                        name="QC_Id"
+                        value={this.state.QC_Id}
+                        onChange={event => {
+                          this.setState({ QC_Id: event.target.value });
+                        }}
+                      ></TextField>
+                    </Box>
+                  </Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
                     <Datepick
@@ -529,16 +559,17 @@ export default class Qualitycheck extends Component {
                           <FormControlLabel
                             control={
                               <Checkbox
+                                disabled={this.props.disabled.Method}
+                                checked={method.Value}
                                 name="Method"
                                 value={this.state.Method}
-                                checked={method.Value}
                                 onClick={event => {
                                   method.Value = !method.Value;
                                   this.setState({
                                     methods: [...this.state.methods],
                                     Method: event.target.value
                                   });
-                                  console.log(this.state.methods);
+                                  console.log("methods", this.state.methods);
                                 }}
                                 Value={`${method.Value}`}
                               />
@@ -592,8 +623,6 @@ export default class Qualitycheck extends Component {
                 <Box style={styles.boxSize2}>
                   <Box
                     style={style}
-                    mb={0}
-                    mt={1}
                     display="flex"
                     alignItems="center"
                     width="100%"

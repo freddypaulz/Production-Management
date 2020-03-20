@@ -21,8 +21,7 @@ export default class ManageProductStock extends Component {
             { title: 'Stock Type', field: 'Id_Type' },
             { title: 'Stock Id', field: 'id' },
             {
-               title: 'Invoice Doument',
-               field: 'Invoice_Document',
+               title: 'Invoice Doument', field: 'Invoice_Document',
                render: rowData => {
                   var temp = rowData.Invoice_Document;
                   var store = [];
@@ -30,7 +29,6 @@ export default class ManageProductStock extends Component {
                      store.push(
                         <Box display='flex' key={index}>
                            <Link
-                              style={{ textDecoration: 'none', color: 'black' }}
                               href={`/uploads/${file}`}
                               target='_blank'
                               rel='noreferrer'
@@ -39,8 +37,8 @@ export default class ManageProductStock extends Component {
                            </Link>
                         </Box>
                      );
-                     return null;
-                  });
+                     return null
+                  })
                   return store;
                }
             },
@@ -58,8 +56,8 @@ export default class ManageProductStock extends Component {
       this.closeDialog = () => {
          this.setState({
             openDialog: false
-         });
-      };
+         })
+      }
 
       this.getMaterialDetails = (id, field) => {
          let temp = id;
@@ -69,7 +67,7 @@ export default class ManageProductStock extends Component {
                   console.log('name called');
                   temp = material.raw_material_name;
                }
-               return null;
+               return null
             });
          } else {
             this.state.materialList.map(material => {
@@ -77,7 +75,7 @@ export default class ManageProductStock extends Component {
                   console.log('code called');
                   temp = material.raw_material_code;
                }
-               return null;
+               return null
             });
          }
          return temp;
@@ -89,7 +87,7 @@ export default class ManageProductStock extends Component {
             if (unit._id === id) {
                temp = unit.measuring_unit_name;
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -101,7 +99,7 @@ export default class ManageProductStock extends Component {
             if (details._id === id) {
                temp = this.getMaterialDetails(details.Raw_Material_Id, field);
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -113,7 +111,7 @@ export default class ManageProductStock extends Component {
             if (details._id === id) {
                temp = details;
             }
-            return null;
+            return null
          });
          return temp;
       };
@@ -126,7 +124,7 @@ export default class ManageProductStock extends Component {
                let str = this.getFullDetails(id);
                console.log(id);
                temp.push(str);
-               return null;
+               return null
             });
          }
          this.setState({
@@ -167,19 +165,21 @@ export default class ManageProductStock extends Component {
                   let temp = [];
                   console.log('Stocks: ', res.data.stock);
                   for (let i = 0; i < res.data.stock.length; i++) {
-                     res.data.stock[i].Raw_Material_Id = this.getDetails(
-                        res.data.stock[i].Purchase_Id,
-                        'name'
-                     );
-                     res.data.stock[i].Raw_Material_Code = this.getDetails(
-                        res.data.stock[i].Purchase_Id,
-                        'code'
-                     );
-                     res.data.stock[i].Measuring_Unit = this.getUnit(
-                        res.data.stock[i].Measuring_Unit
-                     );
-                     console.log('rm: ', res.data.stock[i].Total_Quantity);
-                     temp.push(res.data.stock[i]);
+                     if (res.data.stock[i].Total_Quantity > 0) {
+                        res.data.stock[i].Raw_Material_Id = this.getDetails(
+                           res.data.stock[i].Purchase_Id,
+                           'name'
+                        );
+                        res.data.stock[i].Raw_Material_Code = this.getDetails(
+                           res.data.stock[i].Purchase_Id,
+                           'code'
+                        );
+                        res.data.stock[i].Measuring_Unit = this.getUnit(
+                           res.data.stock[i].Measuring_Unit
+                        );
+                        console.log('rm: ', res.data.stock[i].Total_Quantity);
+                        temp.push(res.data.stock[i]);
+                     }
                   }
                   this.setState({
                      data: temp,
@@ -228,40 +228,28 @@ export default class ManageProductStock extends Component {
                   onRowClick={(event, rowData) => {
                      let temp = [];
                      this.state.reqDetails.map(details => {
-                        if (
-                           details.Status === 'Purchase-Completed' &&
-                           details.Raw_Material_Code ===
-                              rowData.Raw_Material_Code
+                        if (details.Status === 'Purchase-Completed'
+                           && details.Raw_Material_Code === rowData.Raw_Material_Code
                         ) {
-                           details.Measuring_Unit = this.getUnit(
-                              details.Measuring_Unit
-                           );
-                           temp.push(details);
+                           details.Measuring_Unit = this.getUnit(details.Measuring_Unit)
+                           temp.push(details)
                         }
-                        return null;
-                     });
+                        return null
+                     })
                      this.setState({
                         xtraData: temp,
                         openDialog: true
-                     });
+                     })
                   }}
                />
             </Box>
             <Dialog
                open={this.state.openDialog}
-               onBackdropClick={() => {
-                  this.closeDialog();
-               }}
+               onBackdropClick={() => { this.closeDialog() }}
                maxWidth='md'
             >
                <DialogContent>
-                  <Box
-                     fontSize='30px'
-                     mb={2}
-                     fontWeight='bold'
-                     display='flex'
-                     justifyContent='center'
-                  >
+                  <Box fontSize='30px' mb={2} fontWeight='bold' display='flex' justifyContent='center'>
                      Stock Details
                   </Box>
                   <MaterialTable

@@ -32,12 +32,11 @@ router.post('/add', (req, res) => {
                         newStock[0].Raw_Material_Code ===
                         stockDetails[0].Raw_Material_Code
                      ) {
-                        let new_stock =
-                           stock[i].Total_Quantity +
-                           newStock[0].Invoice_Quantity;
+                        flag = true;
+                        let new_stock = stock[i].Total_Quantity + newStock[0].Invoice_Quantity;
                         console.log('_id: ', stockDetails[0]._id);
                         stocks
-                           .findOneAndUpdate(
+                           .findByIdAndUpdate(
                               {
                                  _id: stock[i]._id
                               },
@@ -52,15 +51,14 @@ router.post('/add', (req, res) => {
                               }
                            )
                            .then(Response => {
-                              flag = true;
-                              console.log('Stock added Successful', Response);
-                              return res.send('Updated Successful');
+                              console.log('Stock added Successful');
+                              res.send(Response)
                            })
                            .catch(err => {
-                              res.send(err);
+                              console.log(err)
                            });
                      } else {
-                        if (i === stock.length - 1 && flag !== true) {
+                        if (i === stock.length - 1 && flag != true) {
                            const {
                               Purchase_List,
                               Purchase_Id,
@@ -75,16 +73,15 @@ router.post('/add', (req, res) => {
                            });
                            new_stocks.save().then(stocks => {
                               console.log('new stock added');
-                              return res.send(stocks);
+                              msg = "New Stock Added";
+                              res.send(stocks);
                            }).catch(err => {
                               console.log('new stock not added', err);
-                              return res.send('stock not added');
                            });
                         }
                      }
                   })
                   .catch(err => {
-                     res.send('stock not matched');
                      console.log('stock not added', err);
                   });
             }
@@ -103,18 +100,17 @@ router.post('/add', (req, res) => {
                   Measuring_Unit
                });
                new_stocks.save().then(stocks => {
+                  msg = "Stock initialised";
                   console.log('stock initialised');
                   return res.send(stocks);
                });
             }
          })
          .catch(err => {
-            res.send('stocks not found');
             console.log('Stock not found', err);
          })
          .catch(err => {
             console.log('Not Purchased', err);
-            res.send('Not Purchased');
          });
    });
 });
@@ -131,13 +127,13 @@ router.post('/add-production', (req, res) => {
    let flag = false;
    stocks.find({ Purchase_List: { $in: Id } }).then(data => {
       console.log('stock:', req.body);
-      let stockReduce = (data[0].Total_Quantity -= req.body.Quantity);
+      let stockReduce = data[0].Total_Quantity - req.body.Quantity;
       if (stockReduce < 0) {
          stockReduce = 0;
       }
       stocks.findOneAndUpdate(
          {
-            Purchase_List: { $in: Id }
+            _id: data[0]._id
          },
          {
             $set: {

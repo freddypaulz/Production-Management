@@ -34,9 +34,10 @@ export default class Qualitycheck extends Component {
       Quantity: "",
       Id_Type: "",
       Id: "",
+      QC_Id: "",
       Box_Id: "",
-      I_Capacity: 0,
-      B_Capacity: 0,
+      I_Capacity: "",
+      B_Capacity: "",
       Method: [],
       QC_Date: null,
       Result: "",
@@ -53,8 +54,8 @@ export default class Qualitycheck extends Component {
       prefixcode: "",
       boxprefixcode: "",
       boxcodes: [],
-      dates: []
-
+      dates: [],
+      display: "none"
       // ds: "06-03-2020"
     };
     this.onEditHandler = () => {
@@ -70,6 +71,7 @@ export default class Qualitycheck extends Component {
           Method: this.state.methods,
           Id_Type: this.state.Id_Type,
           Id: this.state.Id,
+          QC_Id: this.state.QC_Id,
           Box_Id: this.state.Box_Id,
           I_Capacity: this.state.I_Capacity,
           B_Capacity: this.state.B_Capacity,
@@ -141,6 +143,10 @@ export default class Qualitycheck extends Component {
           this.setState({
             lastid: res.data.Id[res.data.Id.length - 1].split("-")[1]
           });
+        } else {
+          this.setState({
+            lastid: 0
+          });
         }
         console.log("Lastid", this.state.lastid);
       });
@@ -150,6 +156,10 @@ export default class Qualitycheck extends Component {
         if (res.data.length !== 0) {
           this.setState({
             boxlastid: res.data.Box_Id[res.data.Box_Id.length - 1].split("-")[1]
+          });
+        } else {
+          this.setState({
+            boxlastid: 0
           });
         }
         console.log("boxLastid", this.state.boxlastid);
@@ -329,7 +339,7 @@ export default class Qualitycheck extends Component {
                 </Box>
 
                 <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <TextField
                       size="small"
                       fullWidth
@@ -355,7 +365,7 @@ export default class Qualitycheck extends Component {
                     ></TextField>
                     {/* */}
                   </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -399,135 +409,153 @@ export default class Qualitycheck extends Component {
                     </FormControl>
                   </Box>
                 </Box>
-
-                <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <FormControl
-                      required
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                    >
-                      <InputLabel
-                        style={{
-                          backgroundColor: "white",
-                          paddingLeft: "2px",
-                          paddingRight: "2px"
-                        }}
-                      >
-                        Id Type
-                      </InputLabel>
-                      <Select
-                        variant="outlined"
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="50%" style={style}>
+                      <FormControl
                         required
-                        name="Id_Type"
-                        value={this.state.Id_Type}
-                        onChange={event => {
-                          this.setState({ Id_Type: event.target.value });
-                        }}
+                        variant="outlined"
+                        fullWidth
+                        size="small"
                       >
-                        <MenuItem value="Id Type" disabled>
+                        <InputLabel
+                          style={{
+                            backgroundColor: "white",
+                            paddingLeft: "2px",
+                            paddingRight: "2px"
+                          }}
+                        >
                           Id Type
-                        </MenuItem>
-                        <MenuItem value="Individual">Individual</MenuItem>
-                        <MenuItem value="Box">Box</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Box Capacity"
-                      required
-                      name="B_Capacity"
-                      value={this.state.B_Capacity}
-                      onChange={event => {
-                        this.setState({ B_Capacity: event.target.value });
+                        </InputLabel>
+                        <Select
+                          variant="outlined"
+                          required
+                          name="Id_Type"
+                          value={this.state.Id_Type}
+                          onChange={event => {
+                            this.setState({ Id_Type: event.target.value });
+                          }}
+                        >
+                          <MenuItem value="Id Type" disabled>
+                            Id Type
+                          </MenuItem>
+                          <MenuItem value="Individual">Individual</MenuItem>
+                          <MenuItem value="Box">Box</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <Box width="50%" style={style}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Box Capacity"
+                        required
+                        name="B_Capacity"
+                        value={this.state.B_Capacity}
+                        onChange={event => {
+                          this.setState({ B_Capacity: event.target.value });
 
-                        let cap = [];
-                        let cal;
-                        for (let i = 1; i <= event.target.value; i++) {
-                          cal =
-                            this.state.boxprefixcode +
-                            (parseInt(this.state.boxlastid) + i);
-                          cap.push(cal);
-                        }
-                        this.setState({ Box_Id: cap });
-                        console.log("ids", cap);
-                        console.log("ids+", cal);
+                          let cap = [];
+                          let cal;
+                          for (let i = 1; i <= event.target.value; i++) {
+                            cal =
+                              this.state.boxprefixcode +
+                              (parseInt(this.state.boxlastid) + i);
+                            cap.push(cal);
+                          }
+                          this.setState({ Box_Id: cap });
+                          console.log("ids", cap);
+                          console.log("ids+", cal);
+                        }}
+                      ></TextField>
+                    </Box>
+                    {/* {this.state.QC_Type === "Packing" ? ( */}
+                    <Box width="50%" style={style}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Individual Capacity"
+                        required
+                        name="I_Capacity"
+                        value={this.state.I_Capacity}
+                        onChange={event => {
+                          this.setState({ I_Capacity: event.target.value });
 
-                        // }
-                      }}
-                    ></TextField>
+                          let temp = [];
+                          let calc;
+                          for (let i = 1; i <= event.target.value; i++) {
+                            calc =
+                              this.state.prefixcode +
+                              (parseInt(this.state.lastid) + i);
+                            temp.push(calc);
+                          }
+                          this.setState({ Id: temp });
+                          console.log("ids", temp);
+                          console.log("ids+", calc);
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Indivitual Capacity"
-                      required
-                      name="I_Capacity"
-                      value={this.state.I_Capacity}
-                      onChange={event => {
-                        this.setState({ I_Capacity: event.target.value });
-
-                        let temp = [];
-                        let calc;
-                        for (let i = 1; i <= event.target.value; i++) {
-                          calc =
-                            this.state.prefixcode +
-                            (parseInt(this.state.lastid) + i);
-                          temp.push(calc);
-                        }
-                        this.setState({ Id: temp });
-                        console.log("ids", temp);
-                        console.log("ids+", calc);
-
-                        // }
-                      }}
-                    ></TextField>
+                ) : null}
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Box Id"
+                        required
+                        name="Box_Id"
+                        value={this.state.Box_Id}
+                        onChange={event => {
+                          this.setState({
+                            Box_Id: event.target.value
+                          });
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                </Box>
-
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Box Id"
-                      required
-                      name="Box_Id"
-                      value={this.state.Box_Id}
-                      onChange={event => {
-                        this.setState({
-                          Box_Id: event.target.value
-                        });
-                      }}
-                    ></TextField>
+                ) : null}
+                {this.state.QC_Type === "Packing" ? (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="Individual Id"
+                        required
+                        name="Id"
+                        value={this.state.Id}
+                        onChange={event => {
+                          this.setState({
+                            Id: event.target.value
+                          });
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style} mb={0} mt={0.5}>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Indivitual Id"
-                      required
-                      name="Id"
-                      value={this.state.Id}
-                      onChange={event => {
-                        this.setState({
-                          Id: event.target.value
-                        });
-                      }}
-                    ></TextField>
+                ) : (
+                  <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        variant="outlined"
+                        label="QC Id"
+                        required
+                        name="QC_Id"
+                        value={this.state.QC_Id}
+                        onChange={event => {
+                          this.setState({ QC_Id: event.target.value });
+                        }}
+                      ></TextField>
+                    </Box>
                   </Box>
-                </Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
                     <Datepick
@@ -640,8 +668,6 @@ export default class Qualitycheck extends Component {
                 <Box style={styles.boxSize2}>
                   <Box
                     style={style}
-                    mb={0}
-                    mt={1}
                     display="flex"
                     alignItems="center"
                     width="100%"

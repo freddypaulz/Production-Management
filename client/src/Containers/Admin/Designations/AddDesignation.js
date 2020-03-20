@@ -3,6 +3,7 @@ import { Box, TextField, Button } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './DesignationValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -13,32 +14,42 @@ export default class AddDesignation extends Component {
          designation_name: '',
          description: '',
          errors: [],
-         status: 'Add'
+         status: 'Add',
+         fieldError: {
+            designation_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onAddHandler = () => {
-         this.setState({
-            status: 'wait..'
-         });
-         axios
-            .post('/designations/add-designation', {
-               designation_name: this.state.designation_name,
-               description: this.state.description
-            })
-            .then(res => {
-               this.setState({
-                  status: 'Add'
-               });
-               console.log(res);
-               if (res.data.errors.length > 0) {
-                  console.log(res.data.errors);
+         this.setState({});
+         if (this.state.designation_name === '') {
+            this.setState(prevState => {
+               prevState.fieldError.designation_name.status = true;
+               prevState.fieldError.designation_name.msg = 'Name required';
+            });
+         } else {
+            axios
+               .post('/designations/add-designation', {
+                  designation_name: this.state.designation_name,
+                  description: this.state.description
+               })
+               .then(res => {
                   this.setState({
-                     errors: [...res.data.errors]
+                     status: 'Add'
                   });
-               } else {
-                  this.props.cancel();
-               }
-            })
-            .catch(err => console.log(err));
+                  console.log(res);
+                  if (res.data.errors.length > 0) {
+                     console.log(res.data.errors);
+                     this.setState({
+                        errors: [...res.data.errors]
+                     });
+                  } else {
+                     this.props.cancel();
+                  }
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -67,6 +78,8 @@ export default class AddDesignation extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
+                     name='designation_name'
                      fullWidth
                      required
                      value={this.state.designation_name}
@@ -77,12 +90,22 @@ export default class AddDesignation extends Component {
                         this.setState({
                            designation_name: event.target.value
                         });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.designation_name.status = status;
+                           prevState.fieldError.designation_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
-                  ></TextField>
+                     error={this.state.fieldError.designation_name.status}
+                     helperText={this.state.fieldError.designation_name.msg}
+                  />
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.description}
@@ -91,7 +114,15 @@ export default class AddDesignation extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -120,6 +151,7 @@ export default class AddDesignation extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onAddHandler}
                   >
                      {this.state.status}

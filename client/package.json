@@ -42,12 +42,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": {
-    "/*": {
-      "target": "http://localhost:5000",
-      "secure": false
-    }
-  },
+  "proxy": "http://localhost:5000",
   "devDependencies": {
     "gh-pages": "^2.2.0"
   }

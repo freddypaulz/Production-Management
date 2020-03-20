@@ -4,6 +4,7 @@ import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
+import errorCheck from './DepartmentValidation';
 
 const styles = Styles;
 export default class EditDepartment extends Component {
@@ -14,35 +15,45 @@ export default class EditDepartment extends Component {
          department_name: '',
          description: '',
          errors: [],
-         status: 'Add'
+         status: 'Add',
+         fieldError: {
+            department_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onEditHandler = () => {
-         this.setState({
-            status: 'wait..'
-         });
-         axios
-            .post('/departments/edit-department', {
-               _id: this.state._id,
-               department_name: this.state.department_name,
-               description: this.state.description
-            })
-            .then(res => {
-               this.setState({
-                  status: 'Update'
-               });
-               console.log(res);
-               if (res.data.errors) {
-                  if (res.data.errors.length > 0) {
-                     console.log(res.data.errors);
-                     this.setState({
-                        errors: [...res.data.errors]
-                     });
-                  } else {
-                     this.props.cancel();
+         this.setState({});
+         if (this.state.department_name === '') {
+            this.setState(prevState => {
+               prevState.fieldError.department_name.status = true;
+               prevState.fieldError.department_name.msg = 'Name required';
+            });
+         } else {
+            axios
+               .post('/departments/edit-department', {
+                  _id: this.state._id,
+                  department_name: this.state.department_name,
+                  description: this.state.description
+               })
+               .then(res => {
+                  this.setState({
+                     status: 'Update'
+                  });
+                  console.log(res);
+                  if (res.data.errors) {
+                     if (res.data.errors.length > 0) {
+                        console.log(res.data.errors);
+                        this.setState({
+                           errors: [...res.data.errors]
+                        });
+                     } else {
+                        this.props.cancel();
+                     }
                   }
-               }
-            })
-            .catch(err => console.log(err));
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -79,6 +90,7 @@ export default class EditDepartment extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     name='department_name'
                      fullWidth
                      required
                      value={this.state.department_name}
@@ -89,12 +101,21 @@ export default class EditDepartment extends Component {
                         this.setState({
                            department_name: event.target.value
                         });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.department_name.status = status;
+                           prevState.fieldError.department_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
-                  ></TextField>
+                     error={this.state.fieldError.department_name.status}
+                     helperText={this.state.fieldError.department_name.msg}
+                  />
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
                      fullWidth
                      required
                      value={this.state.description}
@@ -103,7 +124,15 @@ export default class EditDepartment extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -132,6 +161,7 @@ export default class EditDepartment extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onEditHandler}
                   >
                      {this.state.status}
