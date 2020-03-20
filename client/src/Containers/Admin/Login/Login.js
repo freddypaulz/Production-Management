@@ -43,6 +43,62 @@ export default class Login extends Component {
          success: false,
          errors: []
       };
+      this.login = () => {
+         axios
+            .post('/users/login', {
+               name: this.state.user_name,
+               password: this.state.password
+            })
+            .then(res => {
+               if (res.data.name === this.state.user_name) {
+                  console.log('User: ', res.data);
+                  sessionStorage.setItem('User Name', res.data.name);
+                  sessionStorage.setItem(
+                     'User ID',
+                     res.data.employee_id
+                        ? res.data.employee_id
+                        : 'not specified'
+                  );
+                  console.log('User ID: ', sessionStorage.getItem('User ID'));
+                  sessionStorage.setItem('Role ID', res.data.role);
+                  auth.login(res.data.name === this.state.user_name);
+                  axios
+                     .post('roles/role', {
+                        _id: res.data.role
+                     })
+                     .then(res => {
+                        let permissions = [];
+                        console.log(res.data);
+                        res.data.Role[0].permissions.map(permission => {
+                           permissions.push(permission.name);
+                           return null;
+                        });
+                        sessionStorage.setItem(
+                           'permissions',
+                           JSON.stringify(permissions)
+                        );
+                        this.props.history.push('/home');
+                     })
+                     .catch(err => {
+                        console.log(err);
+                        this.setState({
+                           errors: ['Problem in user. Contact Administrator']
+                        });
+                     });
+               } else {
+                  console.log(res.data.message);
+                  this.setState({
+                     errors: res.data.message
+                  });
+               }
+            })
+            .catch(err => {
+               this.setState({
+                  errors: ['Could not reach the server']
+               });
+               console.log(err);
+            });
+      };
    }
 
    render() {
@@ -84,7 +140,12 @@ export default class Login extends Component {
                         onChange={event => {
                            this.setState({ user_name: event.target.value });
                         }}
-                     ></TextField>
+                        onKeyPress={event => {
+                           if (event.key === 'Enter') {
+                              this.login();
+                           }
+                        }}
+                     />
                   </Box>
                   <Box style={styles.box}>
                      <VpnKeyIcon
@@ -104,82 +165,19 @@ export default class Login extends Component {
                         onChange={event => {
                            this.setState({ password: event.target.value });
                         }}
-                     ></TextField>
+                        onKeyPress={event => {
+                           if (event.key === 'Enter') {
+                              this.login();
+                           }
+                        }}
+                     />
                   </Box>
                   <Button
                      variant='contained'
                      size='large'
                      color='primary'
                      onClick={() => {
-                        axios
-                           .post('/users/login', {
-                              name: this.state.user_name,
-                              password: this.state.password
-                           })
-                           .then(res => {
-                              if (res.data.name === this.state.user_name) {
-                                 console.log('User: ', res.data);
-                                 sessionStorage.setItem(
-                                    'User Name',
-                                    res.data.name
-                                 );
-                                 sessionStorage.setItem(
-                                    'User ID',
-                                    res.data.employee_id
-                                       ? res.data.employee_id
-                                       : 'not specified'
-                                 );
-                                 console.log(
-                                    'User ID: ',
-                                    sessionStorage.getItem('User ID')
-                                 );
-                                 sessionStorage.setItem(
-                                    'Role ID',
-                                    res.data.role
-                                 );
-                                 auth.login(
-                                    res.data.name === this.state.user_name
-                                 );
-                                 axios
-                                    .post('roles/role', {
-                                       _id: res.data.role
-                                    })
-                                    .then(res => {
-                                       let permissions = [];
-                                       console.log(res.data);
-                                       res.data.Role[0].permissions.map(
-                                          permission => {
-                                             permissions.push(permission.name);
-                                             return null;
-                                          }
-                                       );
-                                       sessionStorage.setItem(
-                                          'permissions',
-                                          JSON.stringify(permissions)
-                                       );
-                                       this.props.history.push('/home');
-                                    })
-                                    .catch(err => {
-                                       console.log(err);
-                                       this.setState({
-                                          errors: [
-                                             'Problem in user. Contact Administrator'
-                                          ]
-                                       });
-                                    });
-                              } else {
-                                 console.log(res.data.message);
-                                 this.setState({
-                                    errors: res.data.message
-                                 });
-                              }
-                           })
-                           .catch(err => {
-                              this.setState({
-                                 errors: ['Could not reach the server']
-                              });
-                              console.log(err);
-                           });
+                        this.login();
                      }}
                   >
                      Login

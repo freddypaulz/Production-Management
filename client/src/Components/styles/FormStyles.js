@@ -13,12 +13,14 @@ const styles = {
       flexDirection: 'column'
    },
    box_msg: {
-      marginBottom: '10px',
+      color: 'white',
+      marginBottom: '20px',
       padding: '10px',
-      width: '90%',
+      width: '88%',
       textAlign: 'center',
       fontSize: '15px',
-      textTransform: 'uppercase '
+      textTransform: 'uppercase',
+      borderRadius: '5px'
    },
    icons: {
       fontSize: '40px',

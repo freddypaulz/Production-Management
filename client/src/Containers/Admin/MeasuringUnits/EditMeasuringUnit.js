@@ -62,7 +62,7 @@ export default class EditMeasuringUnit extends Component {
       return (
          <Box style={styles.box}>
             <Box fontSize='30px' mb={3}>
-               Edit Country
+               Edit Measuring Unit
             </Box>
             {this.state.errors.length > 0 ? (
                this.state.errors.map((error, index) => {

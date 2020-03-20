@@ -67,11 +67,9 @@ router.post('/request-detail-add', (req, res) => {
       !Priority ||
       !Due_Date ||
       !Status ||
-      !Vendor ||
       !Quotation_Document_URL ||
       !Comments ||
       !Created_By ||
-      !Total_Price ||
       !logs
    ) {
       errors.push('Enter all required field');
@@ -140,14 +138,7 @@ router.post('/request-detail-edit', (req, res) => {
       Vendor
    } = req.body;
 
-   if (
-      !Quantity ||
-      !Measuring_Unit ||
-      !Status ||
-      !Vendor ||
-      !Comments ||
-      !Total_Price
-   ) {
+   if (!Quantity || !Measuring_Unit || !Status || !Comments) {
       errors.push('Enter all required field');
    }
    if (errors.length > 0) {

@@ -4,6 +4,7 @@ import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
+import errorCheck from './CountryValidation';
 
 const styles = Styles;
 export default class AddCountry extends Component {
@@ -13,7 +14,12 @@ export default class AddCountry extends Component {
          country_name: '',
          description: '',
          errors: [],
-         success: false
+         success: false,
+         fieldError: {
+            country_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onAddHandler = () => {
          axios
@@ -62,29 +68,49 @@ export default class AddCountry extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     name='country_name'
                      fullWidth
                      required
                      value={this.state.country_name}
                      variant='outlined'
                      label='Country Name'
                      type='text'
+                     size='small'
                      onChange={event => {
                         this.setState({ country_name: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.country_name.status = status;
+                           prevState.fieldError.country_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.country_name.status}
+                     helperText={this.state.fieldError.country_name.msg}
                   ></TextField>
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
                      fullWidth
                      required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'
                      type='text'
+                     size='small'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -114,6 +140,7 @@ export default class AddCountry extends Component {
                      color='primary'
                      size='large'
                      onClick={this.onAddHandler}
+                     disabled={!this.state.isValid}
                   >
                      Add
                   </Button>

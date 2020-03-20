@@ -338,14 +338,14 @@ export default class AddPreProduction extends Component {
                                                                rmstock.Measuring_Unit;
                                                             availablestock =
                                                                rmstock.Quantity;
-                                                            console.log(
-                                                               'code: ',
-                                                               materialCode,
-                                                               'Measuring: ',
-                                                               Measuring,
-                                                               'availablestock: ',
-                                                               availablestock
-                                                            );
+                                                            // console.log(
+                                                            //    'code: ',
+                                                            //    materialCode,
+                                                            //    'Measuring: ',
+                                                            //    Measuring,
+                                                            //    'availablestock: ',
+                                                            //    availablestock
+                                                            // );
                                                          }
                                                          return null;
                                                       }

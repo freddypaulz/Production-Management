@@ -308,65 +308,7 @@ export default class AddPurchase extends Component {
                               </FormControl>
                            </Box>
                         </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='50%' style={style}>
-                              <FormControl
-                                 required
-                                 variant='outlined'
-                                 fullWidth
-                                 size='small'
-                              >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Vendor Name
-                                 </InputLabel>
-                                 <Select
-                                    variant='outlined'
-                                    required
-                                    name='Vendor'
-                                    value={this.state.Vendor}
-                                    onChange={event => {
-                                       this.setState({
-                                          Vendor: event.target.value
-                                       });
-                                    }}
-                                 >
-                                    {this.state.vendors.map((vendor, index) => {
-                                       return (
-                                          <MenuItem
-                                             //selected
-                                             key={index}
-                                             value={vendor._id}
-                                          >
-                                             {vendor.vendor_name}
-                                          </MenuItem>
-                                       );
-                                    })}
-                                 </Select>
-                              </FormControl>
-                           </Box>
-                           <Box width='50%' style={style}>
-                              <TextField
-                                 size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Total_Price'
-                                 required
-                                 name='Total_Price'
-                                 value={this.state.Total_Price}
-                                 onChange={event => {
-                                    this.setState({
-                                       Total_Price: event.target.value
-                                    });
-                                 }}
-                              ></TextField>
-                           </Box>
-                        </Box>
+
                         <Box style={styles.boxSize2}>
                            <Box width='50%' style={style}>
                               <FormControl
@@ -503,29 +445,97 @@ export default class AddPurchase extends Component {
                               minWidth: '10%'
                            }}
                         >
-                           <Box
-                              fontWeight='bold'
-                              fontSize='1.2vw'
-                              mb={1}
-                              ml={1}
-                              display='flex'
-                           >
-                              Add Quotation
-                           </Box>
-                           <Box width='100%' style={style}>
-                              <input
-                                 multiple
-                                 id='file'
-                                 type='file'
-                                 onChange={e => {
-                                    console.log(e.target.files[0]);
-                                    this.setState({
-                                       file: e.target.files[0]
-                                    });
-                                    console.log(this.state.file);
-                                 }}
-                              />
-                           </Box>
+                           {this.state.Status === 'ForwardedToFinance' ? (
+                              <>
+                                 <Box style={styles.boxSize2}>
+                                    <Box width='50%' marginRight='10px'>
+                                       <FormControl
+                                          required
+                                          variant='outlined'
+                                          fullWidth
+                                          size='small'
+                                       >
+                                          <InputLabel
+                                             style={{
+                                                backgroundColor: 'white',
+                                                paddingLeft: '2px',
+                                                paddingRight: '2px'
+                                             }}
+                                          >
+                                             Vendor Name
+                                          </InputLabel>
+                                          <Select
+                                             variant='outlined'
+                                             required
+                                             name='Vendor'
+                                             value={this.state.Vendor}
+                                             onChange={event => {
+                                                this.setState({
+                                                   Vendor: event.target.value
+                                                });
+                                             }}
+                                          >
+                                             {this.state.vendors.map(
+                                                (vendor, index) => {
+                                                   return (
+                                                      <MenuItem
+                                                         //selected
+                                                         key={index}
+                                                         value={vendor._id}
+                                                      >
+                                                         {vendor.vendor_name}
+                                                      </MenuItem>
+                                                   );
+                                                }
+                                             )}
+                                          </Select>
+                                       </FormControl>
+                                    </Box>
+                                    <Box width='50%'>
+                                       <TextField
+                                          size='small'
+                                          fullWidth
+                                          variant='outlined'
+                                          label='Total_Price'
+                                          required
+                                          name='Total_Price'
+                                          value={this.state.Total_Price}
+                                          onChange={event => {
+                                             this.setState({
+                                                Total_Price: event.target.value
+                                             });
+                                          }}
+                                       />
+                                    </Box>
+                                 </Box>
+                                 <Box style={styles.boxSize2}>
+                                    <Box
+                                       fontWeight='bold'
+                                       fontSize='1.2vw'
+                                       mb={1}
+                                       ml={2}
+                                       mt={1}
+                                       display='flex'
+                                    >
+                                       Add Quotation
+                                    </Box>
+                                    <Box width='30%' style={style}>
+                                       <input
+                                          multiple
+                                          id='file'
+                                          type='file'
+                                          onChange={e => {
+                                             console.log(e.target.files[0]);
+                                             this.setState({
+                                                file: e.target.files[0]
+                                             });
+                                             console.log(this.state.file);
+                                          }}
+                                       />
+                                    </Box>
+                                 </Box>
+                              </>
+                           ) : null}
                         </Box>
                      </Box>
                   </Box>
@@ -559,7 +569,11 @@ export default class AddPurchase extends Component {
                      color='primary'
                      size='large'
                      fontWeight='bold'
-                     onClick={this.onUploadHandler}
+                     onClick={
+                        this.state.Status === 'ForwardedToFinance'
+                           ? this.onUploadHandler
+                           : this.onAddHandler
+                     }
                      style={{ fontWeight: 'bold' }}
                   >
                      Submit

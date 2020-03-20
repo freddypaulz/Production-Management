@@ -141,14 +141,16 @@ export default class EditPurchase extends Component {
             Measuring_Unit: this.props.Purchase.Measuring_Unit
          });
       });
-      console.log('Props: ', this.props.Purchase._id);
+      console.log('PProps: ', this.props.Purchase.Quotation_Document_URL[0]);
       this.setState({
          _id: this.props.Purchase._id,
          Quantity: this.props.Purchase.Quantity,
          Priority: this.props.Purchase.Priority,
          Due_Date: this.props.Purchase.Due_Date,
          Comments: this.props.Purchase.Comments,
-         Total_Price: this.props.Purchase.Total_Price,
+         Total_Price: this.props.Purchase.Total_Price
+            ? this.props.Purchase.Total_Price
+            : '',
          quotation: `/uploads/${this.props.Purchase.Quotation_Document_URL}`
       });
    }
@@ -554,17 +556,20 @@ export default class EditPurchase extends Component {
                width='88%'
             >
                <Box display='flex'>
-                  <Link
-                     style={styles.link}
-                     href={this.state.quotation}
-                     target='_blank'
-                     rel='noreferrer'
-                  >
-                     <GetAppOutlinedIcon color='secondary' />
-                     Quotation
-                  </Link>
+                  {this.props.Purchase.Quotation_Document_URL[0] !== null ? (
+                     <Link
+                        style={styles.link}
+                        href={this.state.quotation}
+                        target='_blank'
+                        rel='noreferrer'
+                     >
+                        <GetAppOutlinedIcon color='secondary' />
+                        Quotation
+                     </Link>
+                  ) : null}
                </Box>
-               <Box display='flex'>
+
+               <Box display='flex' alignSelf='flex-end'>
                   <Box>
                      <Button
                         variant='contained'

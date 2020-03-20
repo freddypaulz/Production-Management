@@ -11,6 +11,7 @@ import {
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './StateValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -24,31 +25,47 @@ export default class EditShift extends Component {
          description: '',
          errors: [],
          success: false,
-         countries: []
+         countries: [],
+         fieldError: {
+            state_name: { status: false, msg: '' },
+            country: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onEditHandler = () => {
-         axios
-            .post('/states/edit-state', {
-               _id: this.state._id,
-               state_name: this.state.state_name,
-               country_id: this.state.country_id,
-               description: this.state.description
-            })
-            .then(res => {
-               console.log(res);
-               if (res.data.errors) {
-                  if (res.data.errors.length > 0) {
-                     console.log(res.data.errors);
-                     this.setState({
-                        errors: [...res.data.errors],
-                        success: false
-                     });
-                  } else {
-                     this.props.cancel();
+         if (this.state.country_id === '') {
+            this.setState({});
+            this.setState(prevState => {
+               prevState.fieldError.country.status = true;
+            });
+            this.setState({
+               errors: ['Select Country']
+            });
+         } else {
+            axios
+               .post('/states/edit-state', {
+                  _id: this.state._id,
+                  state_name: this.state.state_name,
+                  country_id: this.state.country_id,
+                  description: this.state.description
+               })
+               .then(res => {
+                  console.log(res);
+                  if (res.data.errors) {
+                     if (res.data.errors.length > 0) {
+                        console.log(res.data.errors);
+                        this.setState({
+                           errors: [...res.data.errors],
+                           success: false
+                        });
+                     } else {
+                        this.props.cancel();
+                     }
                   }
-               }
-            })
-            .catch(err => console.log(err));
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -91,6 +108,7 @@ export default class EditShift extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     name='state_name'
                      fullWidth
                      required
                      value={this.state.state_name}
@@ -99,7 +117,15 @@ export default class EditShift extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ state_name: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.state_name.status = status;
+                           prevState.fieldError.state_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.state_name.status}
+                     helperText={this.state.fieldError.state_name.msg}
                   ></TextField>
                </Box>
                <FormControl required variant='outlined' fullWidth>
@@ -113,6 +139,7 @@ export default class EditShift extends Component {
                      Select Country
                   </InputLabel>
                   <Select
+                     name='country'
                      style={styles.box_field}
                      required
                      //variant='outlined'
@@ -123,6 +150,7 @@ export default class EditShift extends Component {
                            country_id: event.target.value
                         });
                      }}
+                     error={this.state.fieldError.country.status}
                   >
                      {this.state.countries.map((country, index) => {
                         return (
@@ -136,6 +164,7 @@ export default class EditShift extends Component {
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
                      fullWidth
                      required
                      value={this.state.description}
@@ -144,7 +173,15 @@ export default class EditShift extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -173,6 +210,7 @@ export default class EditShift extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onEditHandler}
                   >
                      Add

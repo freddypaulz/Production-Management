@@ -11,6 +11,7 @@ import {
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './CityValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -24,31 +25,47 @@ export default class EditShift extends Component {
          description: '',
          errors: [],
          success: false,
-         states: []
+         states: [],
+         fieldError: {
+            city_name: { status: false, msg: '' },
+            state: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onEditHandler = () => {
-         axios
-            .post('/cities/edit-city', {
-               _id: this.state._id,
-               city_name: this.state.city_name,
-               state_id: this.state.state_id,
-               description: this.state.description
-            })
-            .then(res => {
-               console.log(res);
-               if (res.data.errors) {
-                  if (res.data.errors.length > 0) {
-                     console.log(res.data.errors);
-                     this.setState({
-                        errors: [...res.data.errors],
-                        success: false
-                     });
-                  } else {
-                     this.props.cancel();
+         if (this.state.state_id === '') {
+            this.setState({});
+            this.setState(prevState => {
+               prevState.fieldError.state.status = true;
+            });
+            this.setState({
+               errors: ['Select State']
+            });
+         } else {
+            axios
+               .post('/cities/edit-city', {
+                  _id: this.state._id,
+                  city_name: this.state.city_name,
+                  state_id: this.state.state_id,
+                  description: this.state.description
+               })
+               .then(res => {
+                  console.log(res);
+                  if (res.data.errors) {
+                     if (res.data.errors.length > 0) {
+                        console.log(res.data.errors);
+                        this.setState({
+                           errors: [...res.data.errors],
+                           success: false
+                        });
+                     } else {
+                        this.props.cancel();
+                     }
                   }
-               }
-            })
-            .catch(err => console.log(err));
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -90,6 +107,8 @@ export default class EditShift extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
+                     name='city_name'
                      fullWidth
                      required
                      value={this.state.city_name}
@@ -98,10 +117,18 @@ export default class EditShift extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ city_name: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.city_name.status = status;
+                           prevState.fieldError.city_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
-                  ></TextField>
+                     error={this.state.fieldError.city_name.status}
+                     helperText={this.state.fieldError.city_name.msg}
+                  />
                </Box>
-               <FormControl required variant='outlined' fullWidth>
+               <FormControl required variant='outlined' fullWidth size='small'>
                   <InputLabel
                      style={{
                         backgroundColor: 'white',
@@ -112,6 +139,7 @@ export default class EditShift extends Component {
                      Select State
                   </InputLabel>
                   <Select
+                     name='state'
                      style={styles.box_field}
                      required
                      //variant='outlined'
@@ -121,7 +149,14 @@ export default class EditShift extends Component {
                         this.setState({
                            state_id: event.target.value
                         });
+                        this.setState(prevState => {
+                           prevState.fieldError.state.status = false;
+                        });
+                        this.setState({
+                           errors: []
+                        });
                      }}
+                     error={this.state.fieldError.state.status}
                   >
                      {this.state.states.map((state, index) => {
                         return (
@@ -135,6 +170,7 @@ export default class EditShift extends Component {
 
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
                      required
                      value={this.state.description}
@@ -143,7 +179,15 @@ export default class EditShift extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -172,6 +216,7 @@ export default class EditShift extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onEditHandler}
                   >
                      Update
