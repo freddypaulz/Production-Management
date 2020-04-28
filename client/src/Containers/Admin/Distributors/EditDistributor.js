@@ -6,7 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
@@ -36,8 +36,8 @@ export default class EditDistributor extends Component {
                name: '',
                designation: '',
                mobile_no: '',
-               sec_mobile_no: ''
-            }
+               sec_mobile_no: '',
+            },
          ],
          description: '',
          errors: [],
@@ -52,7 +52,7 @@ export default class EditDistributor extends Component {
             distributor_state: false,
             distributor_city: false,
             distributor_postal_code: false,
-            distributor_point_of_contacts: false
+            distributor_point_of_contacts: false,
          },
          countries: [],
          states: [],
@@ -60,7 +60,7 @@ export default class EditDistributor extends Component {
          poc_name: '',
          poc_designation: '',
          poc_mobile_no: '',
-         poc_sec_mobile_no: ''
+         poc_sec_mobile_no: '',
       };
       this.onEditHandler = () => {
          this.state.distributor_point_of_contacts.map((poc, index) => {
@@ -86,47 +86,47 @@ export default class EditDistributor extends Component {
                distributor_postal_code: this.state.distributor_postal_code,
                distributor_point_of_contact: this.state
                   .distributor_point_of_contacts,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
-                        errors: [...res.data.errors]
+                        errors: [...res.data.errors],
                      });
                   } else {
                      this.props.cancel();
                   }
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       console.log(this.props.Distributor);
       console.log(this.props.Distributor.distributor_point_of_contact);
       if (permissionCheck(this.props, 'Manage Distributors')) {
-         axios.get('/countries/countries').then(res => {
+         axios.get('/countries/countries').then((res) => {
             this.setState({
-               countries: [...res.data.Countries]
+               countries: [...res.data.Countries],
             });
             axios
                .post('/states/state-country', {
-                  country_id: this.props.Distributor.distributor_country
+                  country_id: this.props.Distributor.distributor_country,
                })
-               .then(states => {
+               .then((states) => {
                   this.setState({
-                     states: [...states.data.state]
+                     states: [...states.data.state],
                   });
                   axios
                      .post('/cities/city-state', {
-                        state_id: this.props.Distributor.distributor_state
+                        state_id: this.props.Distributor.distributor_state,
                      })
-                     .then(cities => {
+                     .then((cities) => {
                         this.setState({
-                           cities: [...cities.data.city]
+                           cities: [...cities.data.city],
                         });
                         if (this.state.distributor_name === '') {
                            this.setState({
@@ -153,7 +153,7 @@ export default class EditDistributor extends Component {
                                  .distributor_postal_code,
                               distributor_point_of_contacts: this.props
                                  .Distributor.distributor_point_of_contact,
-                              description: this.props.Distributor.description
+                              description: this.props.Distributor.description,
                            });
                         }
                      });
@@ -191,9 +191,9 @@ export default class EditDistributor extends Component {
                         variant='outlined'
                         label='Distributor Name'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              distributor_name: event.target.value
+                              distributor_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -207,9 +207,9 @@ export default class EditDistributor extends Component {
                         variant='outlined'
                         label='Location'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              distributor_location: event.target.value
+                              distributor_location: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -223,9 +223,9 @@ export default class EditDistributor extends Component {
                         variant='outlined'
                         label='Tax Number (GSTIN/VAT)'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              distributor_tax_no: event.target.value
+                              distributor_tax_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -241,9 +241,9 @@ export default class EditDistributor extends Component {
                         variant='outlined'
                         label='Mobile Number'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              distributor_mobile_no: event.target.value
+                              distributor_mobile_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -257,9 +257,9 @@ export default class EditDistributor extends Component {
                         variant='outlined'
                         label='Email'
                         type='email'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              distributor_email: event.target.value
+                              distributor_email: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -275,9 +275,9 @@ export default class EditDistributor extends Component {
                      variant='outlined'
                      label='Address'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           distributor_address: event.target.value
+                           distributor_address: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -295,7 +295,7 @@ export default class EditDistributor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Country
@@ -304,20 +304,20 @@ export default class EditDistributor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.distributor_country}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
                                  distributor_country: event.target.value,
-                                 cities: []
+                                 cities: [],
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value
+                                    country_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       states: [...res.data.state]
+                                       states: [...res.data.state],
                                     });
                                  });
                            }}
@@ -347,7 +347,7 @@ export default class EditDistributor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select State
@@ -356,19 +356,19 @@ export default class EditDistributor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.distributor_state}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 distributor_state: event.target.value
+                                 distributor_state: event.target.value,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value
+                                    state_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       cities: [...res.data.city]
+                                       cities: [...res.data.city],
                                     });
                                  });
                            }}
@@ -398,7 +398,7 @@ export default class EditDistributor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select City
@@ -407,10 +407,10 @@ export default class EditDistributor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.distributor_city}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 distributor_city: event.target.value
+                                 distributor_city: event.target.value,
                               });
                            }}
                         >
@@ -439,9 +439,9 @@ export default class EditDistributor extends Component {
                      variant='outlined'
                      label='Postal Code'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           distributor_postal_code: event.target.value
+                           distributor_postal_code: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -457,7 +457,7 @@ export default class EditDistributor extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                      }}
                   ></TextField>
@@ -497,11 +497,11 @@ export default class EditDistributor extends Component {
                                     variant='outlined'
                                     label='Name'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_name: event.target.value
+                                          poc_name: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts[
                                              index
                                           ].name = prevState.poc_name;
@@ -528,11 +528,11 @@ export default class EditDistributor extends Component {
                                     variant='outlined'
                                     label='Designation'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_designation: event.target.value
+                                          poc_designation: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts[
                                              index
                                           ].designation =
@@ -560,11 +560,11 @@ export default class EditDistributor extends Component {
                                     variant='outlined'
                                     label='Mobile No'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_mobile_no: event.target.value
+                                          poc_mobile_no: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts[
                                              index
                                           ].mobile_no = prevState.poc_mobile_no;
@@ -582,7 +582,6 @@ export default class EditDistributor extends Component {
                                  <TextField
                                     size='small'
                                     fullWidth
-                                    required
                                     value={
                                        this.state.distributor_point_of_contacts[
                                           index
@@ -591,11 +590,11 @@ export default class EditDistributor extends Component {
                                     variant='outlined'
                                     label='Secondary Mobile No'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_sec_mobile_no: event.target.value
+                                          poc_sec_mobile_no: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts[
                                              index
                                           ].sec_mobile_no =
@@ -623,13 +622,13 @@ export default class EditDistributor extends Component {
                                     fontSize='medium'
                                     onClick={() => {
                                        this.setState({});
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts.push(
                                              {
                                                 name: '',
                                                 designation: '',
                                                 mobile_no: '',
-                                                sec_mobile_no: ''
+                                                sec_mobile_no: '',
                                              }
                                           );
                                           console.log(
@@ -644,7 +643,7 @@ export default class EditDistributor extends Component {
                                     fontSize='medium'
                                     onClick={() => {
                                        this.setState({});
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.distributor_point_of_contacts.splice(
                                              index,
                                              1

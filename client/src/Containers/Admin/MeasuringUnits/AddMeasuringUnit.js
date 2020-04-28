@@ -71,6 +71,7 @@ export default class AddMeasuringUnit extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='measuring_unit_name'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.measuring_unit_name}
@@ -96,10 +97,10 @@ export default class AddMeasuringUnit extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='description'
+                     size='small'
                      multiline
                      rowsMax={4}
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'

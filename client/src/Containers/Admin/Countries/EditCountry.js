@@ -18,32 +18,32 @@ export default class EditCountry extends Component {
          success: false,
          fieldError: {
             country_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
       };
       this.onEditHandler = () => {
          axios
             .post('/countries/edit-country', {
                _id: this.state._id,
                country_name: this.state.country_name,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
-                        success: false
+                        success: false,
                      });
                   } else {
                      this.props.cancel();
                   }
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
@@ -53,7 +53,7 @@ export default class EditCountry extends Component {
             this.setState({
                country_name: this.props.country.country_name,
                description: this.props.country.description,
-               _id: this.props.country._id
+               _id: this.props.country._id,
             });
          }
       }
@@ -88,10 +88,10 @@ export default class EditCountry extends Component {
                      label='Country Name'
                      type='text'
                      size='small'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ country_name: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.country_name.status = status;
                            prevState.fieldError.country_name.msg = msg;
                            prevState.isValid = isValid;
@@ -106,16 +106,15 @@ export default class EditCountry extends Component {
                   <TextField
                      name='description'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'
                      type='text'
                      size='small'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

@@ -76,8 +76,9 @@ export default class AddMaterialType extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
-                     fullWidth
                      name='material_type_name'
+                     size='small'
+                     fullWidth
                      required
                      value={this.state.material_type_name}
                      variant='outlined'
@@ -102,8 +103,8 @@ export default class AddMaterialType extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='description'
+                     size='small'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'

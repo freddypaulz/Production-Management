@@ -16,23 +16,23 @@ export default class EditBox extends Component {
          box_size: '',
          description: '',
          errors: [],
-         status: 'Add',
+         status: 'UPDATE',
          fieldError: {
             box_name: { status: false, msg: '' },
             box_size: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
       };
       this.onEditHandler = () => {
          this.setState({});
          if (this.state.box_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.box_name.status = true;
                prevState.fieldError.box_name.msg = 'Name required';
             });
          } else if (this.state.box_size <= 0) {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.box_size.status = true;
                prevState.fieldError.box_size.msg = 'Enter a positive value';
             });
@@ -42,25 +42,25 @@ export default class EditBox extends Component {
                   _id: this.state._id,
                   box_name: this.state.box_name,
                   box_size: this.state.box_size,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   this.setState({
-                     status: 'Update'
+                     status: 'Update',
                   });
                   console.log(res);
                   if (res.data.errors) {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
-                           errors: [...res.data.errors]
+                           errors: [...res.data.errors],
                         });
                      } else {
                         this.props.cancel();
                      }
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
@@ -72,7 +72,7 @@ export default class EditBox extends Component {
                box_name: this.props.Box.box_name,
                box_size: this.props.Box.box_size,
                description: this.props.Box.description,
-               _id: this.props.Box._id
+               _id: this.props.Box._id,
             });
          }
       }
@@ -106,12 +106,12 @@ export default class EditBox extends Component {
                      variant='outlined'
                      label='Box Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           box_name: event.target.value
+                           box_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.box_name.status = status;
                            prevState.fieldError.box_name.msg = msg;
                            prevState.isValid = isValid;
@@ -131,12 +131,12 @@ export default class EditBox extends Component {
                      variant='outlined'
                      label='Box Size'
                      type='number'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           box_size: event.target.value
+                           box_size: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.box_size.status = status;
                            prevState.fieldError.box_size.msg = msg;
                            prevState.isValid = isValid;
@@ -155,10 +155,10 @@ export default class EditBox extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

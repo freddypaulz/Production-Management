@@ -6,7 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
 } from '@material-ui/core';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
@@ -35,8 +35,8 @@ export default class AddVendor extends Component {
                name: '',
                designation: '',
                mobile_no: '',
-               sec_mobile_no: ''
-            }
+               sec_mobile_no: '',
+            },
          ],
          poc_name: '',
          poc_designation: '',
@@ -46,7 +46,7 @@ export default class AddVendor extends Component {
          errors: [],
          countries: [],
          states: [],
-         cities: []
+         cities: [],
       };
       this.onAddHandler = () => {
          axios
@@ -62,27 +62,27 @@ export default class AddVendor extends Component {
                vendor_city: this.state.vendor_city,
                vendor_postal_code: this.state.vendor_postal_code,
                vendor_point_of_contact: this.state.vendor_point_of_contacts,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
-                     errors: [...res.data.errors]
+                     errors: [...res.data.errors],
                   });
                } else {
                   this.props.cancel();
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Vendors')) {
-         axios.get('/countries/countries').then(res => {
+         axios.get('/countries/countries').then((res) => {
             this.setState({
-               countries: [...res.data.Countries]
+               countries: [...res.data.Countries],
             });
          });
       }
@@ -117,9 +117,9 @@ export default class AddVendor extends Component {
                         variant='outlined'
                         label='Vendor Name'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              vendor_name: event.target.value
+                              vendor_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -133,9 +133,9 @@ export default class AddVendor extends Component {
                         variant='outlined'
                         label='Location'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              vendor_location: event.target.value
+                              vendor_location: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -149,9 +149,9 @@ export default class AddVendor extends Component {
                         variant='outlined'
                         label='Tax Number (GSTIN/VAT)'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              vendor_tax_no: event.target.value
+                              vendor_tax_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -167,9 +167,9 @@ export default class AddVendor extends Component {
                         variant='outlined'
                         label='Mobile Number'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              vendor_mobile_no: event.target.value
+                              vendor_mobile_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -183,9 +183,9 @@ export default class AddVendor extends Component {
                         variant='outlined'
                         label='Email'
                         type='email'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              vendor_email: event.target.value
+                              vendor_email: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -201,9 +201,9 @@ export default class AddVendor extends Component {
                      variant='outlined'
                      label='Address'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           vendor_address: event.target.value
+                           vendor_address: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -221,7 +221,7 @@ export default class AddVendor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Country
@@ -230,20 +230,20 @@ export default class AddVendor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.vendor_country}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
                                  vendor_country: event.target.value,
-                                 cities: []
+                                 cities: [],
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value
+                                    country_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       states: [...res.data.state]
+                                       states: [...res.data.state],
                                     });
                                  });
                            }}
@@ -273,7 +273,7 @@ export default class AddVendor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select State
@@ -282,19 +282,19 @@ export default class AddVendor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.vendor_state}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 vendor_state: event.target.value
+                                 vendor_state: event.target.value,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value
+                                    state_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       cities: [...res.data.city]
+                                       cities: [...res.data.city],
                                     });
                                  });
                            }}
@@ -324,7 +324,7 @@ export default class AddVendor extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select City
@@ -333,10 +333,10 @@ export default class AddVendor extends Component {
                            required
                            //variant='outlined'
                            value={this.state.vendor_city}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 vendor_city: event.target.value
+                                 vendor_city: event.target.value,
                               });
                            }}
                         >
@@ -365,9 +365,9 @@ export default class AddVendor extends Component {
                      variant='outlined'
                      label='Postal Code'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           vendor_postal_code: event.target.value
+                           vendor_postal_code: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -383,7 +383,7 @@ export default class AddVendor extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                      }}
                   ></TextField>
@@ -423,11 +423,11 @@ export default class AddVendor extends Component {
                                     variant='outlined'
                                     label='Name'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_name: event.target.value
+                                          poc_name: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts[
                                              index
                                           ].name = prevState.poc_name;
@@ -453,11 +453,11 @@ export default class AddVendor extends Component {
                                     variant='outlined'
                                     label='Designation'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_designation: event.target.value
+                                          poc_designation: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts[
                                              index
                                           ].designation =
@@ -484,11 +484,11 @@ export default class AddVendor extends Component {
                                     variant='outlined'
                                     label='Mobile No'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_mobile_no: event.target.value
+                                          poc_mobile_no: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts[
                                              index
                                           ].mobile_no = prevState.poc_mobile_no;
@@ -505,7 +505,6 @@ export default class AddVendor extends Component {
                                  <TextField
                                     size='small'
                                     fullWidth
-                                    required
                                     value={
                                        this.state.vendor_point_of_contacts[
                                           index
@@ -514,11 +513,11 @@ export default class AddVendor extends Component {
                                     variant='outlined'
                                     label='Secondary Mobile No'
                                     type='text'
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          poc_sec_mobile_no: event.target.value
+                                          poc_sec_mobile_no: event.target.value,
                                        });
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts[
                                              index
                                           ].sec_mobile_no =
@@ -544,13 +543,13 @@ export default class AddVendor extends Component {
                                     fontSize='medium'
                                     onClick={() => {
                                        this.setState({});
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts.push(
                                              {
                                                 name: '',
                                                 designation: '',
                                                 mobile_no: '',
-                                                sec_mobile_no: ''
+                                                sec_mobile_no: '',
                                              }
                                           );
                                           console.log(
@@ -565,7 +564,7 @@ export default class AddVendor extends Component {
                                     fontSize='medium'
                                     onClick={() => {
                                        this.setState({});
-                                       this.setState(prevState => {
+                                       this.setState((prevState) => {
                                           prevState.vendor_point_of_contacts.splice(
                                              index,
                                              1

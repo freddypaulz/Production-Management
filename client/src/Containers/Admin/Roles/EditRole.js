@@ -4,7 +4,7 @@ import {
    TextField,
    Button,
    Checkbox,
-   FormControlLabel
+   FormControlLabel,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -31,7 +31,7 @@ export default class EditRole extends Component {
          production: false,
          errors: [],
          success: false,
-         open: false
+         open: false,
       };
 
       this.manageSelected = 0;
@@ -66,7 +66,7 @@ export default class EditRole extends Component {
          if (this.state.production) {
             givenPermissions.push({ name: 'Production', Value: true });
          }
-         this.state.permissions.map(permission => {
+         this.state.permissions.map((permission) => {
             if (permission.value === true) {
                givenPermissions.push(permission);
             }
@@ -77,18 +77,18 @@ export default class EditRole extends Component {
                _id: this.state._id,
                role_name: this.state.role_name,
                description: this.state.description,
-               permissions: givenPermissions
+               permissions: givenPermissions,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
                      errors: [...res.data.errors],
-                     success: false
+                     success: false,
                   });
                } else {
-                  this.state.permissions.map(permission => {
+                  this.state.permissions.map((permission) => {
                      permission.value = false;
                      return null;
                   });
@@ -96,7 +96,7 @@ export default class EditRole extends Component {
                   this.props.cancel();
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
 
       this.onCheckHandle = (component, value) => {
@@ -110,11 +110,11 @@ export default class EditRole extends Component {
                }
                if (this.manageSelected > 0) {
                   this.setState({
-                     management: true
+                     management: true,
                   });
                } else {
                   this.setState({
-                     management: false
+                     management: false,
                   });
                }
                break;
@@ -128,11 +128,11 @@ export default class EditRole extends Component {
                }
                if (this.reportSelected > 0) {
                   this.setState({
-                     reports: true
+                     reports: true,
                   });
                } else {
                   this.setState({
-                     reports: false
+                     reports: false,
                   });
                }
                break;
@@ -146,11 +146,11 @@ export default class EditRole extends Component {
                }
                if (this.requestSelected > 0) {
                   this.setState({
-                     requests: true
+                     requests: true,
                   });
                } else {
                   this.setState({
-                     requests: false
+                     requests: false,
                   });
                }
                break;
@@ -164,11 +164,11 @@ export default class EditRole extends Component {
                }
                if (this.configurationSelected > 0) {
                   this.setState({
-                     configurations: true
+                     configurations: true,
                   });
                } else {
                   this.setState({
-                     configurations: false
+                     configurations: false,
                   });
                }
                break;
@@ -182,11 +182,11 @@ export default class EditRole extends Component {
                }
                if (this.purchaseSelected > 0) {
                   this.setState({
-                     purchase: true
+                     purchase: true,
                   });
                } else {
                   this.setState({
-                     purchase: false
+                     purchase: false,
                   });
                }
                break;
@@ -200,11 +200,11 @@ export default class EditRole extends Component {
                }
                if (this.financeSelected > 0) {
                   this.setState({
-                     finance: true
+                     finance: true,
                   });
                } else {
                   this.setState({
-                     finance: false
+                     finance: false,
                   });
                }
                break;
@@ -218,11 +218,11 @@ export default class EditRole extends Component {
                }
                if (this.productionSelected > 0) {
                   this.setState({
-                     production: true
+                     production: true,
                   });
                } else {
                   this.setState({
-                     production: false
+                     production: false,
                   });
                }
                break;
@@ -239,44 +239,44 @@ export default class EditRole extends Component {
             this.setState({
                role_name: this.props.role.role_name,
                description: this.props.role.description,
-               _id: this.props.role._id
+               _id: this.props.role._id,
             });
-            this.state.permissions.map(permission => {
-               this.props.role.permissions.map(rolePermission => {
+            this.state.permissions.map((permission) => {
+               this.props.role.permissions.map((rolePermission) => {
                   if (permission.name === rolePermission.name) {
                      if (rolePermission.component === 'management') {
                         this.setState({
-                           management: true
+                           management: true,
                         });
                         this.manageSelected++;
                      } else if (rolePermission.component === 'requests') {
                         this.setState({
-                           requests: true
+                           requests: true,
                         });
                         this.requestSelected++;
                      } else if (rolePermission.component === 'reports') {
                         this.setState({
-                           reports: true
+                           reports: true,
                         });
                         this.reportSelected++;
                      } else if (rolePermission.component === 'purchase') {
                         this.setState({
-                           purchase: true
+                           purchase: true,
                         });
                         this.purchaseSelected++;
                      } else if (rolePermission.component === 'configurations') {
                         this.setState({
-                           configurations: true
+                           configurations: true,
                         });
                         this.configurationSelected++;
                      } else if (rolePermission.component === 'finance') {
                         this.setState({
-                           finance: true
+                           finance: true,
                         });
                         this.financeSelected++;
                      } else if (rolePermission.component === 'production') {
                         this.setState({
-                           production: true
+                           production: true,
                         });
                         this.productionSelected++;
                      }
@@ -290,7 +290,7 @@ export default class EditRole extends Component {
       }
    }
    componentWillUnmount() {
-      this.state.permissions.map(permission => {
+      this.state.permissions.map((permission) => {
          permission.value = false;
          return null;
       });
@@ -325,7 +325,7 @@ export default class EditRole extends Component {
                      variant='outlined'
                      label='Role Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ role_name: event.target.value });
                      }}
                   ></TextField>
@@ -338,7 +338,7 @@ export default class EditRole extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                      }}
                   ></TextField>
@@ -366,8 +366,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.management}
-                              disabled
                               value={this.state.management}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.management = !prevState.management;
+                                    if (prevState.management === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'management' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.manageSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'management'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Management'
@@ -378,8 +408,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.requests}
-                              disabled
                               value={this.state.requests}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.requests = !prevState.requests;
+                                    if (prevState.requests === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'requests' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.requestSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'requests'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Requests'
@@ -390,8 +450,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.reports}
-                              disabled
                               value={this.state.reports}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.reports = !prevState.reports;
+                                    if (prevState.reports === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'reports' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.reportSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'reports'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Reports'
@@ -402,8 +492,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.purchase}
-                              disabled
                               value={this.state.purchase}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.purchase = !prevState.purchase;
+                                    if (prevState.purchase === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'purchase' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.purchaseSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'purchase'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Purchase'
@@ -414,8 +534,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.finance}
-                              disabled
                               value={this.state.finance}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.finance = !prevState.finance;
+                                    if (prevState.finance === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'finance' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.financeSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'finance'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Finance'
@@ -426,8 +576,38 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.production}
-                              disabled
                               value={this.state.production}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.production = !prevState.production;
+                                    if (prevState.production === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'production' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.productionSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'production'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
                         label='Production'
@@ -438,11 +618,41 @@ export default class EditRole extends Component {
                         control={
                            <Checkbox
                               checked={this.state.configurations}
-                              disabled
                               value={this.state.configurations}
+                              onClick={() => {
+                                 this.setState({});
+                                 this.setState((prevState) => {
+                                    prevState.configurations = !prevState.configurations;
+                                    if (prevState.configurations === true) {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                   'configurations' &&
+                                                permission.value === false
+                                             ) {
+                                                permission.value = true;
+                                                this.configurationSelected++;
+                                             }
+                                          }
+                                       );
+                                    } else {
+                                       prevState.permissions.map(
+                                          (permission) => {
+                                             if (
+                                                permission.component ===
+                                                'configurations'
+                                             ) {
+                                                permission.value = false;
+                                             }
+                                          }
+                                       );
+                                    }
+                                 });
+                              }}
                            />
                         }
-                        label='Configuration'
+                        label='Configurations'
                      />
                   </Box>
                   {this.state.permissions.map((permission, index) => {
@@ -452,7 +662,7 @@ export default class EditRole extends Component {
                               control={
                                  <Checkbox
                                     checked={permission.value}
-                                    onClick={e => {
+                                    onClick={(e) => {
                                        permission.value = !permission.value;
                                        console.log(permission.component);
                                        this.onCheckHandle(
@@ -461,8 +671,8 @@ export default class EditRole extends Component {
                                        );
                                        this.setState({
                                           permissions: [
-                                             ...this.state.permissions
-                                          ]
+                                             ...this.state.permissions,
+                                          ],
                                        });
                                     }}
                                     value={`${permission.name}`}

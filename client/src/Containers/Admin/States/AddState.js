@@ -6,7 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -29,47 +29,47 @@ export default class AddUser extends Component {
          fieldError: {
             state_name: { status: false, msg: '' },
             country: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
       };
       this.onAddHandler = () => {
          if (this.state.country_id === '') {
             this.setState({});
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.country.status = true;
             });
             this.setState({
-               errors: ['Select Country']
+               errors: ['Select Country'],
             });
          } else {
             axios
                .post('/states/add-state', {
                   state_name: this.state.state_name,
                   country_id: this.state.country_id,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   console.log(res);
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
-                        success: false
+                        success: false,
                      });
                   } else {
                      this.props.cancel();
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage States')) {
-         axios.get('/countries/countries').then(res => {
+         axios.get('/countries/countries').then((res) => {
             this.setState({
-               Countries: [...res.data.Countries]
+               Countries: [...res.data.Countries],
             });
          });
       }
@@ -103,10 +103,10 @@ export default class AddUser extends Component {
                      variant='outlined'
                      label='State Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ state_name: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.state_name.status = status;
                            prevState.fieldError.state_name.msg = msg;
                            prevState.isValid = isValid;
@@ -121,7 +121,7 @@ export default class AddUser extends Component {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Country
@@ -132,9 +132,9 @@ export default class AddUser extends Component {
                      required
                      //variant='outlined'
                      value={this.state.country_id}
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           country_id: event.target.value
+                           country_id: event.target.value,
                         });
                      }}
                      error={this.state.fieldError.country.status}
@@ -153,15 +153,14 @@ export default class AddUser extends Component {
                   <TextField
                      name='description'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

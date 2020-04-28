@@ -89,6 +89,7 @@ export default class EditMaterialType extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='material_type_name'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.material_type_name}
@@ -114,8 +115,8 @@ export default class EditMaterialType extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='description'
+                     size='small'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'

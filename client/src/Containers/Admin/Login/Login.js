@@ -130,6 +130,7 @@ export default class Login extends Component {
                         color='primary'
                      ></AccountBoxOutlinedIcon>
                      <TextField
+                        name='user_name'
                         color='primary'
                         size='small'
                         fullWidth
@@ -156,6 +157,7 @@ export default class Login extends Component {
                         color='primary'
                      ></VpnKeyIcon>
                      <TextField
+                        name='password'
                         size='small'
                         variant='outlined'
                         fullWidth

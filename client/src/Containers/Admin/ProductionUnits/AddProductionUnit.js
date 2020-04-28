@@ -3,6 +3,7 @@ import { Box, TextField, Button } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './ProductionUnitValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -12,26 +13,39 @@ export default class AddProductionUnit extends Component {
       this.state = {
          production_unit_name: '',
          description: '',
-         errors: []
+         errors: [],
+         fieldError: {
+            production_unit_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onAddHandler = () => {
-         axios
-            .post('/production-units/add-production-unit', {
-               production_unit_name: this.state.production_unit_name,
-               description: this.state.description
-            })
-            .then(res => {
-               console.log(res);
-               if (res.data.errors.length > 0) {
-                  console.log(res.data.errors);
-                  this.setState({
-                     errors: [...res.data.errors]
-                  });
-               } else {
-                  this.props.cancel();
-               }
-            })
-            .catch(err => console.log(err));
+         this.setState({});
+         if (this.state.production_unit_name === '') {
+            this.setState(prevState => {
+               prevState.fieldError.production_unit_name.status = true;
+               prevState.fieldError.production_unit_name.msg = 'Name required';
+            });
+         } else {
+            axios
+               .post('/production-units/add-production-unit', {
+                  production_unit_name: this.state.production_unit_name,
+                  description: this.state.description
+               })
+               .then(res => {
+                  console.log(res);
+                  if (res.data.errors.length > 0) {
+                     console.log(res.data.errors);
+                     this.setState({
+                        errors: [...res.data.errors]
+                     });
+                  } else {
+                     this.props.cancel();
+                  }
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -60,6 +74,8 @@ export default class AddProductionUnit extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     name='production_unit_name'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.production_unit_name}
@@ -70,22 +86,39 @@ export default class AddProductionUnit extends Component {
                         this.setState({
                            production_unit_name: event.target.value
                         });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.production_unit_name.status = status;
+                           prevState.fieldError.production_unit_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
-                  ></TextField>
+                     error={this.state.fieldError.production_unit_name.status}
+                     helperText={this.state.fieldError.production_unit_name.msg}
+                  />
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
+                     size='small'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
-                  ></TextField>
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
+                  />
                </Box>
             </PaperBoard>
             <Box
@@ -113,6 +146,7 @@ export default class AddProductionUnit extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onAddHandler}
                   >
                      Add

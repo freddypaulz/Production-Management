@@ -15,17 +15,17 @@ export default class EditDepartment extends Component {
          department_name: '',
          description: '',
          errors: [],
-         status: 'Add',
+         status: 'Update',
          fieldError: {
             department_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
       };
       this.onEditHandler = () => {
          this.setState({});
          if (this.state.department_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.department_name.status = true;
                prevState.fieldError.department_name.msg = 'Name required';
             });
@@ -34,25 +34,25 @@ export default class EditDepartment extends Component {
                .post('/departments/edit-department', {
                   _id: this.state._id,
                   department_name: this.state.department_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   this.setState({
-                     status: 'Update'
+                     status: 'Update',
                   });
                   console.log(res);
                   if (res.data.errors) {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
-                           errors: [...res.data.errors]
+                           errors: [...res.data.errors],
                         });
                      } else {
                         this.props.cancel();
                      }
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
@@ -63,7 +63,7 @@ export default class EditDepartment extends Component {
             this.setState({
                department_name: this.props.Department.department_name,
                description: this.props.Department.description,
-               _id: this.props.Department._id
+               _id: this.props.Department._id,
             });
          }
       }
@@ -91,18 +91,19 @@ export default class EditDepartment extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='department_name'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.department_name}
                      variant='outlined'
                      label='Department Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           department_name: event.target.value
+                           department_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.department_name.status = status;
                            prevState.fieldError.department_name.msg = msg;
                            prevState.isValid = isValid;
@@ -116,16 +117,16 @@ export default class EditDepartment extends Component {
                <Box style={styles.box_field}>
                   <TextField
                      name='description'
+                     size='small'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;
@@ -133,7 +134,7 @@ export default class EditDepartment extends Component {
                      }}
                      error={this.state.fieldError.description.status}
                      helperText={this.state.fieldError.description.msg}
-                  ></TextField>
+                  />
                </Box>
             </PaperBoard>
             <Box

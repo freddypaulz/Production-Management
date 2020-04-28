@@ -3,6 +3,7 @@ import { Box, TextField, Button } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import errorCheck from './WorkLocationValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -12,26 +13,39 @@ export default class AddWorkLocation extends Component {
       this.state = {
          work_location_name: '',
          description: '',
-         errors: []
+         errors: [],
+         fieldError: {
+            work_location_name: { status: false, msg: '' },
+            description: { status: false, msg: '' }
+         },
+         isValid: false
       };
       this.onAddHandler = () => {
-         axios
-            .post('/work-locations/add-work-location', {
-               work_location_name: this.state.work_location_name,
-               description: this.state.description
-            })
-            .then(res => {
-               console.log(res);
-               if (res.data.errors.length > 0) {
-                  console.log(res.data.errors);
-                  this.setState({
-                     errors: [...res.data.errors]
-                  });
-               } else {
-                  this.props.cancel();
-               }
-            })
-            .catch(err => console.log(err));
+         this.setState({});
+         if (this.state.work_location_name === '') {
+            this.setState(prevState => {
+               prevState.fieldError.work_location_name.status = true;
+               prevState.fieldError.work_location_name.msg = 'Name required';
+            });
+         } else {
+            axios
+               .post('/work-locations/add-work-location', {
+                  work_location_name: this.state.work_location_name,
+                  description: this.state.description
+               })
+               .then(res => {
+                  console.log(res);
+                  if (res.data.errors.length > 0) {
+                     console.log(res.data.errors);
+                     this.setState({
+                        errors: [...res.data.errors]
+                     });
+                  } else {
+                     this.props.cancel();
+                  }
+               })
+               .catch(err => console.log(err));
+         }
       };
    }
    componentDidMount() {
@@ -60,6 +74,8 @@ export default class AddWorkLocation extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     name='work_location_name'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.work_location_name}
@@ -70,12 +86,22 @@ export default class AddWorkLocation extends Component {
                         this.setState({
                            work_location_name: event.target.value
                         });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.work_location_name.status = status;
+                           prevState.fieldError.work_location_name.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.work_location_name.status}
+                     helperText={this.state.fieldError.work_location_name.msg}
                   ></TextField>
                </Box>
 
                <Box style={styles.box_field}>
                   <TextField
+                     name='description'
+                     size='small'
                      fullWidth
                      required
                      value={this.state.description}
@@ -84,7 +110,15 @@ export default class AddWorkLocation extends Component {
                      type='text'
                      onChange={event => {
                         this.setState({ description: event.target.value });
+                        const { status, msg, isValid } = errorCheck(event);
+                        this.setState(prevState => {
+                           prevState.fieldError.description.status = status;
+                           prevState.fieldError.description.msg = msg;
+                           prevState.isValid = isValid;
+                        });
                      }}
+                     error={this.state.fieldError.description.status}
+                     helperText={this.state.fieldError.description.msg}
                   ></TextField>
                </Box>
             </PaperBoard>
@@ -113,6 +147,7 @@ export default class AddWorkLocation extends Component {
                      variant='contained'
                      color='primary'
                      size='large'
+                     disabled={!this.state.isValid}
                      onClick={this.onAddHandler}
                   >
                      Add

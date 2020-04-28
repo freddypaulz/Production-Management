@@ -15,17 +15,17 @@ export default class EditDesignation extends Component {
          designation_name: '',
          description: '',
          errors: [],
-         status: 'Add',
+         status: 'UPDATE',
          fieldError: {
             designation_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
       };
       this.onEditHandler = () => {
          this.setState({});
          if (this.state.designation_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.designation_name.status = true;
                prevState.fieldError.designation_name.msg = 'Name required';
             });
@@ -34,25 +34,25 @@ export default class EditDesignation extends Component {
                .post('/designations/edit-designation', {
                   _id: this.state._id,
                   designation_name: this.state.designation_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   this.setState({
-                     status: 'Update'
+                     status: 'Update',
                   });
                   console.log(res);
                   if (res.data.errors) {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
-                           errors: [...res.data.errors]
+                           errors: [...res.data.errors],
                         });
                      } else {
                         this.props.cancel();
                      }
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
@@ -63,7 +63,7 @@ export default class EditDesignation extends Component {
             this.setState({
                designation_name: this.props.Designation.designation_name,
                description: this.props.Designation.description,
-               _id: this.props.Designation._id
+               _id: this.props.Designation._id,
             });
          }
       }
@@ -98,12 +98,12 @@ export default class EditDesignation extends Component {
                      variant='outlined'
                      label='Designation Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           designation_name: event.target.value
+                           designation_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.designation_name.status = status;
                            prevState.fieldError.designation_name.msg = msg;
                            prevState.isValid = isValid;
@@ -124,10 +124,10 @@ export default class EditDesignation extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;
