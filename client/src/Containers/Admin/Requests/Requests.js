@@ -3,7 +3,7 @@ import { Box } from '@material-ui/core';
 import Dashboard from '../../../Components/Dashboard/Dashboard';
 import auth from '../../../Components/Auth/auth';
 import { Route } from 'react-router-dom';
-import ManagePurchase from './Finance/ManagePurchases';
+import ManagePurchase from './Purchase/ManagePurchases';
 import AppBar from '../../../Components/AppBar/AppBar';
 
 export default class Requests extends Component {
@@ -11,7 +11,7 @@ export default class Requests extends Component {
       super(props);
       this.state = {
          width: '17vw',
-         dashboardItems: []
+         dashboardItems: [],
       };
       this.permissions = JSON.parse(sessionStorage.getItem('permissions'));
       this.contents = ['Purchase Requests'];
@@ -25,29 +25,29 @@ export default class Requests extends Component {
       };
       this.dashboardMin = () => {
          this.setState({
-            width: '.1px'
+            width: '.1px',
          });
       };
       this.dashboardMax = () => {
          this.setState({
-            width: '17vw'
+            width: '17vw',
          });
       };
    }
    componentDidMount() {
       console.log(this.permissions);
-      this.contents.map(content => {
+      this.contents.map((content) => {
          if (
-            this.permissions.find(el => {
+            this.permissions.find((el) => {
                return el === content ? true : false;
             })
          ) {
             let path = content.toLowerCase().replace(/ /g, '-');
             this.setState({});
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.dashboardItems.push({
                   Name: content,
-                  Path: path
+                  Path: path,
                });
             });
          }

@@ -6,6 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
+   LinearProgress,
    MenuItem,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -60,6 +61,7 @@ export default class EditVendor extends Component {
          poc_name: '',
          poc_designation: '',
          poc_mobile_no: '',
+         dataReceived: false,
          poc_sec_mobile_no: '',
       };
       this.onEditHandler = () => {
@@ -71,6 +73,9 @@ export default class EditVendor extends Component {
             return null;
          });
          console.log(this.state.vendor_point_of_contacts);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/vendors/edit-vendor', {
                _id: this.state._id,
@@ -94,8 +99,12 @@ export default class EditVendor extends Component {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
@@ -107,6 +116,9 @@ export default class EditVendor extends Component {
       console.log(this.props.Vendor);
       console.log(this.props.Vendor.vendor_point_of_contact);
       if (permissionCheck(this.props, 'Manage Vendors')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/countries/countries').then((res) => {
             this.setState({
                countries: [...res.data.Countries],
@@ -146,6 +158,7 @@ export default class EditVendor extends Component {
                               vendor_point_of_contacts: this.props.Vendor
                                  .vendor_point_of_contact,
                               description: this.props.Vendor.description,
+                              dataReceived: true,
                            });
                         }
                      });
@@ -172,6 +185,9 @@ export default class EditVendor extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -301,6 +317,10 @@ export default class EditVendor extends Component {
                               this.setState({
                                  vendor_country: event.target.value,
                                  cities: [],
+                                 states: [],
+                                 vendor_state: '',
+                                 vendor_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
@@ -310,6 +330,7 @@ export default class EditVendor extends Component {
                                     console.log(res);
                                     this.setState({
                                        states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -352,6 +373,9 @@ export default class EditVendor extends Component {
                               console.log(event.target.value);
                               this.setState({
                                  vendor_state: event.target.value,
+                                 vendor_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
@@ -361,6 +385,7 @@ export default class EditVendor extends Component {
                                     console.log(res);
                                     this.setState({
                                        cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}

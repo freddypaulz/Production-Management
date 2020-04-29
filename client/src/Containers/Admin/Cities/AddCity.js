@@ -7,6 +7,7 @@ import {
    InputLabel,
    Select,
    MenuItem,
+   LinearProgress,
    Divider,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -33,6 +34,7 @@ export default class AddUser extends Component {
             description: { status: false, msg: '' },
          },
          isValid: false,
+         dataReceived: false,
       };
       this.onAddHandler = () => {
          if (this.state.state_id === '') {
@@ -44,6 +46,9 @@ export default class AddUser extends Component {
                errors: ['Select State'],
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/cities/add-city', {
                   city_name: this.state.city_name,
@@ -56,9 +61,13 @@ export default class AddUser extends Component {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
+                        dataReceived: true,
                         success: false,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                })
@@ -68,9 +77,13 @@ export default class AddUser extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Cities')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/states/states').then((res) => {
             this.setState({
                states: [...res.data.States],
+               dataReceived: true,
             });
          });
       }
@@ -94,6 +107,9 @@ export default class AddUser extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

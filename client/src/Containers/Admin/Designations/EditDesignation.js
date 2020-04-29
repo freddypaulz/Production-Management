@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -20,6 +20,7 @@ export default class EditDesignation extends Component {
             designation_name: { status: false, msg: '' },
             description: { status: false, msg: '' },
          },
+         dataReceived: false,
          isValid: false,
       };
       this.onEditHandler = () => {
@@ -30,6 +31,9 @@ export default class EditDesignation extends Component {
                prevState.fieldError.designation_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/designations/edit-designation', {
                   _id: this.state._id,
@@ -45,9 +49,13 @@ export default class EditDesignation extends Component {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
+                           dataReceived: true,
                            errors: [...res.data.errors],
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
@@ -64,6 +72,7 @@ export default class EditDesignation extends Component {
                designation_name: this.props.Designation.designation_name,
                description: this.props.Designation.description,
                _id: this.props.Designation._id,
+               dataReceived: true,
             });
          }
       }
@@ -87,6 +96,9 @@ export default class EditDesignation extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

@@ -7,6 +7,7 @@ import {
    InputLabel,
    Select,
    MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -32,6 +33,7 @@ export default class EditShift extends Component {
             description: { status: false, msg: '' },
          },
          isValid: false,
+         dataReceived: false,
       };
       this.onEditHandler = () => {
          if (this.state.state_id === '') {
@@ -43,6 +45,9 @@ export default class EditShift extends Component {
                errors: ['Select State'],
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/cities/edit-city', {
                   _id: this.state._id,
@@ -58,8 +63,12 @@ export default class EditShift extends Component {
                         this.setState({
                            errors: [...res.data.errors],
                            success: false,
+                           dataReceived: true,
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
@@ -70,6 +79,9 @@ export default class EditShift extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Cities')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/states/states').then((res) => {
             this.setState({
                states: [...res.data.States],
@@ -80,6 +92,7 @@ export default class EditShift extends Component {
                   city_name: this.props.city.city_name,
                   state_id: this.props.city.state_id,
                   description: this.props.city.description,
+                  dataReceived: true,
                });
             }
          });
@@ -104,6 +117,9 @@ export default class EditShift extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

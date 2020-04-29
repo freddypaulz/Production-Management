@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -20,6 +20,7 @@ export default class EditDepartment extends Component {
             department_name: { status: false, msg: '' },
             description: { status: false, msg: '' },
          },
+         dataReceived: false,
          isValid: false,
       };
       this.onEditHandler = () => {
@@ -30,6 +31,9 @@ export default class EditDepartment extends Component {
                prevState.fieldError.department_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/departments/edit-department', {
                   _id: this.state._id,
@@ -46,8 +50,12 @@ export default class EditDepartment extends Component {
                         console.log(res.data.errors);
                         this.setState({
                            errors: [...res.data.errors],
+                           dataReceived: true,
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
@@ -64,6 +72,7 @@ export default class EditDepartment extends Component {
                department_name: this.props.Department.department_name,
                description: this.props.Department.description,
                _id: this.props.Department._id,
+               dataReceived: true,
             });
          }
       }
@@ -87,6 +96,9 @@ export default class EditDepartment extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -113,7 +125,6 @@ export default class EditDepartment extends Component {
                      helperText={this.state.fieldError.department_name.msg}
                   />
                </Box>
-
                <Box style={styles.box_field}>
                   <TextField
                      name='description'

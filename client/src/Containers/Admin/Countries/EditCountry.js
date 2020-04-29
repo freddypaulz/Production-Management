@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -20,9 +20,13 @@ export default class EditCountry extends Component {
             country_name: { status: false, msg: '' },
             description: { status: false, msg: '' },
          },
+         dataReceived: false,
          isValid: false,
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/countries/edit-country', {
                _id: this.state._id,
@@ -37,8 +41,12 @@ export default class EditCountry extends Component {
                      this.setState({
                         errors: [...res.data.errors],
                         success: false,
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
@@ -54,6 +62,7 @@ export default class EditCountry extends Component {
                country_name: this.props.country.country_name,
                description: this.props.country.description,
                _id: this.props.country._id,
+               dataReceived: true,
             });
          }
       }
@@ -77,6 +86,9 @@ export default class EditCountry extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

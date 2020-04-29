@@ -6,6 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
+   LinearProgress,
    MenuItem,
 } from '@material-ui/core';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
@@ -46,9 +47,13 @@ export default class AddVendor extends Component {
          errors: [],
          countries: [],
          states: [],
+         dataReceived: false,
          cities: [],
       };
       this.onAddHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/vendors/add-vendor', {
                vendor_name: this.state.vendor_name,
@@ -69,9 +74,13 @@ export default class AddVendor extends Component {
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
+                     dataReceived: true,
                      errors: [...res.data.errors],
                   });
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                }
             })
@@ -80,9 +89,13 @@ export default class AddVendor extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Vendors')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/countries/countries').then((res) => {
             this.setState({
                countries: [...res.data.Countries],
+               dataReceived: true,
             });
          });
       }
@@ -106,6 +119,9 @@ export default class AddVendor extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -235,6 +251,10 @@ export default class AddVendor extends Component {
                               this.setState({
                                  vendor_country: event.target.value,
                                  cities: [],
+                                 states: [],
+                                 vendor_state: '',
+                                 vendor_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
@@ -244,6 +264,7 @@ export default class AddVendor extends Component {
                                     console.log(res);
                                     this.setState({
                                        states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -286,6 +307,9 @@ export default class AddVendor extends Component {
                               console.log(event.target.value);
                               this.setState({
                                  vendor_state: event.target.value,
+                                 vendor_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
@@ -295,6 +319,7 @@ export default class AddVendor extends Component {
                                     console.log(res);
                                     this.setState({
                                        cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}

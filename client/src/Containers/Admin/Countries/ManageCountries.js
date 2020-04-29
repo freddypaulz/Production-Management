@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -15,41 +15,39 @@ export default class ManageCountries extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Country Name', field: 'country_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
-         openUploadCSV: false
+         dataReceived: false,
+         openUploadCSV: false,
       };
       this.OnEditHandler = (event, rowData) => {
          axios
             .post('/countries/country', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(country => {
-               //console.log(country);
+            .then((country) => {
                this.EditData = { ...country.data.Country[0] };
                console.log(this.EditData);
-               // this.props.history.push({
-               //    pathname: 'manage-countries/edit-country',
-               //    state: {
-               //       country: this.EditData
-               //    }
-               // });
                this.setState({
-                  openEdit: true
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/countries/countries').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/countries/countries').then((res) => {
             console.log(res.data.Countries);
             for (let i = 0; i < res.data.Countries.length; i++) {
                res.data.Countries[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.Countries]
+               data: [...res.data.Countries],
+               dataReceived: true,
             });
          });
       };
@@ -77,12 +75,12 @@ export default class ManageCountries extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
@@ -93,19 +91,21 @@ export default class ManageCountries extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openUploadCSV: true
+                        openUploadCSV: true,
                      });
                   }}
                >
                   Upload CSV
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -115,8 +115,8 @@ export default class ManageCountries extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -124,25 +124,25 @@ export default class ManageCountries extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/countries/delete-country', {
-                           country_name: oldData.country_name
+                           country_name: oldData.country_name,
                         })
-                        .then(Country => {
+                        .then((Country) => {
                            console.log(Country);
                            if (Country) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -153,7 +153,7 @@ export default class ManageCountries extends Component {
                   <AddCountry
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -166,7 +166,7 @@ export default class ManageCountries extends Component {
                      country={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}
@@ -178,7 +178,7 @@ export default class ManageCountries extends Component {
                   <CountryCSVUpload
                      cancel={() => {
                         this.setState({
-                           openUploadCSV: false
+                           openUploadCSV: false,
                         });
                         this.handleClose();
                      }}

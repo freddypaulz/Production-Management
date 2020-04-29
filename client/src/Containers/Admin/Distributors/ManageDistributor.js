@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddDistributor from './AddDistributor';
@@ -16,33 +16,39 @@ export default class ManageDistributors extends Component {
             { title: 'ID', field: 'id' },
             { title: 'Distributor Name', field: 'distributor_name' },
             { title: 'Distributor Location', field: 'distributor_location' },
-            // { title: 'Distributor Tax No', field: 'distributor_tax_no' },
-            // { title: 'Distributor Mobile No', field: 'distributor_mobile_no' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
-         openEdit: false
+         dataReceived: false,
+         openEdit: false,
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/distributors/distributor', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                this.EditData = { ...res.data.Distributor };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .get('/distributors/distributors')
-            .then(res => {
+            .then((res) => {
                //console.log(res.data.States[0].country_id);
                for (let i = 0; i < res.data.Distributors.length; i++) {
                   res.data.Distributors[i].id = i + 1;
@@ -72,10 +78,11 @@ export default class ManageDistributors extends Component {
                   //      });
                }
                this.setState({
-                  data: [...res.data.Distributors]
+                  data: [...res.data.Distributors],
+                  dataReceived: true,
                });
             })
-            .catch(err => {
+            .catch((err) => {
                console.log('Error');
             });
       };
@@ -103,19 +110,21 @@ export default class ManageDistributors extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -125,8 +134,8 @@ export default class ManageDistributors extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -134,25 +143,25 @@ export default class ManageDistributors extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/distributors/delete-distributor', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -164,7 +173,7 @@ export default class ManageDistributors extends Component {
                   <AddDistributor
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -177,7 +186,7 @@ export default class ManageDistributors extends Component {
                      Distributor={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

@@ -6,6 +6,7 @@ import {
    FormControl,
    InputLabel,
    Select,
+   LinearProgress,
    MenuItem,
 } from '@material-ui/core';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
@@ -46,9 +47,13 @@ export default class AddDistributor extends Component {
          poc_name: '',
          poc_designation: '',
          poc_mobile_no: '',
+         dataReceived: false,
          poc_sec_mobile_no: '',
       };
       this.onAddHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/distributors/add-distributor', {
                distributor_name: this.state.distributor_name,
@@ -70,9 +75,13 @@ export default class AddDistributor extends Component {
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
+                     dataReceived: true,
                      errors: [...res.data.errors],
                   });
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                }
             })
@@ -81,9 +90,13 @@ export default class AddDistributor extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Distributors')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/countries/countries').then((res) => {
             this.setState({
                countries: [...res.data.Countries],
+               dataReceived: true,
             });
          });
       }
@@ -107,6 +120,9 @@ export default class AddDistributor extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -236,6 +252,10 @@ export default class AddDistributor extends Component {
                               this.setState({
                                  distributor_country: event.target.value,
                                  cities: [],
+                                 states: [],
+                                 distributor_state: '',
+                                 distributor_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
@@ -245,6 +265,7 @@ export default class AddDistributor extends Component {
                                     console.log(res);
                                     this.setState({
                                        states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -287,6 +308,9 @@ export default class AddDistributor extends Component {
                               console.log(event.target.value);
                               this.setState({
                                  distributor_state: event.target.value,
+                                 distributor_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
@@ -296,6 +320,7 @@ export default class AddDistributor extends Component {
                                     console.log(res);
                                     this.setState({
                                        cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}

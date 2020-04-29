@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -22,6 +22,7 @@ export default class EditBox extends Component {
             box_size: { status: false, msg: '' },
             description: { status: false, msg: '' },
          },
+         dataReceived: false,
          isValid: false,
       };
       this.onEditHandler = () => {
@@ -37,6 +38,9 @@ export default class EditBox extends Component {
                prevState.fieldError.box_size.msg = 'Enter a positive value';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/boxes/edit-box', {
                   _id: this.state._id,
@@ -54,8 +58,12 @@ export default class EditBox extends Component {
                         console.log(res.data.errors);
                         this.setState({
                            errors: [...res.data.errors],
+                           dataReceived: true,
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
@@ -73,6 +81,7 @@ export default class EditBox extends Component {
                box_size: this.props.Box.box_size,
                description: this.props.Box.description,
                _id: this.props.Box._id,
+               dataReceived: true,
             });
          }
       }
@@ -96,6 +105,9 @@ export default class EditBox extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

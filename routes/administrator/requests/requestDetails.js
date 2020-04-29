@@ -9,12 +9,12 @@ router.get('/', (req, res) => {
    request_details
       .find({})
       .sort({ date: -1 })
-      .then(data => {
+      .then((data) => {
          res.send(data);
       });
 });
 router.post('/', (req, res) => {
-   request_details.find({ _id: req.body._id }, function(err, data) {
+   request_details.find({ _id: req.body._id }, function (err, data) {
       if (err) throw err;
       res.send(data);
       // console.log(data);
@@ -28,16 +28,19 @@ router.post('/upload', (req, res) => {
       const fileName = `quotation_${new moment().format('DD_MM_YYYY_HH_m_s')}.${
          fileType[1]
       }`;
-      file.mv(`${__dirname}/../../../client/build/uploads/${fileName}`, err => {
-         if (err) {
-            res.send(err);
-         } else {
-            res.json({
-               fileName: file.name,
-               filePath: fileName
-            });
+      file.mv(
+         `${__dirname}/../../../client/build/uploads/${fileName}`,
+         (err) => {
+            if (err) {
+               res.send(err);
+            } else {
+               res.json({
+                  fileName: file.name,
+                  filePath: fileName,
+               });
+            }
          }
-      });
+      );
    }
 });
 
@@ -57,7 +60,7 @@ router.post('/request-detail-add', (req, res) => {
       Comments,
       Created_By,
       Total_Price,
-      logs
+      logs,
    } = req.body;
    if (
       !Raw_Material_Id ||
@@ -68,7 +71,6 @@ router.post('/request-detail-add', (req, res) => {
       !Due_Date ||
       !Status ||
       !Quotation_Document_URL ||
-      !Comments ||
       !Created_By ||
       !logs
    ) {
@@ -91,29 +93,29 @@ router.post('/request-detail-add', (req, res) => {
          Total_Price,
          Vendor,
          Quotation_Document_URL,
-         Created_By
+         Created_By,
       });
       new_request_details
          .save()
-         .then(request_details => {
+         .then((request_details) => {
             const newLogs = new Logs({
                Request_Id: request_details._id,
                Address: {
                   From: logs.from,
-                  To: logs.to
+                  To: logs.to,
                },
-               Comments: logs.comments
+               Comments: logs.comments,
             });
             newLogs
                .save()
-               .then(logs => {
+               .then((logs) => {
                   return res.send({ request_details, errors });
                })
-               .catch(err => {
+               .catch((err) => {
                   console.log(err);
                });
          })
-         .catch(err => {
+         .catch((err) => {
             console.log(err);
          });
    }
@@ -121,7 +123,7 @@ router.post('/request-detail-add', (req, res) => {
 router.post('/request-detail-delete', (req, res, next) => {
    request_details
       .findOneAndDelete({ _id: req.body._id })
-      .then(requestdetails => {
+      .then((requestdetails) => {
          res.send(request_details);
       });
 });
@@ -135,7 +137,7 @@ router.post('/request-detail-edit', (req, res) => {
       Status,
       Comments,
       Total_Price,
-      Vendor
+      Vendor,
    } = req.body;
 
    if (!Quantity || !Measuring_Unit || !Status || !Comments) {
@@ -153,13 +155,13 @@ router.post('/request-detail-edit', (req, res) => {
                Status,
                Comments,
                Total_Price,
-               Vendor
+               Vendor,
             }
          )
-         .then(request_details => {
+         .then((request_details) => {
             res.send({ request_details, errors });
          })
-         .catch(err => {});
+         .catch((err) => {});
    }
 });
 
@@ -179,21 +181,21 @@ router.post('/request-details-filter', (req, res) => {
       raw_material_code,
       from_total_price,
       to_total_price,
-      vendor
+      vendor,
    } = req.body;
 
    let conditions = {};
    if (from_date && to_date) {
       conditions.date = {
          $gte: new Date(from_date),
-         $lte: new Date(to_date)
+         $lte: new Date(to_date),
       };
    }
 
    if (from_due_date && to_due_date) {
       conditions.Due_Date = {
          $gte: new Date(from_due_date),
-         $lte: new Date(to_due_date)
+         $lte: new Date(to_due_date),
       };
    }
 
@@ -220,18 +222,18 @@ router.post('/request-details-filter', (req, res) => {
    if (from_quantity && to_quantity) {
       conditions.Quantity = {
          $gte: from_quantity,
-         $lte: to_quantity
+         $lte: to_quantity,
       };
    }
 
    if (from_total_price && to_total_price) {
       conditions.Total_Price = {
          $gte: from_total_price,
-         $lte: to_total_price
+         $lte: to_total_price,
       };
    }
    console.log('query: ', conditions);
-   request_details.find(conditions).then(reqDetails => {
+   request_details.find(conditions).then((reqDetails) => {
       console.log(reqDetails);
       res.send(reqDetails);
    });

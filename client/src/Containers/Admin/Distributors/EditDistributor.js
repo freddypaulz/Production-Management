@@ -7,6 +7,7 @@ import {
    InputLabel,
    Select,
    MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
@@ -60,6 +61,7 @@ export default class EditDistributor extends Component {
          poc_name: '',
          poc_designation: '',
          poc_mobile_no: '',
+         dataReceived: false,
          poc_sec_mobile_no: '',
       };
       this.onEditHandler = () => {
@@ -71,6 +73,9 @@ export default class EditDistributor extends Component {
             return null;
          });
          console.log(this.state.distributor_point_of_contacts);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/distributors/edit-distributor', {
                _id: this.state._id,
@@ -95,8 +100,12 @@ export default class EditDistributor extends Component {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
@@ -108,6 +117,9 @@ export default class EditDistributor extends Component {
       console.log(this.props.Distributor);
       console.log(this.props.Distributor.distributor_point_of_contact);
       if (permissionCheck(this.props, 'Manage Distributors')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/countries/countries').then((res) => {
             this.setState({
                countries: [...res.data.Countries],
@@ -154,6 +166,7 @@ export default class EditDistributor extends Component {
                               distributor_point_of_contacts: this.props
                                  .Distributor.distributor_point_of_contact,
                               description: this.props.Distributor.description,
+                              dataReceived: true,
                            });
                         }
                      });
@@ -180,6 +193,9 @@ export default class EditDistributor extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -309,6 +325,10 @@ export default class EditDistributor extends Component {
                               this.setState({
                                  distributor_country: event.target.value,
                                  cities: [],
+                                 states: [],
+                                 distributor_state: '',
+                                 distributor_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
@@ -318,6 +338,7 @@ export default class EditDistributor extends Component {
                                     console.log(res);
                                     this.setState({
                                        states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -360,6 +381,9 @@ export default class EditDistributor extends Component {
                               console.log(event.target.value);
                               this.setState({
                                  distributor_state: event.target.value,
+                                 distributor_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
@@ -369,6 +393,7 @@ export default class EditDistributor extends Component {
                                     console.log(res);
                                     this.setState({
                                        cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}

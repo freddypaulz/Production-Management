@@ -382,6 +382,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.manageSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -393,6 +394,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -424,6 +426,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.requestSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -435,6 +438,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -466,6 +470,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.reportSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -477,6 +482,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -508,6 +514,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.purchaseSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -519,6 +526,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -550,6 +558,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.financeSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -561,6 +570,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -592,6 +602,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.productionSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -603,6 +614,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }
@@ -634,6 +646,7 @@ export default class EditRole extends Component {
                                                 permission.value = true;
                                                 this.configurationSelected++;
                                              }
+                                             return null;
                                           }
                                        );
                                     } else {
@@ -645,6 +658,7 @@ export default class EditRole extends Component {
                                              ) {
                                                 permission.value = false;
                                              }
+                                             return null;
                                           }
                                        );
                                     }

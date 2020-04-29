@@ -6,22 +6,27 @@ import {
    Select,
    FormControl,
    InputLabel,
-   MenuItem
+   MenuItem,
+   Link,
+   Dialog,
+   DialogContent,
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
 import { Datepick } from '../../../../Components/Date/Datepick';
+import GetAppOutlinedIcon from '@material-ui/icons/GetAppOutlined';
+import DescriptionOutlinedIcon from '@material-ui/icons/DescriptionOutlined';
+import Logs from '../Logs/Logs';
 
 const styles = Styles;
 const style = {
    marginRight: '6px',
-   marginLeft: '6px'
+   marginLeft: '6px',
 };
-export default class AddPurchase extends Component {
+export default class EditPurchase extends Component {
    constructor(props) {
       super();
       this.state = {
-         file: null,
          _id: '',
          Raw_Material_Id: '',
          Raw_Material_Code: '',
@@ -39,78 +44,61 @@ export default class AddPurchase extends Component {
          materials: [],
          vendors: [],
          code: '',
-         to: ''
+         to: '',
+         quotation: '',
+         openLog: false,
+         logs: [],
+         disabled: false,
+         label: 'Submit',
       };
-
-      this.onUploadHandler = () => {
-         const formData = new FormData();
-         console.log(this.state.file);
-         if (this.state.file) {
-            formData.append('file', this.state.file);
-            axios
-               .post('/request-details/upload', formData, {
-                  headers: {
-                     'content-type': 'multipart/form-data'
-                  }
-               })
-               .then(res => {
-                  if (res.data) {
-                     this.onAddHandler(res.data);
-                  }
-               })
-               .catch(err => {
-                  console.error(err);
-               });
-         } else {
-            this.setState({});
-            this.setState(prev => {
-               prev.errors.push('Choose a file');
-            });
-            console.log(this.state.errors);
-         }
-      };
-
-      this.onAddHandler = file => {
-         console.log('Add:', file);
+      this.onEditHandler = () => {
+         this.setState({
+            disabled: true,
+            label: 'wait...',
+         });
          axios
-            .post('/request-details/request-detail-add', {
-               Raw_Material_Id: this.state.Raw_Material_Id,
-               Raw_Material_Code: this.state.Raw_Material_Code,
-               Quantity: this.state.Quantity,
-               Measuring_Unit: this.state.Measuring_Unit,
-               Priority: this.state.Priority,
-               Due_Date: this.state.Due_Date,
-               Status: this.state.Status,
-               Comments: this.state.Comments,
-               Quotation_Document_URL: [file.filePath],
-               Vendor: this.state.Vendor,
-               Total_Price: this.state.Total_Price,
-               Created_By: {
-                  Employee_Id: sessionStorage.getItem('User ID'),
-                  Role_Id: sessionStorage.getItem('Role ID')
-               },
+            .post('/logs/comment9', {
                logs: {
+                  reqId: props.Purchase._id,
                   from: sessionStorage.getItem('Role ID'),
                   to: this.state.to,
-                  comments: this.state.Comments
-               }
+                  comments: this.state.Comments,
+               },
             })
-            .then(res => {
-               console.log(res.data);
-               if (res.data.errors.length > 0) {
+            .then((comments) => {
+               console.log('Comments: ', comments);
+               if (comments.data.errors.length > 0) {
                   this.setState({
-                     errors: [...res.data.errors]
+                     errors: [...comments.data.errors],
+                     disabled: false,
+                     label: 'Submit',
                   });
                } else {
-                  this.setState({
-                     errors: [...res.data.errors]
-                  });
-                  this.props.close();
+                  axios
+                     .post('/request-details/request-detail-edit', {
+                        _id: this.state._id,
+                        Quantity: this.state.Quantity,
+                        Measuring_Unit: this.state.Measuring_Unit,
+                        Status: this.state.Status,
+                        Vendor: this.state.Vendor,
+                        Comments: this.state.Comments,
+                        Total_Price: this.state.Total_Price,
+                     })
+                     .then((res) => {
+                        console.log(res.data);
+                        if (comments.data.errors.length > 0) {
+                           this.setState({
+                              errors: [...comments.data.errors],
+                              disabled: false,
+                              label: 'Submit',
+                           });
+                        } else {
+                           this.props.close();
+                        }
+                     });
                }
             })
-            .catch(err => {
-               console.log(err);
-            });
+            .catch((err) => console.log(err));
       };
 
       this.loadStatus = () => {
@@ -124,23 +112,46 @@ export default class AddPurchase extends Component {
    }
 
    componentDidMount() {
-      axios.get('/raw-materials/raw-materials').then(res => {
+      console.log('Props: ', this.props.Purchase);
+      axios.get('/raw-materials/raw-materials').then((res) => {
          console.log(res);
+         this.setState((prevState) => {
+            prevState.materials = [...res.data.RawMaterials];
+         });
          this.setState({
-            materials: [...res.data.RawMaterials]
+            Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
+            Raw_Material_Code: this.props.Purchase.Raw_Material_Code,
          });
       });
-      axios.get('/vendors/vendors').then(res => {
+      axios.get('/vendors/vendors').then((res) => {
          console.log(res);
+         this.setState((prevState) => {
+            prevState.vendors = [...res.data.Vendors];
+         });
          this.setState({
-            vendors: [...res.data.Vendors]
+            Vendor: this.props.Purchase.Vendor,
          });
       });
-      axios.get('/measuring-units/measuring-units').then(res => {
+      axios.get('/measuring-units/measuring-units').then((res) => {
          console.log(res);
-         this.setState({
-            measuring_units: [...res.data.MeasuringUnits]
+         this.setState((prevState) => {
+            prevState.measuring_units = [...res.data.MeasuringUnits];
          });
+         this.setState({
+            Measuring_Unit: this.props.Purchase.Measuring_Unit,
+         });
+      });
+      console.log('PProps: ', this.props.Purchase.Quotation_Document_URL[0]);
+      this.setState({
+         _id: this.props.Purchase._id,
+         Quantity: this.props.Purchase.Quantity,
+         Priority: this.props.Purchase.Priority,
+         Due_Date: this.props.Purchase.Due_Date,
+         Comments: this.props.Purchase.Comments,
+         Total_Price: this.props.Purchase.Total_Price
+            ? this.props.Purchase.Total_Price
+            : '',
+         quotation: `/uploads/${this.props.Purchase.Quotation_Document_URL}`,
       });
    }
 
@@ -179,19 +190,20 @@ export default class AddPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Material Name
                                  </InputLabel>
                                  <Select
+                                    disabled
                                     variant='outlined'
                                     required
                                     name='Raw_Material_Id'
                                     value={this.state.Raw_Material_Id}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        let materialCode;
-                                       this.state.materials.map(material => {
+                                       this.state.materials.map((material) => {
                                           if (
                                              material._id === event.target.value
                                           ) {
@@ -206,7 +218,7 @@ export default class AddPurchase extends Component {
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
-                                          Raw_Material_Code: materialCode
+                                          Raw_Material_Code: materialCode,
                                        });
                                     }}
                                  >
@@ -228,6 +240,7 @@ export default class AddPurchase extends Component {
                            </Box>
                            <Box width='50%' style={style}>
                               <TextField
+                                 disabled
                                  size='small'
                                  fullWidth
                                  variant='outlined'
@@ -235,9 +248,9 @@ export default class AddPurchase extends Component {
                                  required
                                  name='Material_Code'
                                  value={this.state.Raw_Material_Code}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Material_Code: event.target.value
+                                       Material_Code: event.target.value,
                                     });
                                     console.log(event.target.value);
                                  }}
@@ -247,6 +260,7 @@ export default class AddPurchase extends Component {
                         <Box style={styles.boxSize2}>
                            <Box width='50%' style={style}>
                               <TextField
+                                 disabled={this.props.disabled.quantity}
                                  size='small'
                                  fullWidth
                                  variant='outlined'
@@ -254,9 +268,9 @@ export default class AddPurchase extends Component {
                                  required
                                  name='Quantity'
                                  value={this.state.Quantity}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Quantity: event.target.value
+                                       Quantity: event.target.value,
                                     });
                                  }}
                               ></TextField>
@@ -272,19 +286,20 @@ export default class AddPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Measuring Unit
                                  </InputLabel>
                                  <Select
+                                    disabled={this.props.disabled.unit}
                                     name='Measuring_Unit'
                                     variant='outlined'
                                     required
                                     value={this.state.Measuring_Unit}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Measuring_Unit: event.target.value
+                                          Measuring_Unit: event.target.value,
                                        });
                                        console.log(event.target.value);
                                     }}
@@ -308,7 +323,6 @@ export default class AddPurchase extends Component {
                               </FormControl>
                            </Box>
                         </Box>
-
                         <Box style={styles.boxSize2}>
                            <Box width='50%' style={style}>
                               <FormControl
@@ -321,19 +335,81 @@ export default class AddPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
+                                    }}
+                                 >
+                                    Vendor Name
+                                 </InputLabel>
+                                 <Select
+                                    disabled={this.props.disabled.vendor}
+                                    variant='outlined'
+                                    required
+                                    name='Vendor'
+                                    value={this.state.Vendor}
+                                    onChange={(event) => {
+                                       this.setState({
+                                          Vendor: event.target.value,
+                                       });
+                                    }}
+                                 >
+                                    {this.state.vendors.map((vendor, index) => {
+                                       return (
+                                          <MenuItem
+                                             //selected
+                                             key={index}
+                                             value={vendor._id}
+                                          >
+                                             {vendor.vendor_name}
+                                          </MenuItem>
+                                       );
+                                    })}
+                                 </Select>
+                              </FormControl>
+                           </Box>
+                           <Box width='50%' style={style}>
+                              <TextField
+                                 disabled={this.props.disabled.vendor}
+                                 size='small'
+                                 fullWidth
+                                 variant='outlined'
+                                 label='Total_Price'
+                                 required
+                                 name='Total_Price'
+                                 value={this.state.Total_Price}
+                                 onChange={(event) => {
+                                    this.setState({
+                                       Total_Price: event.target.value,
+                                    });
+                                 }}
+                              ></TextField>
+                           </Box>
+                        </Box>
+                        <Box style={styles.boxSize2}>
+                           <Box width='50%' style={style}>
+                              <FormControl
+                                 required
+                                 variant='outlined'
+                                 fullWidth
+                                 size='small'
+                              >
+                                 <InputLabel
+                                    style={{
+                                       backgroundColor: 'white',
+                                       paddingLeft: '2px',
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Priority
                                  </InputLabel>
                                  <Select
+                                    disabled
                                     variant='outlined'
                                     required
                                     name='Priority'
                                     value={this.state.Priority}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Priority: event.target.value
+                                          Priority: event.target.value,
                                        });
                                     }}
                                  >
@@ -348,14 +424,15 @@ export default class AddPurchase extends Component {
                            </Box>
                            <Box width='50%' style={style}>
                               <Datepick
+                                 disabled={true}
                                  id='4'
                                  variant='outlined'
                                  Name='Due_Date'
                                  minDate={new Date()}
                                  value={this.state.Due_Date}
-                                 setDate={date => {
+                                 setDate={(date) => {
                                     this.setState({
-                                       Due_Date: date
+                                       Due_Date: date,
                                     });
                                     console.log(date);
                                  }}
@@ -374,36 +451,37 @@ export default class AddPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Status
                                  </InputLabel>
                                  <Select
+                                    disabled={this.props.disabled.status}
                                     variant='outlined'
                                     required
                                     name='Status'
                                     value={this.state.Status}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Status: event.target.value
+                                          Status: event.target.value,
                                        });
                                        if (
                                           event.target.value ===
                                           'ForwardedToFinance'
                                        ) {
-                                          this.setState(pre => {
+                                          this.setState((pre) => {
                                              pre.to = 'Finance';
                                           });
                                        } else if (
                                           event.target.value ===
                                           'ForwardedToPurchase'
                                        ) {
-                                          this.setState(pre => {
+                                          this.setState((pre) => {
                                              pre.to = 'Purchase';
                                           });
                                        } else {
-                                          this.setState(pre => {
+                                          this.setState((pre) => {
                                              pre.to = 'Rejected';
                                           });
                                        }
@@ -415,127 +493,55 @@ export default class AddPurchase extends Component {
                                  </Select>
                               </FormControl>
                            </Box>
-                           <Box width='100%' style={style}>
-                              <TextField
-                                 size='small'
-                                 multiline
-                                 rowsMax='3'
-                                 variant='outlined'
-                                 fullWidth
-                                 label='Comments'
-                                 value={this.state.Comments}
-                                 onChange={event => {
-                                    this.setState({
-                                       Comments: event.target.value
-                                    });
-                                    console.log(event.target.value);
-                                 }}
-                              ></TextField>
+                           <Box
+                              width='100%'
+                              style={style}
+                              display='flex'
+                              justifyContent='space-between'
+                           >
+                              <Box display='flex' width='85%'>
+                                 <TextField
+                                    disabled={this.props.disabled.comment}
+                                    size='small'
+                                    multiline
+                                    rowsMax='3'
+                                    variant='outlined'
+                                    fullWidth
+                                    label='Comments'
+                                    value={this.state.Comments}
+                                    onChange={(event) => {
+                                       this.setState({
+                                          Comments: event.target.value,
+                                       });
+                                    }}
+                                 />
+                              </Box>
+                              <Box display='flex'>
+                                 <Button
+                                    variant='outlined'
+                                    color='secondary'
+                                    size='small'
+                                    fontWeight='Bold'
+                                    onClick={() => {
+                                       axios
+                                          .post('/logs/logs', {
+                                             Request_Id: this.state._id,
+                                          })
+                                          .then((Logs) => {
+                                             console.log(Logs.data);
+                                             this.setState({
+                                                logs: Logs.data,
+                                             });
+                                             this.setState({
+                                                openLog: true,
+                                             });
+                                          });
+                                    }}
+                                 >
+                                    <DescriptionOutlinedIcon />
+                                 </Button>
+                              </Box>
                            </Box>
-                        </Box>
-                        <Box
-                           style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignContent: 'center',
-                              paddingTop: '5px',
-                              paddingLeft: '5px',
-                              paddingRight: '5px',
-                              paddingBottom: '5px',
-                              minWidth: '10%'
-                           }}
-                        >
-                           {this.state.Status === 'ForwardedToFinance' ? (
-                              <>
-                                 <Box style={styles.boxSize2}>
-                                    <Box width='50%' marginRight='10px'>
-                                       <FormControl
-                                          required
-                                          variant='outlined'
-                                          fullWidth
-                                          size='small'
-                                       >
-                                          <InputLabel
-                                             style={{
-                                                backgroundColor: 'white',
-                                                paddingLeft: '2px',
-                                                paddingRight: '2px'
-                                             }}
-                                          >
-                                             Vendor Name
-                                          </InputLabel>
-                                          <Select
-                                             variant='outlined'
-                                             required
-                                             name='Vendor'
-                                             value={this.state.Vendor}
-                                             onChange={event => {
-                                                this.setState({
-                                                   Vendor: event.target.value
-                                                });
-                                             }}
-                                          >
-                                             {this.state.vendors.map(
-                                                (vendor, index) => {
-                                                   return (
-                                                      <MenuItem
-                                                         //selected
-                                                         key={index}
-                                                         value={vendor._id}
-                                                      >
-                                                         {vendor.vendor_name}
-                                                      </MenuItem>
-                                                   );
-                                                }
-                                             )}
-                                          </Select>
-                                       </FormControl>
-                                    </Box>
-                                    <Box width='50%'>
-                                       <TextField
-                                          size='small'
-                                          fullWidth
-                                          variant='outlined'
-                                          label='Total_Price'
-                                          required
-                                          name='Total_Price'
-                                          value={this.state.Total_Price}
-                                          onChange={event => {
-                                             this.setState({
-                                                Total_Price: event.target.value
-                                             });
-                                          }}
-                                       />
-                                    </Box>
-                                 </Box>
-                                 <Box style={styles.boxSize2}>
-                                    <Box
-                                       fontWeight='bold'
-                                       fontSize='1.2vw'
-                                       mb={1}
-                                       ml={2}
-                                       mt={1}
-                                       display='flex'
-                                    >
-                                       Add Quotation
-                                    </Box>
-                                    <Box width='30%' style={style}>
-                                       <input
-                                          multiple
-                                          id='file'
-                                          type='file'
-                                          onChange={e => {
-                                             console.log(e.target.files[0]);
-                                             this.setState({
-                                                file: e.target.files[0]
-                                             });
-                                             console.log(this.state.file);
-                                          }}
-                                       />
-                                    </Box>
-                                 </Box>
-                              </>
-                           ) : null}
                         </Box>
                      </Box>
                   </Box>
@@ -546,38 +552,83 @@ export default class AddPurchase extends Component {
                pb={2}
                m={0}
                display='flex'
-               justifyContent='flex-end'
-               width='87%'
+               justifyContent='space-between'
+               width='88%'
             >
                <Box display='flex'>
-                  <Button
-                     variant='contained'
-                     color='primary'
-                     size='large'
-                     fontWeight='Bold'
-                     onClick={() => {
-                        this.props.cancel();
-                     }}
-                     style={{ fontWeight: 'bold' }}
-                  >
-                     Cancel
-                  </Button>
+                  {this.props.Purchase.Quotation_Document_URL[0] !== null ? (
+                     <Link
+                        style={styles.link}
+                        href={this.state.quotation}
+                        target='_blank'
+                        rel='noreferrer'
+                     >
+                        <GetAppOutlinedIcon color='secondary' />
+                        Quotation
+                     </Link>
+                  ) : null}
                </Box>
-               <Box marginLeft='10px'>
-                  <Button
-                     variant='contained'
-                     color='primary'
-                     size='large'
-                     fontWeight='bold'
-                     onClick={
-                        this.state.Status === 'ForwardedToFinance'
-                           ? this.onUploadHandler
-                           : this.onAddHandler
-                     }
-                     style={{ fontWeight: 'bold' }}
-                  >
-                     Submit
-                  </Button>
+
+               <Box display='flex' alignSelf='flex-end'>
+                  <Box>
+                     <Button
+                        variant='contained'
+                        color='primary'
+                        size='large'
+                        fontWeight='Bold'
+                        onClick={() => {
+                           this.props.cancel();
+                        }}
+                        style={{ fontWeight: 'bold' }}
+                     >
+                        {this.props.disabled.btnText}
+                     </Button>
+                  </Box>
+                  <Box marginLeft='10px'>
+                     <Button
+                        disabled={this.props.disabled.submit}
+                        variant='contained'
+                        color='primary'
+                        size='large'
+                        fontWeight='bold'
+                        onClick={this.onEditHandler}
+                        style={{ fontWeight: 'bold' }}
+                     >
+                        {this.state.label}
+                     </Button>
+                  </Box>
+                  <Dialog open={this.state.openLog} maxWidth='lg' fullWidth>
+                     <DialogContent>
+                        <Logs
+                           data={this.state.logs}
+                           cancel={() => {
+                              this.setState({
+                                 openLog: false,
+                              });
+                              this.handleClose();
+                           }}
+                        />
+                        <Box
+                           width='95%'
+                           display='flex'
+                           justifyContent='flex-end'
+                           marginTop='20px'
+                        >
+                           <Button
+                              variant='contained'
+                              color='primary'
+                              size='large'
+                              onClick={() => {
+                                 this.setState({
+                                    openLog: false,
+                                 });
+                              }}
+                           >
+                              Close
+                           </Button>
+                        </Box>
+                     </DialogContent>
+                  </Dialog>
                </Box>
             </Box>
          </Box>

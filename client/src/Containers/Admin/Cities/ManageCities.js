@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddCity from './AddCity';
@@ -17,12 +17,16 @@ export default class ManageCities extends Component {
             { title: 'ID', field: 'id' },
             { title: 'City Name', field: 'city_name' },
             { title: 'State Name', field: 'state_id' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
-         openUploadCSV: false
+         openUploadCSV: false,
+         progress: 0,
+         progressLength: 0,
+         completed: 0,
+         dataReceived: false,
       };
       this.CancelToken = axios.CancelToken;
       this.source = this.CancelToken.source();
@@ -33,63 +37,77 @@ export default class ManageCities extends Component {
             .post(
                '/cities/city',
                {
-                  _id: rowData._id
+                  _id: rowData._id,
                },
                {
-                  cancelToken: this.source.token
+                  cancelToken: this.source.token,
                }
             )
-            .then(city => {
+            .then((city) => {
                console.log(city);
                this.EditData = { ...city.data.city };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            progress: 0,
+            progressLength: 0,
+            completed: 0,
+            dataReceived: false,
+         });
          axios
             .get('/cities/cities', {
-               cancelToken: this.source.token
+               cancelToken: this.source.token,
             })
-            .then(res => {
-               //console.log(res.data.States[0].country_id);
+            .then((res) => {
+               this.setState({
+                  progressLength: res.data.Cities.length,
+               });
                for (let i = 0; i < res.data.Cities.length; i++) {
                   res.data.Cities[i].id = i + 1;
                   axios
                      .post(
                         '/states/state',
                         {
-                           _id: res.data.Cities[i].state_id
+                           _id: res.data.Cities[i].state_id,
                         },
                         {
-                           cancelToken: this.source.token
+                           cancelToken: this.source.token,
                         }
                      )
-                     .then(state => {
-                        console.log(state);
+                     .then((state) => {
+                        this.setState((prevState) => {
+                           prevState.dataReceived = true;
+                           prevState.progress++;
+                           prevState.completed =
+                              (prevState.progress / prevState.progressLength) *
+                              100;
+                        });
                         if (state.data.state[0]) {
                            console.log(state.data.state[0].state_name);
                            res.data.Cities[i].state_id =
                               state.data.state[0].state_name;
                            this.setState({
-                              data: [...res.data.Cities]
+                              data: [...res.data.Cities],
                            });
                         } else {
                            res.data.Cities[i].state_id =
                               'problem loading state';
                            this.setState({
-                              data: [...res.data.Cities]
+                              data: [...res.data.Cities],
                            });
                         }
                      })
-                     .catch(err => {
+                     .catch((err) => {
                         console.log(err);
                      });
                }
             })
-            .catch(err => {
+            .catch((err) => {
                console.log('Error');
             });
       };
@@ -120,12 +138,12 @@ export default class ManageCities extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
@@ -136,19 +154,28 @@ export default class ManageCities extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openUploadCSV: true
+                        openUploadCSV: true,
                      });
                   }}
                >
                   Upload CSV
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? (
+                  <LinearProgress />
+               ) : this.state.completed !== 100 ? (
+                  <LinearProgress
+                     variant='determinate'
+                     value={this.state.completed}
+                  />
+               ) : null}
+            </Box>
             <MaterialTable
                fixed
                title=' '
@@ -157,14 +184,14 @@ export default class ManageCities extends Component {
                style={{
                   width: '90%',
                   maxHeight: '500px',
-                  overflow: 'auto'
+                  overflow: 'auto',
                }}
                options={{
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -172,25 +199,25 @@ export default class ManageCities extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/cities/delete-city', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -202,7 +229,7 @@ export default class ManageCities extends Component {
                   <AddCity
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -215,7 +242,7 @@ export default class ManageCities extends Component {
                      city={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}
@@ -227,7 +254,7 @@ export default class ManageCities extends Component {
                   <CityCSVUpload
                      cancel={() => {
                         this.setState({
-                           openUploadCSV: false
+                           openUploadCSV: false,
                         });
                         this.handleClose();
                      }}

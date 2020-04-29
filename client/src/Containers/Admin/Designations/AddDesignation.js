@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -17,43 +17,54 @@ export default class AddDesignation extends Component {
          status: 'Add',
          fieldError: {
             designation_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         dataReceived: false,
+         isValid: false,
       };
       this.onAddHandler = () => {
          this.setState({});
          if (this.state.designation_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.designation_name.status = true;
                prevState.fieldError.designation_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/designations/add-designation', {
                   designation_name: this.state.designation_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   this.setState({
-                     status: 'Add'
+                     status: 'Add',
                   });
                   console.log(res);
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
-                        errors: [...res.data.errors]
+                        dataReceived: true,
+                        errors: [...res.data.errors],
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Designations')) {
+         this.setState({
+            dataReceived: true,
+         });
       }
    }
    render() {
@@ -75,6 +86,9 @@ export default class AddDesignation extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -86,12 +100,12 @@ export default class AddDesignation extends Component {
                      variant='outlined'
                      label='Designation Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           designation_name: event.target.value
+                           designation_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.designation_name.status = status;
                            prevState.fieldError.designation_name.msg = msg;
                            prevState.isValid = isValid;
@@ -112,10 +126,10 @@ export default class AddDesignation extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

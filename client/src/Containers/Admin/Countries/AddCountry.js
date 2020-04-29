@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -20,8 +20,12 @@ export default class AddCountry extends Component {
             description: { status: false, msg: '' },
          },
          isValid: false,
+         dataReceived: false,
       };
       this.onAddHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/countries/add-country', {
                country_name: this.state.country_name,
@@ -34,8 +38,12 @@ export default class AddCountry extends Component {
                   this.setState({
                      errors: [...res.data.errors],
                      success: false,
+                     dataReceived: true,
                   });
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                }
             })
@@ -44,6 +52,9 @@ export default class AddCountry extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Countries')) {
+         this.setState({
+            dataReceived: true,
+         });
       }
    }
    render() {
@@ -65,6 +76,9 @@ export default class AddCountry extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

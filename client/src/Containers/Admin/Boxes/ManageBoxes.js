@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -15,35 +15,43 @@ export default class ManageBoxes extends Component {
             { title: 'ID', field: 'id' },
             { title: 'Box Name', field: 'box_name' },
             { title: 'Box Size', field: 'box_size' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
-         openEdit: false
+         openEdit: false,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/boxes/box', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(Box => {
+            .then((Box) => {
                console.log(Box.data);
                this.EditData = { ...Box.data.box[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/boxes/boxes').then(res => {
-            console.log(res.data.Boxes);
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/boxes/boxes').then((res) => {
             for (let i = 0; i < res.data.Boxes.length; i++) {
                res.data.Boxes[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.Boxes]
+               data: [...res.data.Boxes],
+               dataReceived: true,
             });
          });
       };
@@ -71,19 +79,21 @@ export default class ManageBoxes extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -93,8 +103,8 @@ export default class ManageBoxes extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -102,25 +112,25 @@ export default class ManageBoxes extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/boxes/delete-box', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(Box => {
+                        .then((Box) => {
                            console.log(Box);
                            if (Box) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -131,7 +141,7 @@ export default class ManageBoxes extends Component {
                   <AddBox
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -145,7 +155,7 @@ export default class ManageBoxes extends Component {
                      props={this.props}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

@@ -20,7 +20,7 @@ export default class ManagePurchases extends Component {
             { title: 'Vendor', field: 'Vendor_Name' },
             { title: 'Total Price', field: 'Total_Price' },
             { title: 'Priority', field: 'Priority' },
-            { title: 'Status', field: 'Status' }
+            { title: 'Status', field: 'Status' },
          ],
 
          data: [],
@@ -36,10 +36,10 @@ export default class ManagePurchases extends Component {
             status: false,
             comment: false,
             btnDisplay: 'none',
-            btnText: 'Close'
+            btnText: 'Close',
          },
          found: false,
-         msg: 'Fetching Data...'
+         msg: 'Fetching Data...',
       };
       this.closeAlert = () => {
          this.setState({ alert: false });
@@ -48,69 +48,69 @@ export default class ManagePurchases extends Component {
       this.OnEditHandler = (event, rowData) => {
          axios
             .post('/request-details', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res.data[0]);
                this.EditData = { ...res.data[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
                });
             });
       };
 
-      this.loadRawMaterial = RequestDetail => {
+      this.loadRawMaterial = (RequestDetail) => {
          axios
             .post('/raw-materials/raw-material', {
-               _id: RequestDetail.Raw_Material_Id
+               _id: RequestDetail.Raw_Material_Id,
             })
-            .then(RawMaterial => {
+            .then((RawMaterial) => {
                RequestDetail.Raw_Material_Name =
                   RawMaterial.data.RawMaterial[0].raw_material_name;
                this.req.push(RequestDetail);
                this.setState({
                   data: [...this.req],
-                  msg: 'No Data Found!'
+                  msg: 'No Data Found!',
                });
             })
-            .catch(err => {
+            .catch((err) => {
                RequestDetail.Raw_Material_Name = 'Problem Loading Raw Material';
                this.req.push(RequestDetail);
                this.setState({
                   data: [...this.req],
-                  msg: 'No Data Found!'
+                  msg: 'No Data Found!',
                });
             });
       };
 
-      this.loadMeasuringUnit = RequestDetail => {
+      this.loadMeasuringUnit = (RequestDetail) => {
          axios
             .post('/measuring-units/measuring-unit', {
-               _id: RequestDetail.Measuring_Unit
+               _id: RequestDetail.Measuring_Unit,
             })
-            .then(MeasuringUnit => {
+            .then((MeasuringUnit) => {
                RequestDetail.Measuring_Unit_Name =
                   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                this.loadRawMaterial(RequestDetail);
             })
-            .catch(err => {
+            .catch((err) => {
                RequestDetail.Measuring_Unit_Name =
                   'Problem Loading Measuring Unit';
                this.loadRawMaterial(RequestDetail);
             });
       };
 
-      this.loadVendor = RequestDetail => {
+      this.loadVendor = (RequestDetail) => {
          axios
             .post('/vendors/vendor', {
-               _id: RequestDetail.Vendor
+               _id: RequestDetail.Vendor,
             })
-            .then(vendor => {
+            .then((vendor) => {
                RequestDetail.Vendor_Name = vendor.data.Vendor[0].vendor_name;
                this.loadMeasuringUnit(RequestDetail);
             })
-            .catch(err => {
+            .catch((err) => {
                RequestDetail.Vendor_Name = 'Problem Loading Vendor';
                this.loadMeasuringUnit(RequestDetail);
             });
@@ -119,25 +119,25 @@ export default class ManagePurchases extends Component {
       this.handleClose = () => {
          this.req = [];
          this.setState({
-            msg: 'Fetching Data...'
+            msg: 'Fetching Data...',
          });
-         axios.get('/request-details').then(RequestDetails => {
+         axios.get('/request-details').then((RequestDetails) => {
             if (RequestDetails.data[0] !== undefined) {
-               RequestDetails.data.map(RequestDetail => {
+               RequestDetails.data.map((RequestDetail) => {
                   if (this.props.load) {
                      if (RequestDetail.Status !== 'Completed') {
                         this.loadVendor(RequestDetail);
                         this.setState({
-                           found: true
+                           found: true,
                         });
                      }
                      if (this.state.found) {
                         this.setState({
-                           msg: 'Loading....'
+                           msg: 'Loading....',
                         });
                      } else {
                         this.setState({
-                           msg: 'No data Found!'
+                           msg: 'No data Found!',
                         });
                      }
                   } else {
@@ -152,32 +152,32 @@ export default class ManagePurchases extends Component {
                            sessionStorage.getItem('Role ID')
                      ) {
                         this.setState({
-                           found: true
+                           found: true,
                         });
                         this.loadVendor(RequestDetail);
                      }
                      if (this.state.found) {
                         this.setState({
-                           msg: 'Loading....'
+                           msg: 'Loading....',
                         });
                      } else {
                         this.setState({
-                           msg: 'No data Found!'
+                           msg: 'No data Found!',
                         });
                      }
                   }
                   this.setState({
-                     data: [...this.req]
+                     data: [...this.req],
                   });
                   this.setState({
                      openEdit: false,
-                     openAdd: false
+                     openAdd: false,
                   });
                   return null;
                });
             } else {
                this.setState({
-                  msg: 'No data Found!'
+                  msg: 'No data Found!',
                });
             }
          });
@@ -205,12 +205,12 @@ export default class ManagePurchases extends Component {
                      style={{
                         marginBottom: '20px',
                         display: 'flex',
-                        marginRight: '10px'
+                        marginRight: '10px',
                      }}
                      size='large'
                      onClick={() => {
                         this.setState({
-                           openAdd: true
+                           openAdd: true,
                         });
                      }}
                   >
@@ -222,12 +222,12 @@ export default class ManagePurchases extends Component {
                      style={{
                         marginBottom: '20px',
                         display: 'flex',
-                        marginRight: '10px'
+                        marginRight: '10px',
                      }}
                      size='large'
                      onClick={() => {
                         this.setState({
-                           openAll: true
+                           openAll: true,
                         });
                      }}
                   >
@@ -242,8 +242,8 @@ export default class ManagePurchases extends Component {
                style={{ width: '90%', maxHeight: '500px', overflow: 'auto' }}
                localization={{
                   body: {
-                     emptyDataSourceMessage: this.state.msg
-                  }
+                     emptyDataSourceMessage: this.state.msg,
+                  },
                }}
                options={{
                   sorting: true,
@@ -251,8 +251,8 @@ export default class ManagePurchases extends Component {
                      backgroundColor: '#3f51b5',
                      color: '#FFF',
                      fontSize: 'medium',
-                     fontWeight: 'bold'
-                  }
+                     fontWeight: 'bold',
+                  },
                }}
                actions={[
                   {
@@ -276,15 +276,15 @@ export default class ManagePurchases extends Component {
                                  status: false,
                                  comment: false,
                                  btnDisplay: 'flex',
-                                 btnText: 'Cancel'
-                              }
+                                 btnText: 'Cancel',
+                              },
                            });
                            this.OnEditHandler(event, rowData);
                         } else {
                            this.setState({ alert: true });
                         }
-                     }
-                  }
+                     },
+                  },
                ]}
                onRowClick={(event, rowData) => {
                   this.setState({
@@ -296,8 +296,9 @@ export default class ManagePurchases extends Component {
                         status: true,
                         comment: true,
                         btnDisplay: 'none',
-                        btnText: 'Close'
-                     }
+                        btnText: 'Close',
+                        submit: true,
+                     },
                   });
                   this.OnEditHandler(event, rowData);
                }}
@@ -318,7 +319,7 @@ export default class ManagePurchases extends Component {
                            size='large'
                            onClick={() => {
                               this.setState({
-                                 openAll: false
+                                 openAll: false,
                               });
                            }}
                         >
@@ -335,7 +336,7 @@ export default class ManagePurchases extends Component {
                      Purchase={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                      }}
                      close={() => {
@@ -351,7 +352,7 @@ export default class ManagePurchases extends Component {
                      Purchase={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                      }}
                      close={() => {
