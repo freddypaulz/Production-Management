@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -17,32 +17,40 @@ export default class EditMeasuringUnit extends Component {
          errors: [],
          fieldError: {
             measuring_unit_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
+         dataReceived: false,
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/measuring-units/edit-measuring-unit', {
                _id: this.state._id,
                measuring_unit_name: this.state.measuring_unit_name,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
                         isValid: false,
-                        errors: [...res.data.errors]
+                        errors: [...res.data.errors],
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
@@ -53,7 +61,8 @@ export default class EditMeasuringUnit extends Component {
                measuring_unit_name: this.props.MeasuringUnit
                   .measuring_unit_name,
                description: this.props.MeasuringUnit.description,
-               _id: this.props.MeasuringUnit._id
+               _id: this.props.MeasuringUnit._id,
+               dataReceived: true,
             });
          }
       }
@@ -77,6 +86,9 @@ export default class EditMeasuringUnit extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -88,13 +100,13 @@ export default class EditMeasuringUnit extends Component {
                      variant='outlined'
                      label='Measuring Unit Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           measuring_unit_name: event.target.value
+                           measuring_unit_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
                         console.log(status, msg);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.measuring_unit_name.status = status;
                            prevState.fieldError.measuring_unit_name.msg = msg;
                            prevState.isValid = isValid;
@@ -114,10 +126,10 @@ export default class EditMeasuringUnit extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

@@ -6,7 +6,8 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -27,9 +28,13 @@ export default class EditRawMaterial extends Component {
          errors: [],
          success: false,
          material_types: [],
-         measuring_units: []
+         dataReceived: false,
+         measuring_units: [],
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/raw-materials/edit-raw-material', {
                _id: this.state._id,
@@ -38,49 +43,60 @@ export default class EditRawMaterial extends Component {
                raw_material_type: this.state.raw_material_type,
                raw_material_measuring_unit: this.state
                   .raw_material_measuring_unit,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
-                        success: false
+                        success: false,
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Raw Materials')) {
-         axios.get('/material-types/material-types').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/material-types/material-types').then((res) => {
             this.setState({
-               material_types: [...res.data.MaterialTypes]
+               material_types: [...res.data.MaterialTypes],
+            });
+            axios.get('/measuring-units/measuring-units').then((res) => {
+               console.log(res);
+               this.setState({
+                  measuring_units: [...res.data.MeasuringUnits],
+               });
+               if (this.state.raw_material_name === '') {
+                  this.setState({
+                     _id: this.props.RawMaterial._id,
+                     raw_material_name: this.props.RawMaterial
+                        .raw_material_name,
+                     raw_material_code: this.props.RawMaterial
+                        .raw_material_code,
+                     raw_material_type: this.props.RawMaterial
+                        .raw_material_type,
+                     raw_material_measuring_unit: this.props.RawMaterial
+                        .raw_material_measuring_unit,
+                     description: this.props.RawMaterial.description,
+                     dataReceived: true,
+                  });
+               }
             });
          });
-         axios.get('/measuring-units/measuring-units').then(res => {
-            console.log(res);
-            this.setState({
-               measuring_units: [...res.data.MeasuringUnits]
-            });
-         });
-         if (this.state.raw_material_name === '') {
-            this.setState({
-               _id: this.props.RawMaterial._id,
-               raw_material_name: this.props.RawMaterial.raw_material_name,
-               raw_material_code: this.props.RawMaterial.raw_material_code,
-               raw_material_type: this.props.RawMaterial.raw_material_type,
-               raw_material_measuring_unit: this.props.RawMaterial
-                  .raw_material_measuring_unit,
-               description: this.props.RawMaterial.description
-            });
-         }
       }
    }
    render() {
@@ -102,6 +118,9 @@ export default class EditRawMaterial extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -112,9 +131,9 @@ export default class EditRawMaterial extends Component {
                         variant='outlined'
                         label='Raw Material Name'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              raw_material_name: event.target.value
+                              raw_material_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -127,9 +146,9 @@ export default class EditRawMaterial extends Component {
                         variant='outlined'
                         label='Raw Material Code'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              raw_material_code: event.target.value
+                              raw_material_code: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -140,7 +159,7 @@ export default class EditRawMaterial extends Component {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Raw Material Type
@@ -150,10 +169,10 @@ export default class EditRawMaterial extends Component {
                      required
                      //variant='outlined'
                      value={this.state.raw_material_type}
-                     onChange={event => {
+                     onChange={(event) => {
                         console.log(event.target.value);
                         this.setState({
-                           raw_material_type: event.target.value
+                           raw_material_type: event.target.value,
                         });
                      }}
                   >
@@ -175,7 +194,7 @@ export default class EditRawMaterial extends Component {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Measuring Unit
@@ -184,10 +203,10 @@ export default class EditRawMaterial extends Component {
                      style={styles.box_field}
                      required
                      value={this.state.raw_material_measuring_unit}
-                     onChange={event => {
+                     onChange={(event) => {
                         console.log(event.target.value);
                         this.setState({
-                           raw_material_measuring_unit: event.target.value
+                           raw_material_measuring_unit: event.target.value,
                         });
                      }}
                   >
@@ -215,7 +234,7 @@ export default class EditRawMaterial extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                      }}
                   ></TextField>

@@ -33,6 +33,9 @@ export default class ManageCities extends Component {
 
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post(
                '/cities/city',
@@ -48,6 +51,7 @@ export default class ManageCities extends Component {
                this.EditData = { ...city.data.city };
                console.log(this.EditData[0]);
                this.setState({
+                  dataReceived: true,
                   openEdit: true,
                });
             });

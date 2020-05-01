@@ -6,7 +6,8 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import axios from 'axios';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -45,53 +46,50 @@ export default function FilterEmployee(props) {
    const [workLocations, setWorkLocations] = useState([]);
    const [shift, setShift] = useState(props.filters.shift);
    const [shifts, setShifts] = useState([]);
+   const [dataReceived, setDataReceived] = useState(false);
 
    useEffect(() => {
-      axios.get('/countries/countries').then(res => {
+      setDataReceived(false);
+      axios.get('/countries/countries').then((res) => {
          setCountries([...res.data.Countries]);
          setCountry(props.filters.country);
          axios
             .post('/states/state-country', {
-               country_id: props.filters.country
+               country_id: props.filters.country,
             })
-            .then(state => {
+            .then((state) => {
                setStates([...state.data.state]);
                setState(props.filters.state);
                axios
                   .post('/cities/city-state', {
-                     state_id: props.filters.state
+                     state_id: props.filters.state,
                   })
-                  .then(city => {
-                     setCities([...city.data.city]);
-                     setCity(props.filters.city);
+                  .then((city) => {
+                     axios.get('/designations/designations').then((res) => {
+                        setDesignations(res.data.Designations);
+                        //console.log(res.data.Designations);
+                        axios
+                           .get('/work-locations/work-locations')
+                           .then((res) => {
+                              setWorkLocations(res.data.WorkLocations);
+                              //console.log(res.data.WorkLocations);
+                              axios.get('/shifts/shifts').then((res) => {
+                                 setShifts(res.data.Shifts);
+                                 //console.log(res.data.Shifts);
+                                 setCities([...city.data.city]);
+                                 setCity(props.filters.city);
+                                 setDataReceived(true);
+                              });
+                           });
+                     });
                   });
             });
       });
    }, [props.filters.country, props.filters.state, props.filters.city]);
 
-   useEffect(() => {
-      axios.get('/designations/designations').then(res => {
-         setDesignations(res.data.Designations);
-         //console.log(res.data.Designations);
-      });
-   }, []);
-
-   useEffect(() => {
-      axios.get('/work-locations/work-locations').then(res => {
-         setWorkLocations(res.data.WorkLocations);
-         //console.log(res.data.WorkLocations);
-      });
-   }, []);
-
-   useEffect(() => {
-      axios.get('/shifts/shifts').then(res => {
-         setShifts(res.data.Shifts);
-         //console.log(res.data.Shifts);
-      });
-   }, []);
-
    return (
       <Box style={styles.box} alignContent='center'>
+         <Box width='94%'>{!dataReceived ? <LinearProgress /> : null}</Box>
          <PaperBoard>
             <Box style={styles.box_field}>
                <Box style={styles.box} marginRight='10px'>
@@ -102,7 +100,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='First Name'
                      value={firstName}
-                     onChange={event => {
+                     onChange={(event) => {
                         setFirstName(event.target.value);
                      }}
                   />
@@ -115,7 +113,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='Last Name'
                      value={lastName}
-                     onChange={event => {
+                     onChange={(event) => {
                         setLastName(event.target.value);
                      }}
                   />
@@ -127,7 +125,7 @@ export default function FilterEmployee(props) {
                      id='1'
                      Name='From Date of Birth'
                      value={fromDOB}
-                     setDate={date => {
+                     setDate={(date) => {
                         date = date.startOf('day');
                         setFromDOB(date);
                      }}
@@ -140,7 +138,7 @@ export default function FilterEmployee(props) {
                      Name='To Date of Birth'
                      minDate={fromDOB}
                      value={toDOB}
-                     setDate={date => {
+                     setDate={(date) => {
                         date = date.endOf('day');
                         setToDOB(date);
                      }}
@@ -156,7 +154,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='From Age'
                      value={fromAge}
-                     onChange={event => {
+                     onChange={(event) => {
                         setFromAge(event.target.value);
                      }}
                   />
@@ -169,7 +167,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='To Age'
                      value={toAge}
-                     onChange={event => {
+                     onChange={(event) => {
                         setToAge(event.target.value);
                      }}
                   />
@@ -181,7 +179,7 @@ export default function FilterEmployee(props) {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Gender
@@ -189,7 +187,7 @@ export default function FilterEmployee(props) {
                   <Select
                      required
                      value={gender}
-                     onChange={event => {
+                     onChange={(event) => {
                         setGender(event.target.value);
                      }}
                   >
@@ -213,7 +211,7 @@ export default function FilterEmployee(props) {
                   variant='outlined'
                   label='Mobile No'
                   value={mobile}
-                  onChange={event => {
+                  onChange={(event) => {
                      setMobile(event.target.value);
                   }}
                />
@@ -226,7 +224,7 @@ export default function FilterEmployee(props) {
                   variant='outlined'
                   label='Email'
                   value={email}
-                  onChange={event => {
+                  onChange={(event) => {
                      setEmail(event.target.value);
                   }}
                />
@@ -244,7 +242,7 @@ export default function FilterEmployee(props) {
                         style={{
                            backgroundColor: 'white',
                            paddingLeft: '2px',
-                           paddingRight: '2px'
+                           paddingRight: '2px',
                         }}
                      >
                         Select Country
@@ -252,13 +250,13 @@ export default function FilterEmployee(props) {
                      <Select
                         required
                         value={country}
-                        onChange={event => {
+                        onChange={(event) => {
                            setCountry(event.target.value);
                            axios
                               .post('/states/state-country', {
-                                 country_id: event.target.value
+                                 country_id: event.target.value,
                               })
-                              .then(res => {
+                              .then((res) => {
                                  //console.log(res);
                                  setStates([...res.data.state]);
                               });
@@ -290,7 +288,7 @@ export default function FilterEmployee(props) {
                         style={{
                            backgroundColor: 'white',
                            paddingLeft: '2px',
-                           paddingRight: '2px'
+                           paddingRight: '2px',
                         }}
                      >
                         Select State
@@ -298,13 +296,13 @@ export default function FilterEmployee(props) {
                      <Select
                         required
                         value={state}
-                        onChange={event => {
+                        onChange={(event) => {
                            setState(event.target.value);
                            axios
                               .post('/cities/city-state', {
-                                 state_id: event.target.value
+                                 state_id: event.target.value,
                               })
-                              .then(res => {
+                              .then((res) => {
                                  //console.log(res);
                                  setCities([...res.data.city]);
                               });
@@ -332,7 +330,7 @@ export default function FilterEmployee(props) {
                         style={{
                            backgroundColor: 'white',
                            paddingLeft: '2px',
-                           paddingRight: '2px'
+                           paddingRight: '2px',
                         }}
                      >
                         Select City
@@ -340,7 +338,7 @@ export default function FilterEmployee(props) {
                      <Select
                         required
                         value={city}
-                        onChange={event => {
+                        onChange={(event) => {
                            setCity(event.target.value);
                         }}
                      >
@@ -363,7 +361,7 @@ export default function FilterEmployee(props) {
                   variant='outlined'
                   label='Postal Code'
                   value={postalCode}
-                  onChange={event => {
+                  onChange={(event) => {
                      setPostalCode(event.target.value);
                   }}
                />
@@ -376,7 +374,7 @@ export default function FilterEmployee(props) {
                   variant='outlined'
                   label='Employee Id'
                   value={employeeId}
-                  onChange={event => {
+                  onChange={(event) => {
                      setEmployeeId(event.target.value);
                   }}
                />
@@ -387,7 +385,7 @@ export default function FilterEmployee(props) {
                      id='3'
                      Name='From Date of Joining'
                      value={fromDateOfJoining}
-                     setDate={date => {
+                     setDate={(date) => {
                         date = date.startOf('day');
                         setFromDateOfJoining(date);
                      }}
@@ -400,7 +398,7 @@ export default function FilterEmployee(props) {
                      Name='To Date of Joining'
                      minDate={fromDateOfJoining}
                      value={toDateOfJoining}
-                     setDate={date => {
+                     setDate={(date) => {
                         date = date.endOf('day');
                         setToDateOfJoining(date);
                      }}
@@ -419,7 +417,7 @@ export default function FilterEmployee(props) {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Designation
@@ -427,7 +425,7 @@ export default function FilterEmployee(props) {
                   <Select
                      required
                      value={designation}
-                     onChange={event => {
+                     onChange={(event) => {
                         setDesignation(event.target.value);
                      }}
                   >
@@ -454,7 +452,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='From Salary'
                      value={fromSalary}
-                     onChange={event => {
+                     onChange={(event) => {
                         setFromSalary(event.target.value);
                      }}
                   />
@@ -467,7 +465,7 @@ export default function FilterEmployee(props) {
                      variant='outlined'
                      label='To Salary'
                      value={toSalary}
-                     onChange={event => {
+                     onChange={(event) => {
                         setToSalary(event.target.value);
                      }}
                   />
@@ -485,7 +483,7 @@ export default function FilterEmployee(props) {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Work Location
@@ -493,7 +491,7 @@ export default function FilterEmployee(props) {
                   <Select
                      required
                      value={workLocation}
-                     onChange={event => {
+                     onChange={(event) => {
                         setWorkLocation(event.target.value);
                      }}
                   >
@@ -523,7 +521,7 @@ export default function FilterEmployee(props) {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Shifts
@@ -531,7 +529,7 @@ export default function FilterEmployee(props) {
                   <Select
                      required
                      value={shift}
-                     onChange={event => {
+                     onChange={(event) => {
                         setShift(event.target.value);
                      }}
                   >
@@ -558,7 +556,7 @@ export default function FilterEmployee(props) {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
@@ -621,7 +619,7 @@ export default function FilterEmployee(props) {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
@@ -637,7 +635,7 @@ export default function FilterEmployee(props) {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
@@ -665,7 +663,7 @@ export default function FilterEmployee(props) {
                      filters.designation = designation;
                      filters.workLocation = workLocation;
                      filters.shift = shift;
-
+                     setDataReceived(false);
                      axios
                         .post('/employees/filter', {
                            firstName,
@@ -688,9 +686,10 @@ export default function FilterEmployee(props) {
                            fromSalary,
                            toSalary,
                            workLocation,
-                           shift
+                           shift,
                         })
-                        .then(res => {
+                        .then((res) => {
+                           setDataReceived(true);
                            props.setData(res);
                            props.saveFilters(filters);
                         });

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -15,35 +15,44 @@ export default class ManageShift extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Shift Name', field: 'shift_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
 
          openAdd: false,
-         openEdit: false
+         dataReceived: false,
+         openEdit: false,
       };
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/shifts/shift', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(shift => {
+            .then((shift) => {
                console.log(shift);
                this.EditData = { ...shift.data.shift[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/shifts/shifts').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/shifts/shifts').then((res) => {
             console.log(res.data);
             for (let i = 0; i < res.data.Shifts.length; i++) {
                res.data.Shifts[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.Shifts]
+               data: [...res.data.Shifts],
+               dataReceived: true,
             });
          });
       };
@@ -70,19 +79,21 @@ export default class ManageShift extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add Shift
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -92,8 +103,8 @@ export default class ManageShift extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -101,25 +112,25 @@ export default class ManageShift extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/shifts/delete-shift', {
-                           shift_name: oldData.shift_name
+                           shift_name: oldData.shift_name,
                         })
-                        .then(Shift => {
+                        .then((Shift) => {
                            console.log(Shift);
                            if (Shift) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -130,7 +141,7 @@ export default class ManageShift extends Component {
                   <AddShift
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -143,7 +154,7 @@ export default class ManageShift extends Component {
                      shift={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

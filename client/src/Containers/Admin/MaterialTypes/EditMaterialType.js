@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -18,39 +18,47 @@ export default class EditMaterialType extends Component {
          success: false,
          fieldError: {
             material_type_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
+         dataReceived: false,
       };
       this.onEditHandler = () => {
          this.setState({});
          if (this.state.material_type_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.material_type_name.status = true;
                prevState.fieldError.material_type_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/material-types/edit-material-type', {
                   _id: this.state._id,
                   material_type_name: this.state.material_type_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   console.log(res);
                   if (res.data.errors) {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
                            errors: [...res.data.errors],
-                           success: false
+                           success: false,
+                           dataReceived: true,
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
@@ -61,7 +69,8 @@ export default class EditMaterialType extends Component {
             this.setState({
                material_type_name: this.props.MaterialType.material_type_name,
                description: this.props.MaterialType.description,
-               _id: this.props.MaterialType._id
+               _id: this.props.MaterialType._id,
+               dataReceived: true,
             });
          }
       }
@@ -85,6 +94,9 @@ export default class EditMaterialType extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -96,12 +108,12 @@ export default class EditMaterialType extends Component {
                      variant='outlined'
                      label='Material Type Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           material_type_name: event.target.value
+                           material_type_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.material_type_name.status = status;
                            prevState.fieldError.material_type_name.msg = msg;
                            prevState.isValid = isValid;
@@ -121,10 +133,10 @@ export default class EditMaterialType extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

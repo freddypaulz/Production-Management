@@ -6,7 +6,8 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -50,9 +51,13 @@ export default class AddEmployee extends Component {
          cities: [],
          designations: [],
          work_locations: [],
-         shifts: []
+         shifts: [],
+         dataReceived: false,
       };
       this.onAddHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/employees/add-employee', {
                employee_first_name: this.state.employee_first_name,
@@ -80,42 +85,50 @@ export default class AddEmployee extends Component {
                employee_bank_account_no: this.state.employee_bank_account_no,
                employee_bank_name: this.state.employee_bank_name,
                employee_bank_branch: this.state.employee_bank_branch,
-               employee_bank_ifsc: this.state.employee_bank_ifsc
+               employee_bank_ifsc: this.state.employee_bank_ifsc,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
-                     errors: [...res.data.errors]
+                     errors: [...res.data.errors],
+                     dataReceived: true,
                   });
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Employees')) {
-         axios.get('/countries/countries').then(res => {
-            this.setState({
-               countries: [...res.data.Countries]
-            });
+         this.setState({
+            dataReceived: false,
          });
-         axios.get('/designations/designations').then(res => {
+         axios.get('/countries/countries').then((res) => {
             this.setState({
-               designations: [...res.data.Designations]
+               countries: [...res.data.Countries],
             });
-         });
-         axios.get('/work-locations/work-locations').then(res => {
-            this.setState({
-               work_locations: [...res.data.WorkLocations]
-            });
-         });
-         axios.get('/shifts/shifts').then(res => {
-            this.setState({
-               shifts: [...res.data.Shifts]
+            axios.get('/designations/designations').then((res) => {
+               this.setState({
+                  designations: [...res.data.Designations],
+               });
+               axios.get('/work-locations/work-locations').then((res) => {
+                  this.setState({
+                     work_locations: [...res.data.WorkLocations],
+                  });
+                  axios.get('/shifts/shifts').then((res) => {
+                     this.setState({
+                        shifts: [...res.data.Shifts],
+                        dataReceived: true,
+                     });
+                  });
+               });
             });
          });
       }
@@ -139,6 +152,9 @@ export default class AddEmployee extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box
                   fontWeight='bold'
@@ -159,9 +175,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='First Name'
                         value={this.state.employee_first_name}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_first_name: event.target.value
+                              employee_first_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -173,9 +189,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Middle Name'
                         value={this.state.employee_middle_name}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_middle_name: event.target.value
+                              employee_middle_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -187,9 +203,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Last Name'
                         value={this.state.employee_last_name}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_last_name: event.target.value
+                              employee_last_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -204,9 +220,9 @@ export default class AddEmployee extends Component {
                      minDate={new Date() - 1000 * 60 * 60 * 24 * 365.25 * 60}
                      maxDate={new Date() - 1000 * 60 * 60 * 24 * 365.25 * 18}
                      value={this.state.employee_dob}
-                     setDate={date => {
+                     setDate={(date) => {
                         this.setState({});
-                        this.setState(preState => {
+                        this.setState((preState) => {
                            preState.employee_dob = date;
                            preState.employee_age = Math.floor(
                               (new Date() - preState.employee_dob) /
@@ -237,7 +253,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Gender
@@ -245,10 +261,10 @@ export default class AddEmployee extends Component {
                         <Select
                            required
                            value={this.state.employee_gender}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_gender: event.target.value
+                                 employee_gender: event.target.value,
                               });
                            }}
                         >
@@ -273,9 +289,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Mobile No'
                         value={this.state.employee_mobile_no}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_mobile_no: event.target.value
+                              employee_mobile_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -288,9 +304,9 @@ export default class AddEmployee extends Component {
                         label='Email'
                         type='email'
                         value={this.state.employee_email}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_email: event.target.value
+                              employee_email: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -303,9 +319,10 @@ export default class AddEmployee extends Component {
                         label='Father / Spouse Name'
                         type='email'
                         value={this.state.employee_father_or_spouse_name}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_father_or_spouse_name: event.target.value
+                              employee_father_or_spouse_name:
+                                 event.target.value,
                            });
                         }}
                      ></TextField>
@@ -320,9 +337,9 @@ export default class AddEmployee extends Component {
                      variant='outlined'
                      label='Address'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           employee_address: event.target.value
+                           employee_address: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -340,7 +357,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Country
@@ -349,20 +366,25 @@ export default class AddEmployee extends Component {
                            required
                            //variant='outlined'
                            value={this.state.employee_country}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
                                  employee_country: event.target.value,
-                                 cities: []
+                                 cities: [],
+                                 states: [],
+                                 employee_state: '',
+                                 employee_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value
+                                    country_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       states: [...res.data.state]
+                                       states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -392,7 +414,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select State
@@ -401,19 +423,23 @@ export default class AddEmployee extends Component {
                            required
                            //variant='outlined'
                            value={this.state.employee_state}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_state: event.target.value
+                                 employee_state: event.target.value,
+                                 employee_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value
+                                    state_id: event.target.value,
                                  })
-                                 .then(res => {
+                                 .then((res) => {
                                     console.log(res);
                                     this.setState({
-                                       cities: [...res.data.city]
+                                       cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
@@ -443,7 +469,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select City
@@ -452,10 +478,10 @@ export default class AddEmployee extends Component {
                            required
                            //variant='outlined'
                            value={this.state.employee_city}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_city: event.target.value
+                                 employee_city: event.target.value,
                               });
                            }}
                         >
@@ -483,9 +509,9 @@ export default class AddEmployee extends Component {
                      variant='outlined'
                      label='Postal Code'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           employee_postal_code: event.target.value
+                           employee_postal_code: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -508,9 +534,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Employee ID'
                         value={this.state.employee_id}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_id: event.target.value
+                              employee_id: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -522,9 +548,9 @@ export default class AddEmployee extends Component {
                      value={this.state.employee_date_of_joinig}
                      minDate='01/01/1990'
                      maxDate={new Date()}
-                     setDate={date => {
+                     setDate={(date) => {
                         this.setState({
-                           employee_date_of_joinig: date
+                           employee_date_of_joinig: date,
                         });
                      }}
                   />
@@ -541,7 +567,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Designation
@@ -549,10 +575,10 @@ export default class AddEmployee extends Component {
                         <Select
                            required
                            value={this.state.employee_designation}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_designation: event.target.value
+                                 employee_designation: event.target.value,
                               });
                            }}
                         >
@@ -579,9 +605,9 @@ export default class AddEmployee extends Component {
                      label='Salary'
                      type='number'
                      value={this.state.employee_salary}
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           employee_salary: event.target.value
+                           employee_salary: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -598,7 +624,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Work Location
@@ -606,10 +632,10 @@ export default class AddEmployee extends Component {
                         <Select
                            required
                            value={this.state.employee_work_location}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_work_location: event.target.value
+                                 employee_work_location: event.target.value,
                               });
                            }}
                         >
@@ -640,7 +666,7 @@ export default class AddEmployee extends Component {
                            style={{
                               backgroundColor: 'white',
                               paddingLeft: '2px',
-                              paddingRight: '2px'
+                              paddingRight: '2px',
                            }}
                         >
                            Select Shift
@@ -648,10 +674,10 @@ export default class AddEmployee extends Component {
                         <Select
                            required
                            value={this.state.employee_shift}
-                           onChange={event => {
+                           onChange={(event) => {
                               console.log(event.target.value);
                               this.setState({
-                                 employee_shift: event.target.value
+                                 employee_shift: event.target.value,
                               });
                            }}
                         >
@@ -678,9 +704,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Bank Account Number'
                         value={this.state.employee_bank_account_no}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_bank_account_no: event.target.value
+                              employee_bank_account_no: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -692,9 +718,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Bank Name'
                         value={this.state.employee_bank_name}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_bank_name: event.target.value
+                              employee_bank_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -708,9 +734,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='Branch'
                         value={this.state.employee_bank_branch}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_bank_branch: event.target.value
+                              employee_bank_branch: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -722,9 +748,9 @@ export default class AddEmployee extends Component {
                         variant='outlined'
                         label='IFSC'
                         value={this.state.employee_bank_ifsc}
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              employee_bank_ifsc: event.target.value
+                              employee_bank_ifsc: event.target.value,
                            });
                         }}
                      ></TextField>

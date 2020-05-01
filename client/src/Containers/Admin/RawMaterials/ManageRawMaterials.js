@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddRawMaterial from './AddRawMaterial';
@@ -18,39 +18,56 @@ export default class ManageRawMaterials extends Component {
             { title: 'Code', field: 'raw_material_code' },
             { title: 'Type', field: 'raw_material_type' },
             { title: 'Measuring Unit', field: 'raw_material_measuring_unit' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
-         openEdit: false
+         openEdit: false,
+         progress: 0,
+         progressLength: 0,
+         completed: 0,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/raw-materials/raw-material', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                this.EditData = { ...res.data.RawMaterial };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
+                  dataReceived: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            progress: 0,
+            progressLength: 0,
+            completed: 0,
+            dataReceived: false,
+         });
          axios
             .get('/raw-materials/raw-materials')
-            .then(res => {
+            .then((res) => {
                //console.log(res.data.States[0].country_id);
+               this.setState({
+                  progressLength: res.data.RawMaterials.length,
+               });
                for (let i = 0; i < res.data.RawMaterials.length; i++) {
                   res.data.RawMaterials[i].id = i + 1;
                   axios
                      .post('/material-types/material-type', {
-                        _id: res.data.RawMaterials[i].raw_material_type
+                        _id: res.data.RawMaterials[i].raw_material_type,
                      })
-                     .then(MaterialType => {
+                     .then((MaterialType) => {
                         console.log(MaterialType);
                         if (MaterialType.data.MaterialType[0]) {
                            console.log(
@@ -60,48 +77,57 @@ export default class ManageRawMaterials extends Component {
                            res.data.RawMaterials[i].raw_material_type =
                               MaterialType.data.MaterialType[0].material_type_name;
                            this.setState({
-                              data: [...res.data.RawMaterials]
+                              data: [...res.data.RawMaterials],
                            });
                         } else {
                            res.data.RawMaterials[i].material_type =
                               'problem loading Material Type';
                            this.setState({
-                              data: [...res.data.RawMaterials]
+                              data: [...res.data.RawMaterials],
                            });
                         }
-                     });
-                  axios
-                     .post('/measuring-units/measuring-unit', {
-                        _id:
-                           res.data.RawMaterials[i].raw_material_measuring_unit
-                     })
-                     .then(MeasuringUnit => {
-                        console.log(MeasuringUnit);
-                        if (MeasuringUnit.data.MeasuringUnit[0]) {
-                           console.log(
-                              MeasuringUnit.data.MeasuringUnit[0]
-                                 .measuring_unit_name
-                           );
-                           res.data.RawMaterials[
-                              i
-                           ].raw_material_measuring_unit =
-                              MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
-                           this.setState({
-                              data: [...res.data.RawMaterials]
+                        axios
+                           .post('/measuring-units/measuring-unit', {
+                              _id:
+                                 res.data.RawMaterials[i]
+                                    .raw_material_measuring_unit,
+                           })
+                           .then((MeasuringUnit) => {
+                              this.setState((prevState) => {
+                                 prevState.dataReceived = true;
+                                 prevState.progress++;
+                                 prevState.completed =
+                                    (prevState.progress /
+                                       prevState.progressLength) *
+                                    100;
+                              });
+                              console.log(MeasuringUnit);
+                              if (MeasuringUnit.data.MeasuringUnit[0]) {
+                                 console.log(
+                                    MeasuringUnit.data.MeasuringUnit[0]
+                                       .measuring_unit_name
+                                 );
+                                 res.data.RawMaterials[
+                                    i
+                                 ].raw_material_measuring_unit =
+                                    MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
+                                 this.setState({
+                                    data: [...res.data.RawMaterials],
+                                 });
+                              } else {
+                                 res.data.RawMaterials[
+                                    i
+                                 ].raw_material_measuring_unit =
+                                    'problem loading measuring unit';
+                                 this.setState({
+                                    data: [...res.data.RawMaterial],
+                                 });
+                              }
                            });
-                        } else {
-                           res.data.RawMaterials[
-                              i
-                           ].raw_material_measuring_unit =
-                              'problem loading measuring unit';
-                           this.setState({
-                              data: [...res.data.RawMaterial]
-                           });
-                        }
                      });
                }
             })
-            .catch(err => {
+            .catch((err) => {
                console.log('Error');
             });
       };
@@ -129,19 +155,28 @@ export default class ManageRawMaterials extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? (
+                  <LinearProgress />
+               ) : this.state.completed !== 100 ? (
+                  <LinearProgress
+                     variant='determinate'
+                     value={this.state.completed}
+                  />
+               ) : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -151,8 +186,8 @@ export default class ManageRawMaterials extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -160,25 +195,25 @@ export default class ManageRawMaterials extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/raw-materials/delete-raw-material', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -190,7 +225,7 @@ export default class ManageRawMaterials extends Component {
                   <AddRawMaterial
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -203,7 +238,7 @@ export default class ManageRawMaterials extends Component {
                      RawMaterial={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

@@ -7,6 +7,7 @@ import {
    InputLabel,
    Select,
    MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -32,6 +33,7 @@ export default class AddUser extends Component {
             description: { status: false, msg: '' },
          },
          isValid: false,
+         dataReceived: false,
       };
       this.onAddHandler = () => {
          if (this.state.country_id === '') {
@@ -43,6 +45,9 @@ export default class AddUser extends Component {
                errors: ['Select Country'],
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/states/add-state', {
                   state_name: this.state.state_name,
@@ -56,8 +61,12 @@ export default class AddUser extends Component {
                      this.setState({
                         errors: [...res.data.errors],
                         success: false,
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                })
@@ -67,9 +76,13 @@ export default class AddUser extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage States')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios.get('/countries/countries').then((res) => {
             this.setState({
                Countries: [...res.data.Countries],
+               dataReceived: true,
             });
          });
       }
@@ -93,6 +106,9 @@ export default class AddUser extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

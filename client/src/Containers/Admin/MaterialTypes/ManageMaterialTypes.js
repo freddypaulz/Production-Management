@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -15,34 +15,43 @@ export default class ManageMaterialTypes extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Material Type Name', field: 'material_type_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
-         openUploadCSV: false
+         openUploadCSV: false,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/material-types/material-type', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                this.EditData = { ...res.data.MaterialType[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
+                  dataReceived: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/material-types/material-types').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/material-types/material-types').then((res) => {
             console.log(res.data.MaterialTypes);
             for (let i = 0; i < res.data.MaterialTypes.length; i++) {
                res.data.MaterialTypes[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.MaterialTypes]
+               data: [...res.data.MaterialTypes],
+               dataReceived: true,
             });
          });
       };
@@ -70,19 +79,21 @@ export default class ManageMaterialTypes extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -92,8 +103,8 @@ export default class ManageMaterialTypes extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -101,25 +112,25 @@ export default class ManageMaterialTypes extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/material-types/delete-material-type', {
-                           material_type_name: oldData.material_type_name
+                           material_type_name: oldData.material_type_name,
                         })
-                        .then(MaterialType => {
+                        .then((MaterialType) => {
                            console.log(MaterialType);
                            if (MaterialType) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -130,7 +141,7 @@ export default class ManageMaterialTypes extends Component {
                   <AddMaterialType
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -143,7 +154,7 @@ export default class ManageMaterialTypes extends Component {
                      MaterialType={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

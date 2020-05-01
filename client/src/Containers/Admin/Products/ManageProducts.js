@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddProduct from './AddProduct';
@@ -19,39 +19,63 @@ export default class ManageProducts extends Component {
             { title: 'Product price', field: 'product_price' },
             { title: 'Measuring Unit', field: 'product_measuring_unit' },
             // { title: 'Registration Date', field: 'product_registration_date' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
-         openEdit: false
+         progress: 0,
+         progressLength: 0,
+         completed: 0,
+         dataReceived: false,
+         openEdit: false,
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/products/product', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                this.EditData = { ...res.data.Product };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            progress: 0,
+            progressLength: 0,
+            completed: 0,
+            dataReceived: false,
+         });
          axios
             .get('/products/products')
-            .then(res => {
+            .then((res) => {
+               this.setState({
+                  progressLength: res.data.Products.length,
+               });
                //console.log(res.data.States[0].country_id);
                for (let i = 0; i < res.data.Products.length; i++) {
                   res.data.Products[i].id = i + 1;
                   axios
                      .post('/measuring-units/measuring-unit', {
-                        _id: res.data.Products[i].product_measuring_unit
+                        _id: res.data.Products[i].product_measuring_unit,
                      })
-                     .then(MeasuringUnit => {
+                     .then((MeasuringUnit) => {
+                        this.setState((prevState) => {
+                           prevState.dataReceived = true;
+                           prevState.progress++;
+                           prevState.completed =
+                              (prevState.progress / prevState.progressLength) *
+                              100;
+                        });
                         console.log(MeasuringUnit);
                         if (MeasuringUnit.data.MeasuringUnit[0]) {
                            console.log(
@@ -61,19 +85,19 @@ export default class ManageProducts extends Component {
                            res.data.Products[i].product_measuring_unit =
                               MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                            this.setState({
-                              data: [...res.data.Products]
+                              data: [...res.data.Products],
                            });
                         } else {
                            res.data.Products[i].product_measuring_unit =
                               'problem loading Measuring Unit';
                            this.setState({
-                              data: [...res.data.Products]
+                              data: [...res.data.Products],
                            });
                         }
                      });
                }
             })
-            .catch(err => {
+            .catch((err) => {
                console.log('Error');
             });
       };
@@ -101,19 +125,28 @@ export default class ManageProducts extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? (
+                  <LinearProgress />
+               ) : this.state.completed !== 100 ? (
+                  <LinearProgress
+                     variant='determinate'
+                     value={this.state.completed}
+                  />
+               ) : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -123,8 +156,8 @@ export default class ManageProducts extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -132,25 +165,25 @@ export default class ManageProducts extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/products/delete-product', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -162,7 +195,7 @@ export default class ManageProducts extends Component {
                   <AddProduct
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -175,7 +208,7 @@ export default class ManageProducts extends Component {
                      Product={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

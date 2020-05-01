@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddEmployee from './AddEmployee';
@@ -22,8 +22,8 @@ export default class ManageEmployees extends Component {
             { title: 'Designation', field: 'employee_designation_name' },
             {
                title: 'Work Location',
-               field: 'employee_work_location_name'
-            }
+               field: 'employee_work_location_name',
+            },
          ],
          data: [],
          filters: {
@@ -47,27 +47,32 @@ export default class ManageEmployees extends Component {
             fromSalary: '',
             toSalary: '',
             workLocation: '',
-            shift: ''
+            shift: '',
          },
          openAdd: false,
          openEdit: false,
          openFilter: false,
          shifts: [],
          workLocations: [],
-         designations: []
+         dataReceived: false,
+         designations: [],
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/employees/employee', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                this.EditData = { ...res.data.Employee };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
+                  dataReceived: true,
                });
             });
       };
@@ -75,13 +80,16 @@ export default class ManageEmployees extends Component {
       this.dataFetch = () => {
          axios
             .get('/employees/employees')
-            .then(res => {
+            .then((res) => {
                this.handleClose(res);
+               this.setState({
+                  dataReceived: true,
+               });
             })
-            .catch(err => {});
+            .catch((err) => {});
       };
 
-      this.handleClose = res => {
+      this.handleClose = (res) => {
          for (let i = 0; i < res.data.Employees.length; i++) {
             res.data.Employees[i].id = i + 1;
 
@@ -102,6 +110,7 @@ export default class ManageEmployees extends Component {
                         ' Problem Loading Data';
                   }
                }
+
                return null;
             });
 
@@ -143,7 +152,7 @@ export default class ManageEmployees extends Component {
             });
          }
          this.setState({
-            data: [...res.data.Employees]
+            data: [...res.data.Employees],
          });
       };
    }
@@ -154,17 +163,20 @@ export default class ManageEmployees extends Component {
             this.state.designations.length === 0 &&
             this.state.workLocations.length === 0
          ) {
-            axios.get('/shifts/shifts').then(res => {
+            this.setState({
+               dataReceived: false,
+            });
+            axios.get('/shifts/shifts').then((res) => {
                this.setState({
-                  shifts: res.data.Shifts
+                  shifts: res.data.Shifts,
                });
-               axios.get('/work-locations/work-locations').then(res => {
+               axios.get('/work-locations/work-locations').then((res) => {
                   this.setState({
-                     workLocations: res.data.WorkLocations
+                     workLocations: res.data.WorkLocations,
                   });
-                  axios.get('/designations/designations').then(res => {
+                  axios.get('/designations/designations').then((res) => {
                      this.setState({
-                        designations: res.data.Designations
+                        designations: res.data.Designations,
                      });
                      this.dataFetch();
                   });
@@ -191,12 +203,12 @@ export default class ManageEmployees extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
@@ -207,19 +219,21 @@ export default class ManageEmployees extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openFilter: true
+                        openFilter: true,
                      });
                   }}
                >
                   Filters
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -229,8 +243,8 @@ export default class ManageEmployees extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -238,25 +252,25 @@ export default class ManageEmployees extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/employees/delete-employee', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -268,7 +282,7 @@ export default class ManageEmployees extends Component {
                   <AddEmployee
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.dataFetch();
                      }}
@@ -281,9 +295,9 @@ export default class ManageEmployees extends Component {
                      Employee={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
-                        // this.dataFetch();
+                        this.dataFetch();
                      }}
                   />
                </DialogContent>
@@ -292,22 +306,21 @@ export default class ManageEmployees extends Component {
                <DialogContent style={{ padding: '20px' }}>
                   <FilterEmployee
                      filters={this.state.filters}
-                     setData={res => {
-                        //console.log('Hello', res);
+                     setData={(res) => {
                         this.handleClose(res);
                      }}
                      cancel={() => {
                         this.setState({
-                           openFilter: false
+                           openFilter: false,
                         });
                      }}
-                     saveFilters={filters => {
-                        this.setState(prevState => {
+                     saveFilters={(filters) => {
+                        this.setState((prevState) => {
                            prevState.filters = filters;
                         });
 
                         this.setState({
-                           openFilter: false
+                           openFilter: false,
                         });
                      }}
                   />

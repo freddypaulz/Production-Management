@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddState from './AddState';
@@ -17,59 +17,83 @@ export default class ManageStates extends Component {
             { title: 'ID', field: 'id' },
             { title: 'State Name', field: 'state_name' },
             { title: 'Country Name', field: 'country_id' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
          openUploadCSV: false,
-         samp: 'hello'
+         samp: 'hello',
+         progress: 0,
+         progressLength: 0,
+         completed: 0,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
          console.log(rowData._id);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/states/state', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(state => {
+            .then((state) => {
                console.log(state);
                this.EditData = { ...state.data.state };
                console.log(this.EditData[0]);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            progress: 0,
+            progressLength: 0,
+            completed: 0,
+            dataReceived: false,
+         });
          axios
             .get('/states/states')
-            .then(res => {
+            .then((res) => {
+               this.setState({
+                  progressLength: res.data.States.length,
+               });
                //console.log(res.data.States[0].country_id);
                for (let i = 0; i < res.data.States.length; i++) {
                   res.data.States[i].id = i + 1;
                   axios
                      .post('/countries/country', {
-                        _id: res.data.States[i].country_id
+                        _id: res.data.States[i].country_id,
                      })
-                     .then(country => {
+                     .then((country) => {
+                        this.setState((prevState) => {
+                           prevState.dataReceived = true;
+                           prevState.progress++;
+                           prevState.completed =
+                              (prevState.progress / prevState.progressLength) *
+                              100;
+                        });
                         if (country.data.Country[0]) {
                            console.log(country.data.Country[0].country_name);
                            res.data.States[i].country_id =
                               country.data.Country[0].country_name;
                            this.setState({
-                              data: [...res.data.States]
+                              data: [...res.data.States],
                            });
                         } else {
                            res.data.States[i].country_id =
                               'problem loading country';
                            this.setState({
-                              data: [...res.data.States]
+                              data: [...res.data.States],
                            });
                         }
                      });
                }
             })
-            .catch(err => {
+            .catch((err) => {
                console.log('Error');
             });
       };
@@ -97,12 +121,12 @@ export default class ManageStates extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
@@ -113,19 +137,28 @@ export default class ManageStates extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openUploadCSV: true
+                        openUploadCSV: true,
                      });
                   }}
                >
                   Upload CSV
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? (
+                  <LinearProgress />
+               ) : this.state.completed !== 100 ? (
+                  <LinearProgress
+                     variant='determinate'
+                     value={this.state.completed}
+                  />
+               ) : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -135,8 +168,8 @@ export default class ManageStates extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -144,25 +177,25 @@ export default class ManageStates extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/states/delete-state', {
-                           state_name: oldData.state_name
+                           state_name: oldData.state_name,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -174,7 +207,7 @@ export default class ManageStates extends Component {
                   <AddState
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -187,7 +220,7 @@ export default class ManageStates extends Component {
                      state={this.EditData[0]}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}
@@ -199,7 +232,7 @@ export default class ManageStates extends Component {
                   <StateCSVUpload
                      cancel={() => {
                         this.setState({
-                           openUploadCSV: false
+                           openUploadCSV: false,
                         });
                         this.handleClose();
                      }}

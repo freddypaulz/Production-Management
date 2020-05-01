@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -18,49 +18,61 @@ export default class EditShift extends Component {
          success: false,
          fieldError: {
             shift_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
+         dataReceived: false,
       };
       this.onEditHandler = () => {
          this.setState({});
          if (this.state.shift_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.shift_name.status = true;
                prevState.fieldError.shift_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/shifts/edit-shift', {
                   _id: this.state._id,
                   shift_name: this.state.shift_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   console.log(res);
                   if (res.data.errors) {
                      if (res.data.errors.length > 0) {
                         console.log(res.data.errors);
                         this.setState({
                            errors: [...res.data.errors],
-                           success: false
+                           success: false,
+                           dataReceived: true,
                         });
                      } else {
+                        this.setState({
+                           dataReceived: true,
+                        });
                         this.props.cancel();
                      }
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Shifts')) {
+         this.setState({
+            dataReceived: false,
+         });
          if (this.state.shift_name === '') {
             this.setState({
                shift_name: this.props.shift.shift_name,
                description: this.props.shift.description,
-               _id: this.props.shift._id
+               _id: this.props.shift._id,
+               dataReceived: true,
             });
          }
       }
@@ -84,6 +96,9 @@ export default class EditShift extends Component {
                   Registration Successful
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -95,10 +110,10 @@ export default class EditShift extends Component {
                      variant='outlined'
                      label='Shift Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ shift_name: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.shift_name.status = status;
                            prevState.fieldError.shift_name.msg = msg;
                            prevState.isValid = isValid;
@@ -119,10 +134,10 @@ export default class EditShift extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

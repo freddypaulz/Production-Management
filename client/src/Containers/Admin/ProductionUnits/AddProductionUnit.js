@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
@@ -16,40 +16,51 @@ export default class AddProductionUnit extends Component {
          errors: [],
          fieldError: {
             production_unit_name: { status: false, msg: '' },
-            description: { status: false, msg: '' }
+            description: { status: false, msg: '' },
          },
-         isValid: false
+         isValid: false,
+         dataReceived: false,
       };
       this.onAddHandler = () => {
          this.setState({});
          if (this.state.production_unit_name === '') {
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.fieldError.production_unit_name.status = true;
                prevState.fieldError.production_unit_name.msg = 'Name required';
             });
          } else {
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/production-units/add-production-unit', {
                   production_unit_name: this.state.production_unit_name,
-                  description: this.state.description
+                  description: this.state.description,
                })
-               .then(res => {
+               .then((res) => {
                   console.log(res);
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
-                        errors: [...res.data.errors]
+                        errors: [...res.data.errors],
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          }
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Production Units')) {
+         this.setState({
+            dataReceived: true,
+         });
       }
    }
    render() {
@@ -71,6 +82,9 @@ export default class AddProductionUnit extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
@@ -82,12 +96,12 @@ export default class AddProductionUnit extends Component {
                      variant='outlined'
                      label='Production Unit Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           production_unit_name: event.target.value
+                           production_unit_name: event.target.value,
                         });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.production_unit_name.status = status;
                            prevState.fieldError.production_unit_name.msg = msg;
                            prevState.isValid = isValid;
@@ -107,10 +121,10 @@ export default class AddProductionUnit extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                         const { status, msg, isValid } = errorCheck(event);
-                        this.setState(prevState => {
+                        this.setState((prevState) => {
                            prevState.fieldError.description.status = status;
                            prevState.fieldError.description.msg = msg;
                            prevState.isValid = isValid;

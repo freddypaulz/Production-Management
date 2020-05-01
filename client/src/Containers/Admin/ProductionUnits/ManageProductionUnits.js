@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -14,33 +14,42 @@ export default class ManageProductionUnit extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Production Unit Name', field: 'production_unit_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
-         openEdit: false
+         dataReceived: false,
+         openEdit: false,
       };
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/production-units/production-unit', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(ProductionUnit => {
+            .then((ProductionUnit) => {
                this.EditData = { ...ProductionUnit.data.ProductionUnit[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
+                  dataReceived: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/production-units/production-units').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/production-units/production-units').then((res) => {
             console.log(res.data.ProductionUnits);
             for (let i = 0; i < res.data.ProductionUnits.length; i++) {
                res.data.ProductionUnits[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.ProductionUnits]
+               data: [...res.data.ProductionUnits],
+               dataReceived: true,
             });
          });
       };
@@ -68,19 +77,21 @@ export default class ManageProductionUnit extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -90,8 +101,8 @@ export default class ManageProductionUnit extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -99,25 +110,25 @@ export default class ManageProductionUnit extends Component {
                      tooltip: 'Edit',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/production-units/delete-production-unit', {
-                           production_unit_name: oldData.production_unit_name
+                           production_unit_name: oldData.production_unit_name,
                         })
-                        .then(ProductionUnit => {
+                        .then((ProductionUnit) => {
                            console.log(ProductionUnit);
                            if (ProductionUnit) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -128,7 +139,7 @@ export default class ManageProductionUnit extends Component {
                   <AddProductionUnit
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -142,7 +153,7 @@ export default class ManageProductionUnit extends Component {
                      props={this.props}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

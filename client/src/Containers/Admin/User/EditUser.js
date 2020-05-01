@@ -6,7 +6,8 @@ import {
    Select,
    MenuItem,
    FormControl,
-   InputLabel
+   InputLabel,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -27,48 +28,57 @@ export default class EditUser extends Component {
          success: false,
          role: '',
          Roles: [],
-         Employees: []
+         Employees: [],
+         dataReceived: false,
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/users/edit-user', {
                name: this.state.user_name,
                password: this.state.password,
                password2: this.state.password2,
-               role: this.state.role
+               role: this.state.role,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
-                        success: false
+                        success: false,
+                        dataReceived: true,
                      });
                   }
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Users')) {
-         axios.get('/roles/roles').then(res => {
-            //if (this.state.user_name === '' || this.state.role === '') {
-
-            //}
-            this.setState({ Roles: res.data.Roles });
+         this.setState({
+            dataReceived: false,
          });
-         axios.get('/employees/employees').then(res => {
-            console.log(res.data.Employees);
-            this.setState({ Employees: [...res.data.Employees] });
-            this.setState({
-               employee_id: this.props.user.employee_id,
-               user_name: this.props.user.name,
-               role: this.props.user.role
+         axios.get('/roles/roles').then((res) => {
+            this.setState({ Roles: res.data.Roles });
+            axios.get('/employees/employees').then((res) => {
+               console.log(res.data.Employees);
+               this.setState({ Employees: [...res.data.Employees] });
+               this.setState({
+                  employee_id: this.props.user.employee_id,
+                  user_name: this.props.user.name,
+                  role: this.props.user.role,
+                  dataReceived: true,
+               });
             });
          });
       }
@@ -94,6 +104,9 @@ export default class EditUser extends Component {
             ) : (
                <Box></Box>
             )}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <FormControl disabled required variant='outlined' fullWidth>
@@ -101,7 +114,7 @@ export default class EditUser extends Component {
                         style={{
                            backgroundColor: 'white',
                            paddingLeft: '2px',
-                           paddingRight: '2px'
+                           paddingRight: '2px',
                         }}
                      >
                         Select Employee
@@ -110,10 +123,10 @@ export default class EditUser extends Component {
                         required
                         //variant='outlined'
                         value={this.state.employee_id}
-                        onChange={event => {
+                        onChange={(event) => {
                            console.log(event.target.value);
                            this.setState({
-                              employee_id: event.target.value
+                              employee_id: event.target.value,
                            });
                         }}
                      >
@@ -140,7 +153,7 @@ export default class EditUser extends Component {
                      variant='outlined'
                      label='User Name'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ user_name: event.target.value });
                      }}
                   ></TextField>
@@ -154,7 +167,7 @@ export default class EditUser extends Component {
                         variant='outlined'
                         label='Password'
                         type='password'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({ password: event.target.value });
                         }}
                      />
@@ -168,7 +181,7 @@ export default class EditUser extends Component {
                         variant='outlined'
                         label='Confirm Password'
                         type='password'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({ password2: event.target.value });
                         }}
                      ></TextField>
@@ -181,7 +194,7 @@ export default class EditUser extends Component {
                         style={{
                            backgroundColor: 'white',
                            paddingLeft: '2px',
-                           paddingRight: '2px'
+                           paddingRight: '2px',
                         }}
                      >
                         Select Role
@@ -189,10 +202,10 @@ export default class EditUser extends Component {
                      <Select
                         required
                         value={this.state.role}
-                        onChange={event => {
+                        onChange={(event) => {
                            console.log(event.target.value);
                            this.setState({
-                              role: event.target.value
+                              role: event.target.value,
                            });
                         }}
                      >

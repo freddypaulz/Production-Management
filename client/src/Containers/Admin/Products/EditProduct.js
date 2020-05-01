@@ -6,7 +6,8 @@ import {
    FormControl,
    InputLabel,
    Select,
-   MenuItem
+   MenuItem,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -27,9 +28,13 @@ export default class EditProduct extends Component {
          product_registration_date: '',
          description: '',
          errors: [],
-         measuring_units: []
+         dataReceived: false,
+         measuring_units: [],
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/products/edit-product', {
                _id: this.state._id,
@@ -38,30 +43,38 @@ export default class EditProduct extends Component {
                product_price: this.state.product_price,
                product_measuring_unit: this.state.product_measuring_unit,
                product_registration_date: this.state.product_registration_date,
-               description: this.state.description
+               description: this.state.description,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors) {
                   if (res.data.errors.length > 0) {
                      console.log(res.data.errors);
                      this.setState({
-                        errors: [...res.data.errors]
+                        dataReceived: true,
+                        errors: [...res.data.errors],
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Products')) {
-         axios.get('/measuring-units/measuring-units').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/measuring-units/measuring-units').then((res) => {
             console.log(res);
             this.setState({
-               measuring_units: [...res.data.MeasuringUnits]
+               measuring_units: [...res.data.MeasuringUnits],
+               dataReceived: true,
             });
          });
          if (this.state.product_name === '') {
@@ -74,7 +87,7 @@ export default class EditProduct extends Component {
                   .product_measuring_unit,
                product_registration_date: this.props.Product
                   .product_registration_date,
-               description: this.props.Product.description
+               description: this.props.Product.description,
             });
          }
       }
@@ -98,6 +111,9 @@ export default class EditProduct extends Component {
                     );
                  })
                : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -108,9 +124,9 @@ export default class EditProduct extends Component {
                         variant='outlined'
                         label='Product Name'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              product_name: event.target.value
+                              product_name: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -123,9 +139,9 @@ export default class EditProduct extends Component {
                         variant='outlined'
                         label='Product Code'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              product_code: event.target.value
+                              product_code: event.target.value,
                            });
                         }}
                      ></TextField>
@@ -139,9 +155,9 @@ export default class EditProduct extends Component {
                      variant='outlined'
                      label='Product Price'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({
-                           product_price: event.target.value
+                           product_price: event.target.value,
                         });
                      }}
                   ></TextField>
@@ -152,9 +168,9 @@ export default class EditProduct extends Component {
                   Req='true'
                   marginBottom={'20px'}
                   value={this.state.product_registration_date}
-                  setDate={date => {
+                  setDate={(date) => {
                      this.setState({
-                        product_registration_date: date
+                        product_registration_date: date,
                      });
                   }}
                />
@@ -163,7 +179,7 @@ export default class EditProduct extends Component {
                      style={{
                         backgroundColor: 'white',
                         paddingLeft: '2px',
-                        paddingRight: '2px'
+                        paddingRight: '2px',
                      }}
                   >
                      Select Measuring Unit
@@ -172,10 +188,10 @@ export default class EditProduct extends Component {
                      style={styles.box_field}
                      required
                      value={this.state.product_measuring_unit}
-                     onChange={event => {
+                     onChange={(event) => {
                         console.log(event.target.value);
                         this.setState({
-                           product_measuring_unit: event.target.value
+                           product_measuring_unit: event.target.value,
                         });
                      }}
                   >
@@ -203,7 +219,7 @@ export default class EditProduct extends Component {
                      variant='outlined'
                      label='Description'
                      type='text'
-                     onChange={event => {
+                     onChange={(event) => {
                         this.setState({ description: event.target.value });
                      }}
                   ></TextField>

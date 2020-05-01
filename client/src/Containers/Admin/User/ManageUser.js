@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -16,78 +16,102 @@ export default class ManageUser extends Component {
             { title: 'ID', field: 'id' },
             { title: 'Employee ID', field: 'employee_id' },
             { title: 'Name', field: 'name' },
-            { title: 'Role', field: 'role' }
+            { title: 'Role', field: 'role' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
-         msg: ''
+         msg: '',
+         progress: 0,
+         progressLength: 0,
+         completed: 0,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/users/user', {
-               name: rowData.name
+               name: rowData.name,
             })
-            .then(user => {
+            .then((user) => {
                this.EditData = { ...user.data.Users[0] };
                console.log('Edit Data', this.EditData);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/users/users').then(res => {
+         this.setState({
+            progress: 0,
+            progressLength: 0,
+            completed: 0,
+            dataReceived: false,
+         });
+         axios.get('/users/users').then((res) => {
             console.log(res.data.Users);
-
+            this.setState({
+               progressLength: res.data.Users.length,
+            });
             // res.data.Users = res.data.Users.splice(1, res.data.Users.length);
             console.log(res.data.Users);
             for (let i = 0; i < res.data.Users.length; i++) {
                res.data.Users[i].id = i + 1;
                axios
                   .post('/roles/role', {
-                     _id: res.data.Users[i].role
+                     _id: res.data.Users[i].role,
                   })
-                  .then(role => {
+                  .then((role) => {
                      if (role.data.Role[0]) {
                         console.log('role: ', role.data.Role[0].role_name);
                         res.data.Users[i].role = role.data.Role[0].role_name;
                         this.setState({
-                           data: [...res.data.Users]
+                           data: [...res.data.Users],
                         });
                      } else {
                         res.data.Users[i].role = 'problem loading role';
                         this.setState({
-                           data: [...res.data.Users]
+                           data: [...res.data.Users],
                         });
                      }
-                  });
-               axios
-                  .post('/employees/employee', {
-                     _id: res.data.Users[i].employee_id
-                  })
-                  .then(employee => {
-                     if (employee.data.Employee[0]) {
-                        console.log(
-                           'employee: ',
-                           employee.data.Employee[0].employee_id
-                        );
-                        res.data.Users[i].employee_id =
-                           employee.data.Employee[0].employee_id;
-                        this.setState({
-                           data: [...res.data.Users]
+                     axios
+                        .post('/employees/employee', {
+                           _id: res.data.Users[i].employee_id,
+                        })
+                        .then((employee) => {
+                           this.setState((prevState) => {
+                              prevState.dataReceived = true;
+                              prevState.progress++;
+                              prevState.completed =
+                                 (prevState.progress /
+                                    prevState.progressLength) *
+                                 100;
+                           });
+                           if (employee.data.Employee[0]) {
+                              console.log(
+                                 'employee: ',
+                                 employee.data.Employee[0].employee_id
+                              );
+                              res.data.Users[i].employee_id =
+                                 employee.data.Employee[0].employee_id;
+                              this.setState({
+                                 data: [...res.data.Users],
+                              });
+                           } else {
+                              res.data.Users[i].employee_id =
+                                 'problem loading Employee ID';
+                              this.setState({
+                                 data: [...res.data.Users],
+                              });
+                           }
                         });
-                     } else {
-                        res.data.Users[i].employee_id =
-                           'problem loading Employee ID';
-                        this.setState({
-                           data: [...res.data.Users]
-                        });
-                     }
                   });
             }
             this.setState({
-               data: [...res.data.Users]
+               data: [...res.data.Users],
             });
          });
       };
@@ -114,19 +138,28 @@ export default class ManageUser extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add Users
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? (
+                  <LinearProgress />
+               ) : this.state.completed !== 100 ? (
+                  <LinearProgress
+                     variant='determinate'
+                     value={this.state.completed}
+                  />
+               ) : null}
+            </Box>
             <MaterialTable
                title=''
                columns={this.state.columns}
@@ -136,8 +169,8 @@ export default class ManageUser extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -145,25 +178,25 @@ export default class ManageUser extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/users/delete-user', {
-                           _id: oldData._id
+                           _id: oldData._id,
                         })
-                        .then(User => {
+                        .then((User) => {
                            console.log(User);
                            if (User) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -175,7 +208,7 @@ export default class ManageUser extends Component {
                      cancel={() => {
                         this.setState({
                            openAdd: false,
-                           msg: 'Added'
+                           msg: 'Added',
                         });
                         this.handleClose();
                      }}
@@ -192,7 +225,7 @@ export default class ManageUser extends Component {
                      cancel={() => {
                         this.setState({
                            openEdit: false,
-                           msg: 'Updated'
+                           msg: 'Updated',
                         });
                         this.handleClose();
                      }}

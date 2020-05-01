@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -14,35 +14,44 @@ export default class ManageMeasuringUnits extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Measuring Unit Name', field: 'measuring_unit_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
          ],
          data: [],
          openAdd: false,
          openEdit: false,
-         openUploadCSV: false
+         openUploadCSV: false,
+         dataReceived: false,
       };
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/measuring-units/measuring-unit', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                this.EditData = { ...res.data.MeasuringUnit[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  dataReceived: true,
+                  openEdit: true,
                });
             });
       };
       this.handleClose = () => {
-         axios.get('/measuring-units/measuring-units').then(res => {
+         this.setState({
+            dataReceived: false,
+         });
+         axios.get('/measuring-units/measuring-units').then((res) => {
             console.log(res.data.MeasuringUnits);
             for (let i = 0; i < res.data.MeasuringUnits.length; i++) {
                res.data.MeasuringUnits[i].id = i + 1;
             }
             this.setState({
-               data: [...res.data.MeasuringUnits]
+               data: [...res.data.MeasuringUnits],
+               dataReceived: true,
             });
          });
       };
@@ -70,19 +79,21 @@ export default class ManageMeasuringUnits extends Component {
                   style={{
                      marginBottom: '20px',
                      display: 'flex',
-                     marginRight: '10px'
+                     marginRight: '10px',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}
@@ -92,8 +103,8 @@ export default class ManageMeasuringUnits extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -101,25 +112,25 @@ export default class ManageMeasuringUnits extends Component {
                      tooltip: 'Edit User',
                      onClick: (event, rowData) => {
                         this.OnEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/measuring-units/delete-measuring-unit', {
-                           measuring_unit_name: oldData.measuring_unit_name
+                           measuring_unit_name: oldData.measuring_unit_name,
                         })
-                        .then(res => {
+                        .then((res) => {
                            console.log(res);
                            if (res) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.OnEditHandler(event, rowData);
@@ -130,7 +141,7 @@ export default class ManageMeasuringUnits extends Component {
                   <AddMeasuringUnit
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -143,7 +154,7 @@ export default class ManageMeasuringUnits extends Component {
                      MeasuringUnit={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

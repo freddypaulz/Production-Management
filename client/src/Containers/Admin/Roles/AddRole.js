@@ -5,6 +5,7 @@ import {
    Button,
    Checkbox,
    FormControlLabel,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -30,6 +31,7 @@ export default class AddUser extends Component {
          production: false,
          errors: [],
          success: false,
+         dataReceived: false,
       };
 
       this.manageSelected = 0;
@@ -41,6 +43,9 @@ export default class AddUser extends Component {
       this.productionSelected = 0;
 
       this.onAddHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          let givenPermissions = [];
          if (this.state.management) {
             givenPermissions.push({ name: 'Management', Value: true });
@@ -82,8 +87,12 @@ export default class AddUser extends Component {
                   this.setState({
                      errors: [...res.data.errors],
                      success: false,
+                     dataReceived: true,
                   });
                } else {
+                  this.setState({
+                     dataReceived: true,
+                  });
                   this.props.cancel();
                   this.props.snack();
                }
@@ -226,6 +235,9 @@ export default class AddUser extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Roles')) {
+         this.setState({
+            dataReceived: true,
+         });
       }
    }
    componentWillUnmount() {
@@ -257,6 +269,9 @@ export default class AddUser extends Component {
             ) : (
                <Box></Box>
             )}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

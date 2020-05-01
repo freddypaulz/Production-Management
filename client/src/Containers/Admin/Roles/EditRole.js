@@ -5,6 +5,7 @@ import {
    Button,
    Checkbox,
    FormControlLabel,
+   LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
@@ -32,6 +33,7 @@ export default class EditRole extends Component {
          errors: [],
          success: false,
          open: false,
+         dataReceived: false,
       };
 
       this.manageSelected = 0;
@@ -44,7 +46,9 @@ export default class EditRole extends Component {
 
       this.onEditHandler = () => {
          let givenPermissions = [];
-
+         this.setState({
+            dataReceived: false,
+         });
          if (this.state.management) {
             givenPermissions.push({ name: 'Management', Value: true });
          }
@@ -72,6 +76,7 @@ export default class EditRole extends Component {
             }
             return null;
          });
+
          axios
             .post('/roles/edit-role', {
                _id: this.state._id,
@@ -86,11 +91,15 @@ export default class EditRole extends Component {
                   this.setState({
                      errors: [...res.data.errors],
                      success: false,
+                     dataReceived: true,
                   });
                } else {
                   this.state.permissions.map((permission) => {
                      permission.value = false;
                      return null;
+                  });
+                  this.setState({
+                     dataReceived: true,
                   });
                   this.props.snack();
                   this.props.cancel();
@@ -235,6 +244,9 @@ export default class EditRole extends Component {
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Roles')) {
+         this.setState({
+            dataReceived: false,
+         });
          if (this.state.role_name === '') {
             this.setState({
                role_name: this.props.role.role_name,
@@ -286,6 +298,9 @@ export default class EditRole extends Component {
                });
                return null;
             });
+            this.setState({
+               dataReceived: true,
+            });
          }
       }
    }
@@ -316,6 +331,9 @@ export default class EditRole extends Component {
             ) : (
                <Box></Box>
             )}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField

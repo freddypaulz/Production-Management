@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
 import axios from 'axios';
-import { Box, Button, DialogContent, Snackbar } from '@material-ui/core';
+import {
+   Box,
+   Button,
+   DialogContent,
+   Snackbar,
+   LinearProgress,
+} from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import MUIAlert from '@material-ui/lab/Alert';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
@@ -16,46 +22,55 @@ export default class ManageRole extends Component {
          columns: [
             { title: 'ID', field: 'id' },
             { title: 'Role Name', field: 'role_name' },
-            { title: 'Description', field: 'description' }
+            { title: 'Description', field: 'description' },
             // { title: 'Permissions', field: 'permissions' }
          ],
          data: [],
          open: false,
          openAdd: false,
          openEdit: false,
-         msg: ''
+         msg: '',
+         dataReceived: false,
       };
       this.onEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/roles/role', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(role => {
+            .then((role) => {
                this.EditData = { ...role.data.Role[0] };
                console.log('Edit ', this.EditData);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
+                  dataReceived: true,
                });
             });
       };
       this.handleClose = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .get('/roles/roles')
-            .then(res => {
+            .then((res) => {
                console.log(res.data);
                //res.data.Roles = res.data.Roles.splice(1, res.data.Roles.length);
                for (let i = 0; i < res.data.Roles.length; i++) {
                   res.data.Roles[i].id = i + 1;
                }
                this.setState({
-                  data: [...res.data.Roles]
+                  data: [...res.data.Roles],
+                  dataReceived: true,
                });
             })
             .catch(() => {});
       };
       this.openSnack = () => {
          this.setState({
-            open: true
+            open: true,
          });
       };
    }
@@ -82,19 +97,21 @@ export default class ManageRole extends Component {
                   color='primary'
                   style={{
                      marginBottom: '20px',
-                     display: 'flex'
+                     display: 'flex',
                   }}
                   size='large'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
                   Add Role
                </Button>
             </Box>
-
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=''
                columns={this.state.columns}
@@ -104,8 +121,8 @@ export default class ManageRole extends Component {
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
-                     color: '#FFF'
-                  }
+                     color: '#FFF',
+                  },
                }}
                actions={[
                   {
@@ -113,29 +130,29 @@ export default class ManageRole extends Component {
                      tooltip: 'edit Role',
                      onClick: (event, rowData) => {
                         this.onEditHandler(event, rowData);
-                     }
-                  }
+                     },
+                  },
                ]}
                editable={{
-                  onRowDelete: oldData =>
+                  onRowDelete: (oldData) =>
                      axios
                         .post('/roles/delete-role', {
-                           role_name: oldData.role_name
+                           role_name: oldData.role_name,
                         })
-                        .then(Role => {
+                        .then((Role) => {
                            console.log(Role);
                            if (Role) {
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                  const data = [...prevState.data];
                                  data.splice(data.indexOf(oldData), 1);
                                  return { ...prevState, data };
                               });
                               this.setState({
-                                 msg: 'Deleted'
+                                 msg: 'Deleted',
                               });
                               this.openSnack();
                            }
-                        })
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.onEditHandler(event, rowData);
@@ -147,7 +164,7 @@ export default class ManageRole extends Component {
                      cancel={() => {
                         this.setState({
                            openAdd: false,
-                           msg: 'Added'
+                           msg: 'Added',
                         });
                         this.handleClose();
                      }}
@@ -164,7 +181,7 @@ export default class ManageRole extends Component {
                      cancel={() => {
                         this.setState({
                            openEdit: false,
-                           msg: 'Updated'
+                           msg: 'Updated',
                         });
                         this.handleClose();
                      }}
