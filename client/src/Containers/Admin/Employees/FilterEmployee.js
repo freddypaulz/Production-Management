@@ -13,6 +13,7 @@ import axios from 'axios';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import { Datepick } from '../../../Components/Date/Datepick';
 import styles from '../../../Components/styles/FormStyles';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 export default function FilterEmployee(props) {
    const [firstName, setFirstName] = useState(props.filters.firstName);
@@ -233,123 +234,105 @@ export default function FilterEmployee(props) {
                <Box style={styles.box} marginRight='10px'>
                   <FormControl
                      size='small'
-                     required
                      variant='outlined'
                      fullWidth
                      display='flex'
                   >
-                     <InputLabel
-                        style={{
-                           backgroundColor: 'white',
-                           paddingLeft: '2px',
-                           paddingRight: '2px',
-                        }}
-                     >
-                        Select Country
-                     </InputLabel>
-                     <Select
-                        required
+                     <Autocomplete
+                        size='small'
+                        id='country'
+                        disableClearable={true}
+                        options={countries}
+                        getOptionLabel={(option) => option.country_name}
+                        renderInput={(params) => (
+                           <TextField
+                              {...params}
+                              required
+                              label='Select Country'
+                              variant='outlined'
+                           />
+                        )}
                         value={country}
-                        onChange={(event) => {
-                           setCountry(event.target.value);
+                        onChange={(event, value) => {
+                           setCountry(value);
+                           setDataReceived(false);
                            axios
                               .post('/states/state-country', {
-                                 country_id: event.target.value,
+                                 country_id: value,
                               })
                               .then((res) => {
                                  //console.log(res);
                                  setStates([...res.data.state]);
+                                 setDataReceived(true);
                               });
                         }}
-                     >
-                        {countries.map((country, index) => {
-                           return (
-                              <MenuItem
-                                 selected
-                                 key={index}
-                                 value={country._id}
-                              >
-                                 {country.country_name}
-                              </MenuItem>
-                           );
-                        })}
-                     </Select>
+                     />
                   </FormControl>
                </Box>
                <Box style={styles.box} marginRight='10px'>
                   <FormControl
                      size='small'
-                     required
                      variant='outlined'
                      fullWidth
                      display='flex'
                   >
-                     <InputLabel
-                        style={{
-                           backgroundColor: 'white',
-                           paddingLeft: '2px',
-                           paddingRight: '2px',
-                        }}
-                     >
-                        Select State
-                     </InputLabel>
-                     <Select
-                        required
+                     <Autocomplete
+                        size='small'
+                        id='state'
+                        disableClearable={true}
+                        options={states}
+                        getOptionLabel={(option) => option.state_name}
+                        renderInput={(params) => (
+                           <TextField
+                              {...params}
+                              required
+                              label='Select State'
+                              variant='outlined'
+                           />
+                        )}
                         value={state}
-                        onChange={(event) => {
-                           setState(event.target.value);
+                        onChange={(event, value) => {
+                           setState(value);
+                           setDataReceived(false);
                            axios
                               .post('/cities/city-state', {
-                                 state_id: event.target.value,
+                                 state_id: value,
                               })
                               .then((res) => {
                                  //console.log(res);
                                  setCities([...res.data.city]);
+                                 setDataReceived(true);
                               });
                         }}
-                     >
-                        {states.map((state, index) => {
-                           return (
-                              <MenuItem selected key={index} value={state._id}>
-                                 {state.state_name}
-                              </MenuItem>
-                           );
-                        })}
-                     </Select>
+                     />
                   </FormControl>
                </Box>
                <Box style={styles.box}>
                   <FormControl
                      size='small'
-                     required
                      variant='outlined'
                      fullWidth
                      display='flex'
                   >
-                     <InputLabel
-                        style={{
-                           backgroundColor: 'white',
-                           paddingLeft: '2px',
-                           paddingRight: '2px',
-                        }}
-                     >
-                        Select City
-                     </InputLabel>
-                     <Select
-                        required
+                     <Autocomplete
+                        size='small'
+                        id='city'
+                        disableClearable={true}
+                        options={cities}
+                        getOptionLabel={(option) => option.city_name}
+                        renderInput={(params) => (
+                           <TextField
+                              {...params}
+                              required
+                              label='Select City'
+                              variant='outlined'
+                           />
+                        )}
                         value={city}
-                        onChange={(event) => {
-                           setCity(event.target.value);
+                        onChange={(event, value) => {
+                           setCity(value);
                         }}
-                     >
-                        {cities.map((city, index) => {
-                           return (
-                              <MenuItem selected key={index} value={city._id}>
-                                 {city.city_name}
-                              </MenuItem>
-                           );
-                        })}
-                     </Select>
+                     />
                   </FormControl>
                </Box>
             </Box>
@@ -472,7 +455,7 @@ export default function FilterEmployee(props) {
                </Box>
             </Box>
             <Box style={styles.box_field}>
-               <FormControl
+               {/* <FormControl
                   size='small'
                   required
                   variant='outlined'
@@ -507,6 +490,32 @@ export default function FilterEmployee(props) {
                         );
                      })}
                   </Select>
+               </FormControl> */}
+               <FormControl
+                  size='small'
+                  variant='outlined'
+                  fullWidth
+                  display='flex'
+               >
+                  <Autocomplete
+                     size='small'
+                     id='work location'
+                     disableClearable={true}
+                     options={workLocations}
+                     getOptionLabel={(option) => option.work_location_name}
+                     renderInput={(params) => (
+                        <TextField
+                           {...params}
+                           required
+                           label='Select Work Location'
+                           variant='outlined'
+                        />
+                     )}
+                     value={workLocation}
+                     onChange={(event, value) => {
+                        setWorkLocation(value);
+                     }}
+                  />
                </FormControl>
             </Box>
             <Box style={styles.box_field}>

@@ -4,15 +4,13 @@ import {
    TextField,
    Button,
    FormControl,
-   InputLabel,
-   Select,
-   MenuItem,
    LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import errorCheck from './StateValidation';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -34,6 +32,18 @@ export default class EditShift extends Component {
          },
          isValid: false,
          dataReceived: false,
+      };
+      this.onGetCountry = (_id) => {
+         axios
+            .post('/countries/country', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.Country[0]);
+               this.setState({
+                  country_id: res.data.Country[0],
+               });
+            });
       };
       this.onEditHandler = () => {
          if (this.state.country_id === '') {
@@ -86,12 +96,12 @@ export default class EditShift extends Component {
             this.setState({
                countries: [...res.data.Countries],
             });
+            this.onGetCountry(this.props.state.country_id);
             if (this.state.state_name === '') {
                console.log(this.props.state);
                this.setState({
                   _id: this.props.state._id,
                   state_name: this.props.state.state_name,
-                  country_id: this.props.state.country_id,
                   description: this.props.state.description,
                   dataReceived: true,
                });
@@ -124,6 +134,7 @@ export default class EditShift extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      name='state_name'
                      fullWidth
                      required
@@ -144,42 +155,48 @@ export default class EditShift extends Component {
                      helperText={this.state.fieldError.state_name.msg}
                   ></TextField>
                </Box>
-               <FormControl required variant='outlined' fullWidth>
-                  <InputLabel
-                     style={{
-                        backgroundColor: 'white',
-                        paddingLeft: '2px',
-                        paddingRight: '2px',
-                     }}
-                  >
-                     Select Country
-                  </InputLabel>
-                  <Select
-                     name='country'
-                     style={styles.box_field}
-                     required
-                     //variant='outlined'
+               <FormControl
+                  size='small'
+                  variant='outlined'
+                  fullWidth
+                  display='flex'
+                  marginBottom='10px'
+               >
+                  <Autocomplete
+                     size='small'
+                     id='country'
+                     disableClearable={true}
+                     options={this.state.countries}
+                     getOptionLabel={(option) => option.country_name}
+                     renderInput={(params) => (
+                        <TextField
+                           {...params}
+                           required
+                           label='Select Country'
+                           variant='outlined'
+                        />
+                     )}
                      value={this.state.country_id}
-                     onChange={(event) => {
-                        console.log(event.target.value);
+                     onChange={(event, value) => {
+                        console.log(value);
                         this.setState({
-                           country_id: event.target.value,
+                           country_id: value,
+                           isValid: true,
+                        });
+                        this.setState((prevState) => {
+                           prevState.fieldError.country.status = false;
+                        });
+                        this.setState({
+                           errors: [],
                         });
                      }}
                      error={this.state.fieldError.country.status}
-                  >
-                     {this.state.countries.map((country, index) => {
-                        return (
-                           <MenuItem selected key={index} value={country._id}>
-                              {country.country_name}
-                           </MenuItem>
-                        );
-                     })}
-                  </Select>
+                  />
                </FormControl>
 
-               <Box style={styles.box_field}>
+               <Box mt='10px' style={styles.box_field}>
                   <TextField
+                     size='small'
                      name='description'
                      fullWidth
                      value={this.state.description}

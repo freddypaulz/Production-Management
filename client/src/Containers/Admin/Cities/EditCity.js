@@ -13,6 +13,7 @@ import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import errorCheck from './CityValidation';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -34,6 +35,17 @@ export default class EditShift extends Component {
          },
          isValid: false,
          dataReceived: false,
+      };
+      this.onGetState = (_id) => {
+         axios
+            .post('/states/state', {
+               _id,
+            })
+            .then((res) => {
+               this.setState({
+                  state_id: res.data.state[0],
+               });
+            });
       };
       this.onEditHandler = () => {
          if (this.state.state_id === '') {
@@ -86,11 +98,11 @@ export default class EditShift extends Component {
             this.setState({
                states: [...res.data.States],
             });
+            this.onGetState(this.props.city.state_id);
             if (this.state.city_name === '') {
                this.setState({
                   _id: this.props.city._id,
                   city_name: this.props.city.city_name,
-                  state_id: this.props.city.state_id,
                   description: this.props.city.description,
                   dataReceived: true,
                });
@@ -144,7 +156,7 @@ export default class EditShift extends Component {
                      helperText={this.state.fieldError.city_name.msg}
                   />
                </Box>
-               <FormControl required variant='outlined' fullWidth size='small'>
+               {/* <FormControl required variant='outlined' fullWidth size='small'>
                   <InputLabel
                      style={{
                         backgroundColor: 'white',
@@ -183,9 +195,46 @@ export default class EditShift extends Component {
                         );
                      })}
                   </Select>
+               </FormControl> */}
+               <FormControl
+                  size='small'
+                  variant='outlined'
+                  fullWidth
+                  display='flex'
+               >
+                  <Autocomplete
+                     size='small'
+                     id='state'
+                     disableClearable={true}
+                     options={this.state.states}
+                     getOptionLabel={(option) => option.state_name}
+                     renderInput={(params) => (
+                        <TextField
+                           {...params}
+                           required
+                           label='Select State'
+                           variant='outlined'
+                        />
+                     )}
+                     value={this.state.state_id}
+                     onChange={(event, value) => {
+                        console.log(value);
+                        this.setState({
+                           state_id: value,
+                           isValid: true,
+                        });
+                        this.setState((prevState) => {
+                           prevState.fieldError.state.status = false;
+                        });
+                        this.setState({
+                           errors: [],
+                        });
+                     }}
+                     error={this.state.fieldError.state.status}
+                  />
                </FormControl>
 
-               <Box style={styles.box_field}>
+               <Box mt='10px' style={styles.box_field}>
                   <TextField
                      size='small'
                      fullWidth

@@ -4,9 +4,6 @@ import {
    TextField,
    Button,
    FormControl,
-   InputLabel,
-   Select,
-   MenuItem,
    LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -15,6 +12,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const styles = Styles;
 export default class EditDistributor extends Component {
@@ -63,6 +61,41 @@ export default class EditDistributor extends Component {
          poc_mobile_no: '',
          dataReceived: false,
          poc_sec_mobile_no: '',
+      };
+      this.onGetCountry = (_id) => {
+         axios
+            .post('/countries/country', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.Country[0]);
+               this.setState({
+                  distributor_country: res.data.Country[0],
+               });
+            });
+      };
+      this.onGetState = (_id) => {
+         axios
+            .post('/states/state', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.state);
+               this.setState({
+                  distributor_state: res.data.state[0],
+               });
+            });
+      };
+      this.onGetCity = (_id) => {
+         axios
+            .post('/cities/city', {
+               _id,
+            })
+            .then((res) => {
+               this.setState({
+                  distributor_city: res.data.city[0],
+               });
+            });
       };
       this.onEditHandler = () => {
          this.state.distributor_point_of_contacts.map((poc, index) => {
@@ -124,6 +157,7 @@ export default class EditDistributor extends Component {
             this.setState({
                countries: [...res.data.Countries],
             });
+            this.onGetCountry(this.props.Distributor.distributor_country);
             axios
                .post('/states/state-country', {
                   country_id: this.props.Distributor.distributor_country,
@@ -132,6 +166,7 @@ export default class EditDistributor extends Component {
                   this.setState({
                      states: [...states.data.state],
                   });
+                  this.onGetState(this.props.Distributor.distributor_state);
                   axios
                      .post('/cities/city-state', {
                         state_id: this.props.Distributor.distributor_state,
@@ -140,6 +175,7 @@ export default class EditDistributor extends Component {
                         this.setState({
                            cities: [...cities.data.city],
                         });
+                        this.onGetCity(this.props.Distributor.distributor_city);
                         if (this.state.distributor_name === '') {
                            this.setState({
                               _id: this.props.Distributor._id,
@@ -155,12 +191,6 @@ export default class EditDistributor extends Component {
                                  .distributor_email,
                               distributor_address: this.props.Distributor
                                  .distributor_address,
-                              distributor_country: this.props.Distributor
-                                 .distributor_country,
-                              distributor_state: this.props.Distributor
-                                 .distributor_state,
-                              distributor_city: this.props.Distributor
-                                 .distributor_city,
                               distributor_postal_code: this.props.Distributor
                                  .distributor_postal_code,
                               distributor_point_of_contacts: this.props
@@ -302,28 +332,29 @@ export default class EditDistributor extends Component {
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
                         display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select Country
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='country'
+                           disableClearable={true}
+                           options={this.state.countries}
+                           getOptionLabel={(option) => option.country_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select Country'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_country}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_country: event.target.value,
+                                 distributor_country: value,
                                  cities: [],
                                  states: [],
                                  distributor_state: '',
@@ -332,62 +363,55 @@ export default class EditDistributor extends Component {
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value,
+                                    country_id: value,
                                  })
                                  .then((res) => {
-                                    console.log(res);
+                                    console.log(
+                                       'test ===>',
+                                       this.state.distributor_country
+                                    );
                                     this.setState({
                                        states: [...res.data.state],
                                        dataReceived: true,
                                     });
                                  });
                            }}
-                        >
-                           {this.state.countries.map((country, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={country._id}
-                                 >
-                                    {country.country_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select State
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='state'
+                           disableClearable={true}
+                           options={this.state.states}
+                           getOptionLabel={(option) => option.state_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select State'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_state}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_state: event.target.value,
+                                 distributor_state: value,
                                  distributor_city: '',
                                  cities: [],
                                  dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value,
+                                    state_id: value,
                                  })
                                  .then((res) => {
                                     console.log(res);
@@ -397,60 +421,38 @@ export default class EditDistributor extends Component {
                                     });
                                  });
                            }}
-                        >
-                           {this.state.states.map((state, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={state._id}
-                                 >
-                                    {state.state_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box}>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select City
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='city'
+                           disableClearable={true}
+                           options={this.state.cities}
+                           getOptionLabel={(option) => option.city_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select City'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_city}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_city: event.target.value,
+                                 distributor_city: value,
                               });
                            }}
-                        >
-                           {this.state.cities.map((city, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={city._id}
-                                 >
-                                    {city.city_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                </Box>

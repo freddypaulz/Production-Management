@@ -12,6 +12,7 @@ import {
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -103,43 +104,38 @@ export default class AddUser extends Component {
             </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
-                  <FormControl required variant='outlined' fullWidth>
-                     <InputLabel
-                        style={{
-                           backgroundColor: 'white',
-                           paddingLeft: '2px',
-                           paddingRight: '2px',
-                        }}
-                     >
-                        Select Employee
-                     </InputLabel>
-                     <Select
-                        required
-                        //variant='outlined'
+                  <FormControl
+                     size='small'
+                     variant='outlined'
+                     fullWidth
+                     display='flex'
+                  >
+                     <Autocomplete
+                        size='small'
+                        id='employee'
+                        disableClearable={true}
+                        options={this.state.Employees}
+                        getOptionLabel={(option) => option.employee_first_name}
+                        renderInput={(params) => (
+                           <TextField
+                              {...params}
+                              required
+                              label='Select Employee'
+                              variant='outlined'
+                           />
+                        )}
                         value={this.state.employee_id}
-                        onChange={(event) => {
-                           console.log(event.target.value);
+                        onChange={(event, value) => {
                            this.setState({
-                              employee_id: event.target.value,
+                              employee_id: value,
                            });
                         }}
-                     >
-                        {this.state.Employees.map((Employee, index) => {
-                           return (
-                              <MenuItem
-                                 selected
-                                 key={index}
-                                 value={Employee._id}
-                              >
-                                 {Employee.employee_first_name}
-                              </MenuItem>
-                           );
-                        })}
-                     </Select>
+                     />
                   </FormControl>
                </Box>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
                      required
                      value={this.state.user_name}
@@ -153,6 +149,7 @@ export default class AddUser extends Component {
                </Box>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
                      required
                      value={this.state.password}
@@ -166,6 +163,7 @@ export default class AddUser extends Component {
                </Box>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
                      required
                      value={this.state.password2}
@@ -178,7 +176,12 @@ export default class AddUser extends Component {
                   ></TextField>
                </Box>
                <Box style={styles.box_field}>
-                  <FormControl required variant='outlined' fullWidth>
+                  <FormControl
+                     size='small'
+                     required
+                     variant='outlined'
+                     fullWidth
+                  >
                      <InputLabel
                         style={{
                            backgroundColor: 'white',

@@ -14,6 +14,7 @@ import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 import { Datepick } from '../../../Components/Date/Datepick';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const styles = Styles;
 export default class EditEmployee extends Component {
@@ -56,6 +57,9 @@ export default class EditEmployee extends Component {
          dataReceived: false,
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/employees/edit-employee', {
                _id: this.state._id,
@@ -93,13 +97,63 @@ export default class EditEmployee extends Component {
                      console.log(res.data.errors);
                      this.setState({
                         errors: [...res.data.errors],
+                        dataReceived: true,
                      });
                   } else {
+                     this.setState({
+                        dataReceived: true,
+                     });
                      this.props.cancel();
                   }
                }
             })
             .catch((err) => console.log(err));
+      };
+      this.onGetCountry = (_id) => {
+         axios
+            .post('/countries/country', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.Country[0]);
+               this.setState({
+                  employee_country: res.data.Country[0],
+               });
+            });
+      };
+      this.onGetState = (_id) => {
+         axios
+            .post('/states/state', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.state);
+               this.setState({
+                  employee_state: res.data.state[0],
+               });
+            });
+      };
+      this.onGetCity = (_id) => {
+         axios
+            .post('/cities/city', {
+               _id,
+            })
+            .then((res) => {
+               this.setState({
+                  employee_city: res.data.city[0],
+               });
+            });
+      };
+      this.onGetWorkLocation = (_id) => {
+         axios
+            .post('/work-locations/work-location', {
+               _id,
+            })
+            .then((res) => {
+               this.setState({
+                  employee_work_location: res.data.WorkLocation[0],
+               });
+            });
       };
    }
    componentDidMount() {
@@ -111,6 +165,7 @@ export default class EditEmployee extends Component {
             this.setState({
                countries: [...res.data.Countries],
             });
+            this.onGetCountry(this.props.Employee.employee_country);
             axios
                .post('/states/state-country', {
                   country_id: this.props.Employee.employee_country,
@@ -119,6 +174,7 @@ export default class EditEmployee extends Component {
                   this.setState({
                      states: [...states.data.state],
                   });
+                  this.onGetState(this.props.Employee.employee_state);
                   axios
                      .post('/cities/city-state', {
                         state_id: this.props.Employee.employee_state,
@@ -127,12 +183,16 @@ export default class EditEmployee extends Component {
                         this.setState({
                            cities: [...cities.data.city],
                         });
+                        this.onGetCity(this.props.Employee.employee_city);
                         axios
                            .get('/work-locations/work-locations')
                            .then((res) => {
                               this.setState({
                                  work_locations: [...res.data.WorkLocations],
                               });
+                              this.onGetWorkLocation(
+                                 this.props.Employee.employee_work_location
+                              );
                               axios.get('/shifts/shifts').then((res) => {
                                  this.setState({
                                     shifts: [...res.data.Shifts],
@@ -206,15 +266,6 @@ export default class EditEmployee extends Component {
                                                          employee_address: this
                                                             .props.Employee
                                                             .employee_address,
-                                                         employee_country: this
-                                                            .props.Employee
-                                                            .employee_country,
-                                                         employee_state: this
-                                                            .props.Employee
-                                                            .employee_state,
-                                                         employee_city: this
-                                                            .props.Employee
-                                                            .employee_city,
                                                          employee_postal_code: this
                                                             .props.Employee
                                                             .employee_postal_code,
@@ -230,9 +281,6 @@ export default class EditEmployee extends Component {
                                                          employee_salary: this
                                                             .props.Employee
                                                             .employee_salary,
-                                                         employee_work_location: this
-                                                            .props.Employee
-                                                            .employee_work_location,
                                                          employee_shift: this
                                                             .props.Employee
                                                             .employee_shift,
@@ -341,9 +389,9 @@ export default class EditEmployee extends Component {
                </Box>
                <Box style={Styles.box_field}>
                   <Datepick
-                     id='1'
+                     id='2'
                      Name='Date Of Birth'
-                     Req='true'
+                     Req={true}
                      marginRight={'10px'}
                      value={this.state.employee_dob}
                      minDate={new Date() - 1000 * 60 * 60 * 24 * 365.25 * 60}
@@ -480,146 +528,127 @@ export default class EditEmployee extends Component {
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
                         display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select Country
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='country'
+                           disableClearable={true}
+                           options={this.state.countries}
+                           getOptionLabel={(option) => option.country_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select Country'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.employee_country}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 employee_country: event.target.value,
+                                 employee_country: value,
                                  cities: [],
+                                 states: [],
+                                 employee_state: '',
+                                 employee_city: '',
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value,
+                                    country_id: value,
                                  })
                                  .then((res) => {
-                                    console.log(res);
+                                    console.log(
+                                       'test ===>',
+                                       this.state.employee_country
+                                    );
                                     this.setState({
                                        states: [...res.data.state],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
-                        >
-                           {this.state.countries.map((country, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={country._id}
-                                 >
-                                    {country.country_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select State
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='state'
+                           disableClearable={true}
+                           options={this.state.states}
+                           getOptionLabel={(option) => option.state_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select State'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.employee_state}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 employee_state: event.target.value,
+                                 employee_state: value,
+                                 employee_city: '',
+                                 cities: [],
+                                 dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value,
+                                    state_id: value,
                                  })
                                  .then((res) => {
                                     console.log(res);
                                     this.setState({
                                        cities: [...res.data.city],
+                                       dataReceived: true,
                                     });
                                  });
                            }}
-                        >
-                           {this.state.states.map((state, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={state._id}
-                                 >
-                                    {state.state_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box}>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select City
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='city'
+                           disableClearable={true}
+                           options={this.state.cities}
+                           getOptionLabel={(option) => option.city_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select City'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.employee_city}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 employee_city: event.target.value,
+                                 employee_city: value,
                               });
                            }}
-                        >
-                           {this.state.cities.map((city, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={city._id}
-                                 >
-                                    {city.city_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                </Box>
@@ -667,7 +696,7 @@ export default class EditEmployee extends Component {
                   <Datepick
                      id='1'
                      Name='Date Of Joining'
-                     Req='true'
+                     Req={true}
                      value={this.state.employee_date_of_joinig}
                      minDate='01/01/1990'
                      maxDate={new Date()}
@@ -739,43 +768,33 @@ export default class EditEmployee extends Component {
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select Work Location
-                        </InputLabel>
-                        <Select
-                           required
+                        <Autocomplete
+                           size='small'
+                           id='work location'
+                           disableClearable={true}
+                           options={this.state.work_locations}
+                           getOptionLabel={(option) =>
+                              option.work_location_name
+                           }
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select Work Location'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.employee_work_location}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
                               this.setState({
-                                 employee_work_location: event.target.value,
+                                 employee_work_location: value,
                               });
                            }}
-                        >
-                           {this.state.work_locations.map(
-                              (WorkLocation, index) => {
-                                 return (
-                                    <MenuItem
-                                       selected
-                                       key={index}
-                                       value={WorkLocation._id}
-                                    >
-                                       {WorkLocation.work_location_name}
-                                    </MenuItem>
-                                 );
-                              }
-                           )}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box}>

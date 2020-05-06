@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, TextField, Button } from '@material-ui/core';
+import { Box, TextField, Button, LinearProgress } from '@material-ui/core';
 import { PaperBoard } from '../../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../../Components/styles/FormStyles';
@@ -13,43 +13,53 @@ export default class ProductCode extends Component {
          code_prefix: '',
          code_separator: '',
          errors: [],
-         success: false
+         success: false,
+         dataReceived: false,
       };
       this.onEditHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/product-code/edit-product-code', {
                _id: '5e61d45fa171c936c86002fb',
                code_prefix: this.state.code_prefix,
-               code_separator: this.state.code_separator
+               code_separator: this.state.code_separator,
             })
-            .then(res => {
+            .then((res) => {
                console.log(res);
                if (res.data.errors.length > 0) {
                   console.log(res.data.errors);
                   this.setState({
                      errors: [...res.data.errors],
-                     success: false
+                     success: false,
+                     dataReceived: true,
                   });
                } else {
                   this.setState({
                      errors: [...res.data.errors],
-                     success: true
+                     success: true,
+                     dataReceived: true,
                   });
                }
             })
-            .catch(err => console.log(err));
+            .catch((err) => console.log(err));
       };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Product Code')) {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/product-code/product-code', {
-               _id: '5e61d45fa171c936c86002fb'
+               _id: '5e61d45fa171c936c86002fb',
             })
-            .then(res => {
+            .then((res) => {
                this.setState({
                   code_prefix: res.data.ProductCode[0].code_prefix,
-                  code_separator: res.data.ProductCode[0].code_separator
+                  code_separator: res.data.ProductCode[0].code_separator,
+                  dataReceived: true,
                });
             });
       }
@@ -73,6 +83,9 @@ export default class ProductCode extends Component {
                   Success
                </Box>
             ) : null}
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
@@ -83,7 +96,7 @@ export default class ProductCode extends Component {
                         variant='outlined'
                         label='code Prefix'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({ code_prefix: event.target.value });
                         }}
                      />
@@ -97,9 +110,9 @@ export default class ProductCode extends Component {
                         variant='outlined'
                         label='code separator'
                         type='text'
-                        onChange={event => {
+                        onChange={(event) => {
                            this.setState({
-                              code_separator: event.target.value
+                              code_separator: event.target.value,
                            });
                         }}
                      />

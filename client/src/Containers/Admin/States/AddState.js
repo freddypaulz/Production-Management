@@ -4,9 +4,6 @@ import {
    TextField,
    Button,
    FormControl,
-   InputLabel,
-   Select,
-   MenuItem,
    LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -14,6 +11,7 @@ import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import errorCheck from './StateValidation';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const styles = Styles;
 export default class AddUser extends Component {
@@ -112,6 +110,7 @@ export default class AddUser extends Component {
             <PaperBoard>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      name='state_name'
                      fullWidth
                      required
@@ -132,41 +131,40 @@ export default class AddUser extends Component {
                      helperText={this.state.fieldError.state_name.msg}
                   ></TextField>
                </Box>
-               <FormControl required variant='outlined' fullWidth>
-                  <InputLabel
-                     style={{
-                        backgroundColor: 'white',
-                        paddingLeft: '2px',
-                        paddingRight: '2px',
-                     }}
-                  >
-                     Select Country
-                  </InputLabel>
-                  <Select
-                     name='country'
-                     style={styles.box_field}
-                     required
-                     //variant='outlined'
-                     value={this.state.country_id}
-                     onChange={(event) => {
+               <FormControl
+                  size='small'
+                  variant='outlined'
+                  fullWidth
+                  display='flex'
+                  marginBottom='10px'
+               >
+                  <Autocomplete
+                     size='small'
+                     id='country'
+                     disableClearable={true}
+                     options={this.state.Countries}
+                     getOptionLabel={(option) => option.country_name}
+                     renderInput={(params) => (
+                        <TextField
+                           {...params}
+                           required
+                           label='Select Country'
+                           variant='outlined'
+                        />
+                     )}
+                     value={this.state.distributor_country}
+                     onChange={(event, value) => {
+                        console.log(value);
                         this.setState({
-                           country_id: event.target.value,
+                           country_id: value,
                         });
                      }}
-                     error={this.state.fieldError.country.status}
-                  >
-                     {this.state.Countries.map((country, index) => {
-                        return (
-                           <MenuItem selected key={index} value={country._id}>
-                              {country.country_name}
-                           </MenuItem>
-                        );
-                     })}
-                  </Select>
+                  />
                </FormControl>
 
-               <Box style={styles.box_field}>
+               <Box mt='10px' style={styles.box_field}>
                   <TextField
+                     size='small'
                      name='description'
                      fullWidth
                      value={this.state.description}

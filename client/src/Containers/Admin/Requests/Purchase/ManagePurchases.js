@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, DialogContent, Snackbar, Button } from '@material-ui/core';
+import {
+   Box,
+   DialogContent,
+   Snackbar,
+   Button,
+   LinearProgress,
+} from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import EditPurchase from './EditPurchase';
@@ -40,12 +46,16 @@ export default class ManagePurchases extends Component {
          },
          found: false,
          msg: 'Fetching Data...',
+         dataReceived: false,
       };
       this.closeAlert = () => {
          this.setState({ alert: false });
       };
 
       this.OnEditHandler = (event, rowData) => {
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/request-details', {
                _id: rowData._id,
@@ -55,6 +65,7 @@ export default class ManagePurchases extends Component {
                this.EditData = { ...res.data[0] };
                console.log(this.EditData);
                this.setState({
+                  dataReceived: true,
                   openEdit: true,
                });
             });
@@ -72,6 +83,7 @@ export default class ManagePurchases extends Component {
                this.setState({
                   data: [...this.req],
                   msg: 'No Data Found!',
+                  dataReceived: true,
                });
             })
             .catch((err) => {
@@ -80,6 +92,7 @@ export default class ManagePurchases extends Component {
                this.setState({
                   data: [...this.req],
                   msg: 'No Data Found!',
+                  dataReceived: true,
                });
             });
       };
@@ -119,7 +132,10 @@ export default class ManagePurchases extends Component {
       this.handleClose = () => {
          this.req = [];
          this.setState({
+            openEdit: false,
+            openAdd: false,
             msg: 'Fetching Data...',
+            dataReceived: false,
          });
          axios.get('/request-details').then((RequestDetails) => {
             if (RequestDetails.data[0] !== undefined) {
@@ -169,10 +185,7 @@ export default class ManagePurchases extends Component {
                   this.setState({
                      data: [...this.req],
                   });
-                  this.setState({
-                     openEdit: false,
-                     openAdd: false,
-                  });
+
                   return null;
                });
             } else {
@@ -235,6 +248,9 @@ export default class ManagePurchases extends Component {
                   </Button>
                </Box>
             ) : null}
+            <Box width='90%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <MaterialTable
                title=' '
                columns={this.state.columns}

@@ -10,6 +10,7 @@ import {
    TextField,
    IconButton,
    DialogTitle,
+   LinearProgress,
 } from '@material-ui/core';
 import MaterialTable from 'material-table';
 import Axios from 'axios';
@@ -50,16 +51,21 @@ export default class Purchase extends Component {
             { title: 'Status', field: 'Status' },
          ],
          data: [],
+         PDFData: [],
          raw_materials: [],
          vendors: [],
          measuring_units: [],
          openReport: false,
          openPDF: false,
          openCSV: false,
+         dataReceived: false,
       };
 
       this.ref = React.createRef();
       this.onFilterHandler = () => {
+         this.setState({
+            dataReceived: false,
+         });
          Axios.post('/request-details/request-details-filter', {
             from_date: this.state.from_date,
             to_date: this.state.to_date,
@@ -89,63 +95,81 @@ export default class Purchase extends Component {
                   this.setState({
                      data: [...res.data],
                   });
-               });
-               Axios.post('/measuring-units/measuring-unit', {
-                  _id: record.Measuring_Unit,
-               }).then((MeasuringUnit) => {
-                  console.log(MeasuringUnit);
-                  record.Measuring_Unit =
-                     MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
-                  this.setState({
-                     data: [...res.data],
-                  });
-               });
-               Axios.post('/vendors/vendor', {
-                  _id: record.Vendor,
-               }).then((vendor) => {
-                  if (vendor.data.Vendor) {
-                     console.log(vendor.data.Vendor[0].vendor_name);
-                     record.Vendor = vendor.data.Vendor[0].vendor_name;
-                  } else {
-                     record.Vendor = 'not specified';
-                  }
-                  this.setState({
-                     data: [...res.data],
-                  });
-               });
-               Axios.post('/roles/role', {
-                  _id: record.Created_By.Role_Id,
-               }).then((role) => {
-                  if (role.data.Role[0]) {
-                     record.Role = role.data.Role[0].role_name;
-                  } else {
-                     record.Role = 'not specified';
-                  }
-                  this.setState({
-                     data: [...res.data],
-                  });
-               });
-               if (record.Created_By.Employee_Id !== 'not specified') {
-                  console.log(record.Created_By.Employee_Id);
-                  Axios.post('/employees/employee', {
-                     _id: record.Created_By.Employee_Id,
-                  }).then((employee) => {
-                     if (employee.data.Employee[0]) {
-                        console.log(
-                           employee.data.Employee[0].employee_first_name
-                        );
-                        record.Employee =
-                           employee.data.Employee[0].employee_first_name;
+                  Axios.post('/measuring-units/measuring-unit', {
+                     _id: record.Measuring_Unit,
+                  }).then((MeasuringUnit) => {
+                     console.log(
+                        'Hello----->>',
+                        record.Measuring_Unit,
+                        MeasuringUnit
+                     );
+                     if (
+                        typeof MeasuringUnit.data.MeasuringUnit[0] !==
+                        'undefined'
+                     ) {
+                        record.Measuring_Unit =
+                           MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                      } else {
-                        record.Employee = 'not specified';
+                        record.Measuring_Unit = 'Problem loading';
                      }
                      this.setState({
                         data: [...res.data],
                      });
+                     Axios.post('/vendors/vendor', {
+                        _id: record.Vendor,
+                     }).then((vendor) => {
+                        if (vendor.data.Vendor) {
+                           console.log(vendor.data.Vendor[0].vendor_name);
+                           record.Vendor = vendor.data.Vendor[0].vendor_name;
+                        } else {
+                           record.Vendor = 'not specified';
+                        }
+                        this.setState({
+                           data: [...res.data],
+                        });
+                        Axios.post('/roles/role', {
+                           _id: record.Created_By.Role_Id,
+                        }).then((role) => {
+                           if (role.data.Role[0]) {
+                              record.Role = role.data.Role[0].role_name;
+                           } else {
+                              record.Role = 'not specified';
+                           }
+                           this.setState({
+                              data: [...res.data],
+                           });
+                           if (
+                              record.Created_By.Employee_Id !== 'not specified'
+                           ) {
+                              console.log(record.Created_By.Employee_Id);
+                              Axios.post('/employees/employee', {
+                                 _id: record.Created_By.Employee_Id,
+                              }).then((employee) => {
+                                 if (employee.data.Employee[0]) {
+                                    console.log(
+                                       employee.data.Employee[0]
+                                          .employee_first_name
+                                    );
+                                    record.Employee =
+                                       employee.data.Employee[0].employee_first_name;
+                                 } else {
+                                    record.Employee = 'not specified';
+                                 }
+                                 this.setState({
+                                    data: [...res.data],
+                                    dataReceived: true,
+                                 });
+                              });
+                           } else {
+                              record.Employee = 'not specified';
+                              this.setState({
+                                 dataReceived: true,
+                              });
+                           }
+                        });
+                     });
                   });
-               } else {
-                  record.Employee = 'not specified';
-               }
+               });
 
                return null;
             });
@@ -158,19 +182,23 @@ export default class Purchase extends Component {
       };
    }
    componentDidMount() {
+      this.setState({
+         dataReceived: false,
+      });
       Axios.get('/raw-materials/raw-materials').then((res) => {
          this.setState({
             raw_materials: [...res.data.RawMaterials],
          });
-      });
-      Axios.get('/vendors/vendors').then((res) => {
-         this.setState({
-            vendors: [...res.data.Vendors],
-         });
-      });
-      Axios.get('/measuring-units/measuring-units').then((res) => {
-         this.setState({
-            measuring_units: [...res.data.MeasuringUnits],
+         Axios.get('/vendors/vendors').then((res) => {
+            this.setState({
+               vendors: [...res.data.Vendors],
+            });
+            Axios.get('/measuring-units/measuring-units').then((res) => {
+               this.setState({
+                  measuring_units: [...res.data.MeasuringUnits],
+                  dataReceived: true,
+               });
+            });
          });
       });
    }
@@ -184,6 +212,9 @@ export default class Purchase extends Component {
          >
             <Box fontSize='30px' mb={3}>
                Purchase Report
+            </Box>
+            <Box width='94.2%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
             </Box>
             <PaperBoard>
                <Box style={styles.box} alignContent='center'>
@@ -574,6 +605,11 @@ export default class Purchase extends Component {
                      </Box>
 
                      <Box style={styles.box}>
+                        <Box width='95%'>
+                           {!this.state.dataReceived ? (
+                              <LinearProgress />
+                           ) : null}
+                        </Box>
                         <MaterialTable
                            title=''
                            style={{
@@ -618,6 +654,7 @@ export default class Purchase extends Component {
 
                            <Box marginRight='10px'>
                               <Button
+                                 disabled={!this.state.dataReceived}
                                  variant='contained'
                                  color='primary'
                                  size='large'
@@ -632,12 +669,14 @@ export default class Purchase extends Component {
                            </Box>
                            <Box>
                               <Button
+                                 disabled={!this.state.dataReceived}
                                  variant='contained'
                                  color='primary'
                                  size='large'
                                  onClick={() => {
                                     this.setState({
                                        openPDF: true,
+                                       PDFData: [...this.state.data],
                                     });
                                  }}
                               >
@@ -682,7 +721,7 @@ export default class Purchase extends Component {
                   </DialogTitle>
                   <DialogContent>
                      <PDFViewer style={{ minHeight: '500px' }} width='100%'>
-                        <ReportPDF data={this.state.data} />
+                        <ReportPDF data={this.state.PDFData} />
                      </PDFViewer>
                   </DialogContent>
                </Dialog>

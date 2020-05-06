@@ -4,16 +4,14 @@ import {
    TextField,
    Button,
    FormControl,
-   InputLabel,
-   Select,
    LinearProgress,
-   MenuItem,
 } from '@material-ui/core';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -229,28 +227,29 @@ export default class AddDistributor extends Component {
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
                         display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select Country
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='country'
+                           disableClearable={true}
+                           options={this.state.countries}
+                           getOptionLabel={(option) => option.country_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select Country'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_country}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_country: event.target.value,
+                                 distributor_country: value,
                                  cities: [],
                                  states: [],
                                  distributor_state: '',
@@ -259,62 +258,55 @@ export default class AddDistributor extends Component {
                               });
                               axios
                                  .post('/states/state-country', {
-                                    country_id: event.target.value,
+                                    country_id: value,
                                  })
                                  .then((res) => {
-                                    console.log(res);
+                                    console.log(
+                                       'test ===>',
+                                       this.state.distributor_country
+                                    );
                                     this.setState({
                                        states: [...res.data.state],
                                        dataReceived: true,
                                     });
                                  });
                            }}
-                        >
-                           {this.state.countries.map((country, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={country._id}
-                                 >
-                                    {country.country_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box} marginRight='10px'>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select State
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='state'
+                           disableClearable={true}
+                           options={this.state.states}
+                           getOptionLabel={(option) => option.state_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select State'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_state}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_state: event.target.value,
+                                 distributor_state: value,
                                  distributor_city: '',
                                  cities: [],
                                  dataReceived: false,
                               });
                               axios
                                  .post('/cities/city-state', {
-                                    state_id: event.target.value,
+                                    state_id: value,
                                  })
                                  .then((res) => {
                                     console.log(res);
@@ -324,60 +316,38 @@ export default class AddDistributor extends Component {
                                     });
                                  });
                            }}
-                        >
-                           {this.state.states.map((state, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={state._id}
-                                 >
-                                    {state.state_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                   <Box style={styles.box}>
                      <FormControl
                         size='small'
-                        required
                         variant='outlined'
                         fullWidth
+                        display='flex'
                      >
-                        <InputLabel
-                           style={{
-                              backgroundColor: 'white',
-                              paddingLeft: '2px',
-                              paddingRight: '2px',
-                           }}
-                        >
-                           Select City
-                        </InputLabel>
-                        <Select
-                           required
-                           //variant='outlined'
+                        <Autocomplete
+                           size='small'
+                           id='city'
+                           disableClearable={true}
+                           options={this.state.cities}
+                           getOptionLabel={(option) => option.city_name}
+                           renderInput={(params) => (
+                              <TextField
+                                 {...params}
+                                 required
+                                 label='Select City'
+                                 variant='outlined'
+                              />
+                           )}
                            value={this.state.distributor_city}
-                           onChange={(event) => {
-                              console.log(event.target.value);
+                           onChange={(event, value) => {
+                              console.log(value);
                               this.setState({
-                                 distributor_city: event.target.value,
+                                 distributor_city: value,
                               });
                            }}
-                        >
-                           {this.state.cities.map((city, index) => {
-                              return (
-                                 <MenuItem
-                                    selected
-                                    key={index}
-                                    value={city._id}
-                                 >
-                                    {city.city_name}
-                                 </MenuItem>
-                              );
-                           })}
-                        </Select>
+                        />
                      </FormControl>
                   </Box>
                </Box>

@@ -10,6 +10,7 @@ import {
    Link,
    Dialog,
    DialogContent,
+   LinearProgress,
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
@@ -50,14 +51,17 @@ export default class EditPurchase extends Component {
          logs: [],
          disabled: false,
          label: 'Submit',
+         dataReceived: false,
       };
+
       this.onEditHandler = () => {
          this.setState({
             disabled: true,
             label: 'wait...',
+            dataReceived: false,
          });
          axios
-            .post('/logs/comment9', {
+            .post('/logs/comment', {
                logs: {
                   reqId: props.Purchase._id,
                   from: sessionStorage.getItem('Role ID'),
@@ -72,6 +76,7 @@ export default class EditPurchase extends Component {
                      errors: [...comments.data.errors],
                      disabled: false,
                      label: 'Submit',
+                     dataReceived: true,
                   });
                } else {
                   axios
@@ -91,6 +96,7 @@ export default class EditPurchase extends Component {
                               errors: [...comments.data.errors],
                               disabled: false,
                               label: 'Submit',
+                              dataReceived: true,
                            });
                         } else {
                            this.props.close();
@@ -113,6 +119,9 @@ export default class EditPurchase extends Component {
 
    componentDidMount() {
       console.log('Props: ', this.props.Purchase);
+      this.setState({
+         dataReceived: false,
+      });
       axios.get('/raw-materials/raw-materials').then((res) => {
          console.log(res);
          this.setState((prevState) => {
@@ -122,36 +131,40 @@ export default class EditPurchase extends Component {
             Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
             Raw_Material_Code: this.props.Purchase.Raw_Material_Code,
          });
-      });
-      axios.get('/vendors/vendors').then((res) => {
-         console.log(res);
-         this.setState((prevState) => {
-            prevState.vendors = [...res.data.Vendors];
+         axios.get('/vendors/vendors').then((res) => {
+            console.log(res);
+            this.setState((prevState) => {
+               prevState.vendors = [...res.data.Vendors];
+            });
+            this.setState({
+               Vendor: this.props.Purchase.Vendor,
+            });
+            axios.get('/measuring-units/measuring-units').then((res) => {
+               console.log(res);
+               this.setState((prevState) => {
+                  prevState.measuring_units = [...res.data.MeasuringUnits];
+               });
+               this.setState({
+                  Measuring_Unit: this.props.Purchase.Measuring_Unit,
+               });
+            });
+            console.log(
+               'PProps: ',
+               this.props.Purchase.Quotation_Document_URL[0]
+            );
+            this.setState({
+               _id: this.props.Purchase._id,
+               Quantity: this.props.Purchase.Quantity,
+               Priority: this.props.Purchase.Priority,
+               Due_Date: this.props.Purchase.Due_Date,
+               Comments: this.props.Purchase.Comments,
+               Total_Price: this.props.Purchase.Total_Price
+                  ? this.props.Purchase.Total_Price
+                  : '',
+               quotation: `/uploads/${this.props.Purchase.Quotation_Document_URL}`,
+               dataReceived: true,
+            });
          });
-         this.setState({
-            Vendor: this.props.Purchase.Vendor,
-         });
-      });
-      axios.get('/measuring-units/measuring-units').then((res) => {
-         console.log(res);
-         this.setState((prevState) => {
-            prevState.measuring_units = [...res.data.MeasuringUnits];
-         });
-         this.setState({
-            Measuring_Unit: this.props.Purchase.Measuring_Unit,
-         });
-      });
-      console.log('PProps: ', this.props.Purchase.Quotation_Document_URL[0]);
-      this.setState({
-         _id: this.props.Purchase._id,
-         Quantity: this.props.Purchase.Quantity,
-         Priority: this.props.Purchase.Priority,
-         Due_Date: this.props.Purchase.Due_Date,
-         Comments: this.props.Purchase.Comments,
-         Total_Price: this.props.Purchase.Total_Price
-            ? this.props.Purchase.Total_Price
-            : '',
-         quotation: `/uploads/${this.props.Purchase.Quotation_Document_URL}`,
       });
    }
 
@@ -174,6 +187,9 @@ export default class EditPurchase extends Component {
                   Successful
                </Box>
             ) : null}
+            <Box width='88%' marginBottom='20px'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <Box style={styles.root}>
                <Box display='flex' justifyContent='center'>
                   <Box style={styles.lbox}>

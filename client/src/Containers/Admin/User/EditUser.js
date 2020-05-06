@@ -13,6 +13,8 @@ import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+
 const styles = Styles;
 let display = '';
 
@@ -62,6 +64,18 @@ export default class EditUser extends Component {
             })
             .catch((err) => console.log(err));
       };
+      this.onGetEmployee = (_id) => {
+         axios
+            .post('/employees/employee', {
+               _id,
+            })
+            .then((res) => {
+               console.log(res.data.Employee[0]);
+               this.setState({
+                  employee_id: res.data.Employee[0],
+               });
+            });
+      };
    }
    componentDidMount() {
       if (permissionCheck(this.props, 'Manage Users')) {
@@ -73,8 +87,8 @@ export default class EditUser extends Component {
             axios.get('/employees/employees').then((res) => {
                console.log(res.data.Employees);
                this.setState({ Employees: [...res.data.Employees] });
+               this.onGetEmployee(this.props.user.employee_id);
                this.setState({
-                  employee_id: this.props.user.employee_id,
                   user_name: this.props.user.name,
                   role: this.props.user.role,
                   dataReceived: true,
@@ -109,44 +123,40 @@ export default class EditUser extends Component {
             </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
-                  <FormControl disabled required variant='outlined' fullWidth>
-                     <InputLabel
-                        style={{
-                           backgroundColor: 'white',
-                           paddingLeft: '2px',
-                           paddingRight: '2px',
-                        }}
-                     >
-                        Select Employee
-                     </InputLabel>
-                     <Select
-                        required
-                        //variant='outlined'
+                  <FormControl
+                     size='small'
+                     variant='outlined'
+                     fullWidth
+                     display='flex'
+                  >
+                     <Autocomplete
+                        size='small'
+                        id='employee'
+                        disabled={true}
+                        disableClearable={true}
+                        options={this.state.Employees}
+                        getOptionLabel={(option) => option.employee_first_name}
+                        renderInput={(params) => (
+                           <TextField
+                              {...params}
+                              required
+                              label='Select Employee'
+                              variant='outlined'
+                           />
+                        )}
                         value={this.state.employee_id}
-                        onChange={(event) => {
-                           console.log(event.target.value);
+                        onChange={(event, value) => {
                            this.setState({
-                              employee_id: event.target.value,
+                              employee_id: value,
                            });
                         }}
-                     >
-                        {this.state.Employees.map((Employee, index) => {
-                           return (
-                              <MenuItem
-                                 selected
-                                 key={index}
-                                 value={Employee._id}
-                              >
-                                 {Employee.employee_first_name}
-                              </MenuItem>
-                           );
-                        })}
-                     </Select>
+                     />
                   </FormControl>
                </Box>
                <Box style={styles.box_field}>
                   <TextField
                      disabled
+                     size='small'
                      fullWidth
                      required
                      value={this.state.user_name}
@@ -161,6 +171,7 @@ export default class EditUser extends Component {
                <Box style={{ width: '100%' }}>
                   <Box style={styles.box_field}>
                      <TextField
+                        size='small'
                         fullWidth
                         required
                         value={this.state.password}
@@ -176,6 +187,7 @@ export default class EditUser extends Component {
                   <Box style={styles.box_field}>
                      <TextField
                         fullWidth
+                        size='small'
                         required
                         value={this.state.password2}
                         variant='outlined'
@@ -189,7 +201,7 @@ export default class EditUser extends Component {
                </Box>
 
                <Box style={styles.box_field}>
-                  <FormControl variant='outlined' fullWidth>
+                  <FormControl size='small' variant='outlined' fullWidth>
                      <InputLabel
                         style={{
                            backgroundColor: 'white',

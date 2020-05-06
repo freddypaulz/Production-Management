@@ -6,6 +6,7 @@ import {
    Select,
    FormControl,
    InputLabel,
+   LinearProgress,
    MenuItem,
 } from '@material-ui/core';
 import axios from 'axios';
@@ -39,6 +40,7 @@ export default class AddPurchase extends Component {
          materials: [],
          vendors: [],
          code: '',
+         dataReceived: false,
          to: '',
       };
 
@@ -47,6 +49,9 @@ export default class AddPurchase extends Component {
          console.log(this.state.file);
          if (this.state.file) {
             formData.append('file', this.state.file);
+            this.setState({
+               dataReceived: false,
+            });
             axios
                .post('/request-details/upload', formData, {
                   headers: {
@@ -72,6 +77,9 @@ export default class AddPurchase extends Component {
 
       this.onAddHandler = (file) => {
          console.log('Add:', file);
+         this.setState({
+            dataReceived: false,
+         });
          axios
             .post('/request-details/request-detail-add', {
                Raw_Material_Id: this.state.Raw_Material_Id,
@@ -106,6 +114,7 @@ export default class AddPurchase extends Component {
                if (res.data.errors.length > 0) {
                   this.setState({
                      errors: [...res.data.errors],
+                     dataReceived: true,
                   });
                } else {
                   this.setState({
@@ -130,22 +139,26 @@ export default class AddPurchase extends Component {
    }
 
    componentDidMount() {
+      this.setState({
+         dataReceived: false,
+      });
       axios.get('/raw-materials/raw-materials').then((res) => {
          console.log(res);
          this.setState({
             materials: [...res.data.RawMaterials],
          });
-      });
-      axios.get('/vendors/vendors').then((res) => {
-         console.log(res);
-         this.setState({
-            vendors: [...res.data.Vendors],
-         });
-      });
-      axios.get('/measuring-units/measuring-units').then((res) => {
-         console.log(res);
-         this.setState({
-            measuring_units: [...res.data.MeasuringUnits],
+         axios.get('/vendors/vendors').then((res) => {
+            console.log(res);
+            this.setState({
+               vendors: [...res.data.Vendors],
+            });
+            axios.get('/measuring-units/measuring-units').then((res) => {
+               console.log(res);
+               this.setState({
+                  measuring_units: [...res.data.MeasuringUnits],
+                  dataReceived: true,
+               });
+            });
          });
       });
    }
@@ -169,6 +182,9 @@ export default class AddPurchase extends Component {
                   Successful
                </Box>
             ) : null}
+            <Box width='88%' marginBottom='20px'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
+            </Box>
             <Box style={styles.root}>
                <Box display='flex' justifyContent='center'>
                   <Box style={styles.lbox}>

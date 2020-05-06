@@ -14,6 +14,7 @@ import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
 import axios from 'axios';
 import Styles from '../../../Components/styles/FormStyles';
 import errorCheck from './CityValidation';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import permissionCheck from '../../../Components/Auth/permissionCheck';
 
 const styles = Styles;
@@ -134,25 +135,32 @@ export default class AddUser extends Component {
                      helperText={this.state.fieldError.city_name.msg}
                   ></TextField>
                </Box>
-               <FormControl required variant='outlined' size='small' fullWidth>
-                  <InputLabel
-                     style={{
-                        backgroundColor: 'white',
-                        paddingLeft: '2px',
-                        paddingRight: '2px',
-                     }}
-                  >
-                     Select State
-                  </InputLabel>
-                  <Select
-                     name='state'
-                     style={styles.box_field}
-                     required
+
+               <FormControl
+                  size='small'
+                  variant='outlined'
+                  fullWidth
+                  display='flex'
+               >
+                  <Autocomplete
+                     size='small'
+                     id='state'
+                     disableClearable={true}
+                     options={this.state.states}
+                     getOptionLabel={(option) => option.state_name}
+                     renderInput={(params) => (
+                        <TextField
+                           {...params}
+                           required
+                           label='Select State'
+                           variant='outlined'
+                        />
+                     )}
                      value={this.state.state_id}
-                     onChange={(event) => {
-                        console.log(event.target.value);
+                     onChange={(event, value) => {
+                        console.log(value);
                         this.setState({
-                           state_id: event.target.value,
+                           state_id: value,
                         });
                         this.setState((prevState) => {
                            prevState.fieldError.state.status = false;
@@ -162,18 +170,10 @@ export default class AddUser extends Component {
                         });
                      }}
                      error={this.state.fieldError.state.status}
-                  >
-                     {this.state.states.map((state, index) => {
-                        return (
-                           <MenuItem selected key={index} value={state._id}>
-                              {state.state_name}
-                           </MenuItem>
-                        );
-                     })}
-                  </Select>
+                  />
                </FormControl>
 
-               <Box style={styles.box_field}>
+               <Box mt='10px' style={styles.box_field}>
                   <TextField
                      size='small'
                      name='description'
@@ -195,8 +195,6 @@ export default class AddUser extends Component {
                      helperText={this.state.fieldError.description.msg}
                   />
                </Box>
-               <Divider />
-               <Box></Box>
             </PaperBoard>
             <Box
                display=' flex'

@@ -3,7 +3,13 @@ import { Charts } from '../../../../Components/Charts/Charts';
 import styles from '../../../../Components/styles/FormStyles';
 import { PaperBoard } from '../../../../Components/PaperBoard/PaperBoard';
 import { Datepick } from '../../../../Components/Date/Datepick';
-import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
+import {
+   Box,
+   Button,
+   Dialog,
+   DialogContent,
+   LinearProgress,
+} from '@material-ui/core';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -16,90 +22,108 @@ export default class ProductionAndSales extends Component {
       SalesData: [],
       ChartContent: [],
       ChartOpen: false,
-      end_date_disabled: true
+      end_date_disabled: true,
+      dataReceived: false,
    };
    onReportHandler = () => {
       this.setState({
          ChartContent: [],
          ProductionData: [],
-         SalesData: []
+         SalesData: [],
+         dataReceived: false,
       });
-
-      // this.setState({
-      //    ChartOpen: true
-      // });
-      //sales
 
       axios
          .post('/sales/sale', {
             start_date: this.state.start_date,
-            end_date: this.state.end_date
+            end_date: this.state.end_date,
          })
-         .then(res => {
+         .then((res) => {
             console.log(res.data);
-            res.data.Sale.map(Sale => {
+            res.data.Sale.map((Sale) => {
                this.setState({
-                  label: 'Sales'
+                  label: 'Sales',
                });
-               this.setState(prevState => {
+               this.setState((prevState) => {
                   prevState.SalesData.push([
-                     Sale.Product_ID +
+                     new moment(Sale.Selling_Date).format('MM-YYYY') +
                         '-' +
-                        new moment(Sale.Selling_Date).format('MMM-YYYY'),
-                     Sale.Quantity
+                        Sale.Product_ID,
+                     Sale.Quantity,
                   ]);
                });
                return null;
             });
-            this.setState(prevState => {
+            console.log(
+               `sort ====> ${this.state.SalesData.sort((a, b) => {
+                  return b[0] - a[0];
+               }).reverse()} `
+            );
+            this.setState((prevState) => {
                prevState.ChartContent.push({
                   label: prevState.label,
-                  data: prevState.SalesData
+                  data: prevState.SalesData.sort((a, b) => {
+                     return b[0] - a[0];
+                  }),
                });
             });
             axios
                .post('/productions/production', {
                   start_date: this.state.start_date,
-                  end_date: this.state.end_date
+                  end_date: this.state.end_date,
                })
-               .then(res => {
+               .then((res) => {
                   console.log(res.data);
-                  res.data.Production.map(Production => {
+                  res.data.Production.map((Production) => {
                      this.setState({
-                        label: 'Production'
+                        label: 'Production',
                      });
-                     this.setState(prevState => {
+                     this.setState((prevState) => {
                         prevState.ProductionData.push([
-                           //new moment(Production.date).format('MM-YYYY'),
-                           Production.Product_ID +
+                           new moment(Production.Manufacture_Date).format(
+                              'MM-YYYY'
+                           ) +
                               '-' +
-                              new moment(Production.Manufacture_Date).format(
-                                 'MMM-YYYY'
-                              ),
-                           Production.Quantity
+                              Production.Product_ID,
+                           Production.Quantity,
                         ]);
                      });
                      return null;
                   });
-                  this.setState(prevState => {
+                  console.log(
+                     `sort ====> ${this.state.ProductionData.sort((a, b) => {
+                        return b[0] - a[0];
+                     }).reverse()} `
+                  );
+                  this.setState((prevState) => {
                      prevState.ChartContent.push({
                         label: prevState.label,
-                        data: prevState.ProductionData
+                        data: prevState.ProductionData.sort((a, b) => {
+                           return b[0] - a[0];
+                        }),
                      });
                   });
                   this.setState({
-                     ChartOpen: true
+                     ChartOpen: true,
+                     dataReceived: true,
                   });
                   console.log(this.state.ChartContent);
                });
          });
    };
-   componentDidMount() {}
+   componentDidMount() {
+      this.setState({
+         dataReceived: true,
+      });
+   }
    render() {
       return (
          <Box style={styles.box}>
             <Box fontSize='30px' mb={3}>
                Production And Sales Report
+            </Box>
+            <Box width='94%'>
+               {!this.state.dataReceived ? <LinearProgress /> : null}
             </Box>
             <PaperBoard>
                <Box style={styles.box_field}>
@@ -111,10 +135,10 @@ export default class ProductionAndSales extends Component {
                         value={this.state.start_date}
                         minDate={new Date('01-01-1990')}
                         maxDate={new Date()}
-                        setDate={date => {
+                        setDate={(date) => {
                            this.setState({
                               start_date: date.startOf('month'),
-                              end_date_disabled: false
+                              end_date_disabled: false,
                            });
                         }}
                      />
@@ -128,9 +152,9 @@ export default class ProductionAndSales extends Component {
                         value={this.state.end_date}
                         minDate={this.state.start_date}
                         maxDate={new moment().endOf('month')}
-                        setDate={date => {
+                        setDate={(date) => {
                            this.setState({
-                              end_date: date.endOf('month')
+                              end_date: date.endOf('month'),
                            });
                         }}
                      />
@@ -165,14 +189,13 @@ export default class ProductionAndSales extends Component {
                   <Charts
                      cancel={() => {
                         this.setState({
-                           ChartOpen: false
+                           ChartOpen: false,
                         });
                      }}
                      ChartContent={this.state.ChartContent}
                   />
                </DialogContent>
             </Dialog>
-            {/* <Charts ChartContent={this.state.ChartContent} /> */}
          </Box>
       );
    }
