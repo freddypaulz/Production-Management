@@ -5,7 +5,7 @@ import {
    TableBody,
    TableHeader,
    TableCell,
-   DataTableCell
+   DataTableCell,
 } from '@david.kucsai/react-pdf-table';
 import moment from 'moment';
 // Create styles
@@ -17,23 +17,23 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       fontSize: 10,
       width: '100%',
-      padding: 20
+      padding: 20,
    },
    section: {
       margin: 10,
       padding: 10,
-      flexGrow: 1
-   }
+      flexGrow: 1,
+   },
 });
 // Create Document Component
-export const ReportPDF = props => (
+export const ReportPDF = (props) => (
    <Document
       title={`Purchase Report ${new moment().format('DD/MM/YYYY HH:m:s')}`}
    >
       <Page orientation='landscape' size='A4' style={styles.page}>
          <Text
             style={{
-               textAlign: 'center'
+               textAlign: 'center',
             }}
          >
             Purcase Report
@@ -42,7 +42,7 @@ export const ReportPDF = props => (
             style={
                (styles.section,
                {
-                  marginTop: '10'
+                  marginTop: '10',
                })
             }
          >
@@ -57,7 +57,9 @@ export const ReportPDF = props => (
                   <TableCell style={{ padding: '5' }}>Priority</TableCell>
                   <TableCell style={{ padding: '5' }}>Status</TableCell>
                   <TableCell style={{ padding: '5' }}>Vendor</TableCell>
-                  <TableCell style={{ padding: '5' }}>Total Price</TableCell>
+                  <TableCell
+                     style={{ padding: '5' }}
+                  >{`Total Price (${props.currency_type})`}</TableCell>
                   <TableCell style={{ padding: '5' }}>Created By</TableCell>
                   <TableCell style={{ padding: '5' }}>Designation</TableCell>
                   <TableCell style={{ padding: '5' }}>Date</TableCell>
@@ -65,47 +67,47 @@ export const ReportPDF = props => (
                <TableBody fontSize='10'>
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Raw_Material_Name}
+                     getContent={(r) => r.Raw_Material_Name}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Raw_Material_Code}
+                     getContent={(r) => r.Raw_Material_Code}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Quantity}
+                     getContent={(r) => r.Quantity}
                   />
                   <DataTableCell
                      style={{ padding: '5', width: '10' }}
-                     getContent={r => r.Measuring_Unit}
+                     getContent={(r) => r.Measuring_Unit}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Priority}
+                     getContent={(r) => r.Priority}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Status}
+                     getContent={(r) => r.Status}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Vendor}
+                     getContent={(r) => r.Vendor}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Total_Price}
+                     getContent={(r) => r.Total_Price}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Employee}
+                     getContent={(r) => r.Employee}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.Role}
+                     getContent={(r) => r.Role}
                   />
                   <DataTableCell
                      style={{ padding: '5' }}
-                     getContent={r => r.date}
+                     getContent={(r) => r.date}
                   />
                </TableBody>
             </Table>

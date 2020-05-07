@@ -12,10 +12,13 @@ export default class ReportCSV extends Component {
          { label: 'Priority', key: 'Priority' },
          { label: 'Status', key: 'Status' },
          { label: 'Vendor', key: 'Vendor' },
-         { label: 'Total Price', key: 'Total_Price' },
+         {
+            label: `Total Price (${this.props.currency_type})`,
+            key: 'Total_Price',
+         },
          { label: 'Created By', key: 'Employee' },
          { label: 'Designation', key: 'Role' },
-         { label: 'Created Date', key: 'date' }
+         { label: 'Created Date', key: 'date' },
       ];
    }
    render() {
@@ -29,7 +32,7 @@ export default class ReportCSV extends Component {
                backgroundColor: '#3f51b5',
                padding: '10px',
                color: 'white',
-               borderRadius: '5px'
+               borderRadius: '5px',
             }}
          >
             Click to download

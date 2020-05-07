@@ -11,6 +11,7 @@ import {
    Dialog,
    DialogContent,
    LinearProgress,
+   InputAdornment,
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
@@ -38,6 +39,7 @@ export default class EditPurchase extends Component {
          Status: '',
          Comments: '',
          Total_Price: '',
+         currency_type: '',
          Vendor: '',
          errors: [],
          success: false,
@@ -147,6 +149,15 @@ export default class EditPurchase extends Component {
                this.setState({
                   Measuring_Unit: this.props.Purchase.Measuring_Unit,
                });
+               axios
+                  .post('/currency/currency', {
+                     _id: '5eb2a1fcfcdc3a03f401855e',
+                  })
+                  .then((res) => {
+                     this.setState({
+                        currency_type: res.data.Currency[0].currency_type,
+                     });
+                  });
             });
             console.log(
                'PProps: ',
@@ -396,6 +407,13 @@ export default class EditPurchase extends Component {
                                     this.setState({
                                        Total_Price: event.target.value,
                                     });
+                                 }}
+                                 InputProps={{
+                                    endAdornment: (
+                                       <InputAdornment position='start'>
+                                          {this.state.currency_type}
+                                       </InputAdornment>
+                                    ),
                                  }}
                               ></TextField>
                            </Box>

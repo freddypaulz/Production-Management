@@ -19,13 +19,13 @@ mongoose
          useNewUrlParser: true,
          useCreateIndex: true,
          useUnifiedTopology: true,
-         useFindAndModify: false
+         useFindAndModify: false,
       }
    )
    .then(() => {
       console.log('DB connected');
    })
-   .catch(err => {
+   .catch((err) => {
       console.log(err);
    });
 
@@ -72,6 +72,7 @@ app.use(
    '/product-code',
    require('./routes/administrator/configurations/productCode')
 );
+app.use('/currency', require('./routes/administrator/configurations/currency'));
 app.use('/productions', require('./routes/administrator/reports/productions'));
 app.use('/sales', require('./routes/administrator/reports/sales'));
 

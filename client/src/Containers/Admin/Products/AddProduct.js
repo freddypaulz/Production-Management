@@ -7,6 +7,7 @@ import {
    InputLabel,
    Select,
    MenuItem,
+   InputAdornment,
    LinearProgress,
 } from '@material-ui/core';
 import { PaperBoard } from '../../../Components/PaperBoard/PaperBoard';
@@ -23,6 +24,7 @@ export default class AddProducts extends Component {
          product_name: '',
          product_code: '',
          product_price: '',
+         currency_type: '',
          product_measuring_unit: '',
          product_registration_date: null,
          description: '',
@@ -74,6 +76,15 @@ export default class AddProducts extends Component {
                measuring_units: [...res.data.MeasuringUnits],
                dataReceived: true,
             });
+            axios
+               .post('/currency/currency', {
+                  _id: '5eb2a1fcfcdc3a03f401855e',
+               })
+               .then((res) => {
+                  this.setState({
+                     currency_type: res.data.Currency[0].currency_type,
+                  });
+               });
          });
       }
    }
@@ -103,6 +114,7 @@ export default class AddProducts extends Component {
                <Box style={styles.box_field}>
                   <Box style={styles.box} marginRight='10px'>
                      <TextField
+                        size='small'
                         fullWidth
                         required
                         variant='outlined'
@@ -118,6 +130,7 @@ export default class AddProducts extends Component {
                   </Box>
                   <Box style={styles.box}>
                      <TextField
+                        size='small'
                         fullWidth
                         required
                         value={this.state.product_code}
@@ -134,6 +147,7 @@ export default class AddProducts extends Component {
                </Box>
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
                      required
                      value={this.state.product_price}
@@ -145,12 +159,19 @@ export default class AddProducts extends Component {
                            product_price: event.target.value,
                         });
                      }}
+                     InputProps={{
+                        endAdornment: (
+                           <InputAdornment position='start'>
+                              {this.state.currency_type}
+                           </InputAdornment>
+                        ),
+                     }}
                   ></TextField>
                </Box>
                <Datepick
                   id='1'
                   Name='Product Registration Date'
-                  Req='true'
+                  Req={true}
                   marginBottom={'10px'}
                   minDate='01/01/1990'
                   maxDate={new Date()}
@@ -161,7 +182,7 @@ export default class AddProducts extends Component {
                      });
                   }}
                />
-               <FormControl required variant='outlined' fullWidth>
+               <FormControl size='small' required variant='outlined' fullWidth>
                   <InputLabel
                      style={{
                         backgroundColor: 'white',
@@ -200,8 +221,8 @@ export default class AddProducts extends Component {
 
                <Box style={styles.box_field}>
                   <TextField
+                     size='small'
                      fullWidth
-                     required
                      value={this.state.description}
                      variant='outlined'
                      label='Description'

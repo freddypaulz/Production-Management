@@ -3,6 +3,7 @@ import { Box } from '@material-ui/core';
 import Dashboard from '../../../Components/Dashboard/Dashboard';
 import auth from '../../../Components/Auth/auth';
 import ProductCode from './ProductCode/ProductCode';
+import Currency from './Currency/Currency';
 import { Route } from 'react-router-dom';
 import AppBar from '../../../Components/AppBar/AppBar';
 
@@ -11,10 +12,10 @@ export default class Configurations extends Component {
       super(props);
       this.state = {
          width: '17vw',
-         dashboardItems: []
+         dashboardItems: [],
       };
       this.permissions = JSON.parse(sessionStorage.getItem('permissions'));
-      this.contents = ['Product Code'];
+      this.contents = ['Product Code', 'Currency'];
       this.logout = () => {
          if (auth.logout()) {
             this.props.history.push('/');
@@ -25,29 +26,29 @@ export default class Configurations extends Component {
       };
       this.dashboardMin = () => {
          this.setState({
-            width: '.1px'
+            width: '.1px',
          });
       };
       this.dashboardMax = () => {
          this.setState({
-            width: '17vw'
+            width: '17vw',
          });
       };
    }
 
    componentDidMount() {
-      this.contents.map(content => {
+      this.contents.map((content) => {
          if (
-            this.permissions.find(el => {
+            this.permissions.find((el) => {
                return el === content ? true : false;
             })
          ) {
             let path = content.toLowerCase().replace(/ /g, '-');
             this.setState({});
-            this.setState(prevState => {
+            this.setState((prevState) => {
                prevState.dashboardItems.push({
                   Name: content,
-                  Path: path
+                  Path: path,
                });
             });
          }
@@ -83,6 +84,11 @@ export default class Configurations extends Component {
                      exact
                      path='/home/configurations/product-code'
                      component={ProductCode}
+                  />
+                  <Route
+                     exact
+                     path='/home/configurations/currency'
+                     component={Currency}
                   />
                </Box>
             </Box>

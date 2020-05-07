@@ -11,6 +11,7 @@ import {
    IconButton,
    DialogTitle,
    LinearProgress,
+   InputAdornment,
 } from '@material-ui/core';
 import MaterialTable from 'material-table';
 import Axios from 'axios';
@@ -40,6 +41,7 @@ export default class Purchase extends Component {
          raw_material_code: '',
          status: '',
          vendor: '',
+         currency_type: '',
          from_total_price: '',
          to_total_price: '',
          disabled: false,
@@ -197,6 +199,13 @@ export default class Purchase extends Component {
                this.setState({
                   measuring_units: [...res.data.MeasuringUnits],
                   dataReceived: true,
+               });
+               Axios.post('/currency/currency', {
+                  _id: '5eb2a1fcfcdc3a03f401855e',
+               }).then((res) => {
+                  this.setState({
+                     currency_type: res.data.Currency[0].currency_type,
+                  });
                });
             });
          });
@@ -507,6 +516,13 @@ export default class Purchase extends Component {
                               disabled: true,
                            });
                         }}
+                        InputProps={{
+                           endAdornment: (
+                              <InputAdornment position='start'>
+                                 {this.state.currency_type}
+                              </InputAdornment>
+                           ),
+                        }}
                      ></TextField>
                   </Box>
                   <Box style={styles.box}>
@@ -520,6 +536,13 @@ export default class Purchase extends Component {
                         variant='outlined'
                         label='To Total Price'
                         type='text'
+                        InputProps={{
+                           endAdornment: (
+                              <InputAdornment position='start'>
+                                 {this.state.currency_type}
+                              </InputAdornment>
+                           ),
+                        }}
                         onChange={(event) => {
                            this.setState({
                               to_total_price: event.target.value,
@@ -721,7 +744,10 @@ export default class Purchase extends Component {
                   </DialogTitle>
                   <DialogContent>
                      <PDFViewer style={{ minHeight: '500px' }} width='100%'>
-                        <ReportPDF data={this.state.PDFData} />
+                        <ReportPDF
+                           currency_type={this.state.currency_type}
+                           data={this.state.PDFData}
+                        />
                      </PDFViewer>
                   </DialogContent>
                </Dialog>
@@ -770,6 +796,7 @@ export default class Purchase extends Component {
                               'DD/MM/YYYY HH:m:s'
                            )}.csv`}
                            data={this.state.data}
+                           currency_type={this.state.currency_type}
                         />
                      </Box>
                   </DialogContent>

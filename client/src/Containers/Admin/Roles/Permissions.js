@@ -21,6 +21,7 @@ const Permissions = [
    { name: 'Purchase Report', value: false, component: 'reports' },
    { name: 'Production and Sales Report', value: false, component: 'reports' },
    { name: 'Product Code', value: false, component: 'configurations' },
+   { name: 'Currency', value: false, component: 'configurations' },
    { name: 'Manage Purchase', value: false, component: 'purchase' },
    { name: 'Manage Purchase Wastages', value: false, component: 'purchase' },
    { name: 'Manage Purchase Stocks', value: false, component: 'purchase' },
@@ -30,7 +31,7 @@ const Permissions = [
    {
       name: 'Manage Raw Material Request',
       value: false,
-      component: 'production'
+      component: 'production',
    },
    { name: 'Manage Wastage', value: false, component: 'production' },
    { name: 'Manage Unit Request', value: false, component: 'production' },
@@ -38,7 +39,7 @@ const Permissions = [
    { name: 'Manage Sales', value: false, component: 'production' },
    { name: 'Manage Product Stock', value: false, component: 'production' },
    { name: 'Manage Raw Material Stock', value: false, component: 'production' },
-   { name: 'Manage Unit', value: false, component: 'production' }
+   { name: 'Manage Unit', value: false, component: 'production' },
 ];
 
 export default Permissions;
