@@ -2,37 +2,37 @@ const mongoose = require("mongoose");
 const Production_Schema = mongoose.Schema({
   Product_ID: {
     type: String,
-    required: true
+    required: true,
   },
   Product_Name: {
     type: String,
-    required: true
+    // required: true
   },
   Batch_Id: {
     type: String,
     unique: true,
-    required: true
+    required: true,
   },
   Quantity: {
     type: Number,
-    required: true
+    required: true,
   },
   Measuring_Unit: {
     type: String,
-    required: true
+    required: true,
   },
   Expiry_Duration_Days: {
     type: Number,
-    required: true
+    required: true,
   },
   Manufacture_Date: {
     type: Date,
-    required: true
+    required: true,
   },
   Status: {
-    type: String
+    type: String,
   },
-  date: { type: Date, default: Date.now }
+  date: { type: Date, default: Date.now },
 });
 
 const Production = mongoose.model("Production", Production_Schema);

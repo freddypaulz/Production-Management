@@ -6,18 +6,20 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../../styles/FormStyles";
 import { Datepick } from "../../../../Components/Date/Datepick";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class AddWastage extends Component {
   constructor(props) {
@@ -35,68 +37,119 @@ export default class AddWastage extends Component {
       Measuring_Unit: "",
       Wastage_Date: null,
       Description: "",
+      Avilable_Stock: "",
       errors: [],
       openAdd: false,
       success: false,
       materials: [],
       products: [],
+      material: [],
+      productlist: [],
       measuring_units: [],
-      a_id: ""
+      materialRecord: [],
+      ProductRecord: [],
+      a_id: "",
+      disable: true,
+      subdisplay: false,
+      progress: false,
     };
     this.onAddHandler = () => {
-      console.log("Ready to add");
-      axios
-        .post("/wastage/add", {
-          // _id: this.state._id,
-          Wastage_Type: this.state.Wastage_Type,
-          Product_Name: this.state.Product_Name,
-          Raw_Material_Id: this.state.Raw_Material_Id,
-          Quantity: this.state.Quantity,
-          Product_ID: this.state.Product_ID,
-          raw_material_code: this.state.raw_material_code,
-          Id_Type: this.state.Id_Type,
-          Id: this.state.Id,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Wastage_Date: this.state.Wastage_Date,
-          Description: this.state.Description
-        })
-        .then(res => {
-          // // if (res.data.errors.length > 0) {
-          console.log(res);
-          // this.setState({
-          //   errors: [...res.data.errors],
-          //   success: false
-          // });
-          // } else {
-          this.props.cancel();
-          // }
+      if (
+        this.state.materialRecord !== null &&
+        this.state.Quantity !== "" &&
+        this.state.Id_Type !== "" &&
+        this.state.Id[0].id !== "" &&
+        this.state.Wastage_Date !== null &&
+        this.state.Description !== ""
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
         });
-      //.catch(err => console.log(err));
+        axios
+          .post("/wastage/add", {
+            // _id: this.state._id,
+            Wastage_Type: this.state.Wastage_Type,
+            Product_Name: this.state.Product_Name,
+            Raw_Material_Id: this.state.Raw_Material_Id,
+            Quantity: this.state.Quantity,
+            Product_ID: this.state.Product_ID,
+            raw_material_code: this.state.raw_material_code,
+            Id_Type: this.state.Id_Type,
+            Id: this.state.Id,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Wastage_Date: this.state.Wastage_Date,
+            Description: this.state.Description,
+          })
+          .then((res) => {
+            this.setState({
+              progress: true,
+            });
+            this.props.cancel();
+          });
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
+    };
+
+    this.getMaterialName = (id) => {
+      let temp = id;
+      this.state.material.map((material) => {
+        if (material._id === id) {
+          temp = material.raw_material_name;
+        }
+        return null;
+      });
+      return temp;
+    };
+    this.getProductName = (id) => {
+      let temp = id;
+      this.state.productlist.map((product) => {
+        if (product._id === id) {
+          temp = product.product_name;
+        }
+        return null;
+      });
+      return temp;
     };
   }
   componentDidMount() {
-    console.log("material");
-    axios.get("/raw-material").then(res => {
+    axios.get("/production-raw-material-stock").then((res) => {
+      console.log("rmstock", res.data);
+      this.setState({
+        materials: [...res.data],
+      });
+    });
+    axios.get("/production-stock/stock").then((res) => {
+      console.log("products", res.data);
+      this.setState({ products: [...res.data] });
+    });
+    axios.get("/raw-materials/raw-materials").then((res) => {
       console.log(res);
       this.setState({
-        materials: [...res.data.RawMaterials]
+        material: [...res.data.RawMaterials],
       });
-      // console.log("Product: ", this.state.products);
+    });
+    // axios.get("/raw-material").then((res) => {
+    //   console.log(res);
+    //   this.setState({
+    //     materials: [...res.data.RawMaterials],
+    //   });
+    //   // console.log("Product: ", this.state.products);
+    // });
+
+    axios.get("/products/products").then((res) => {
+      this.setState({
+        productlist: [...res.data.Products],
+      });
+      console.log("Product: ", this.state.productlist);
     });
 
-    axios.get("/products/products").then(res => {
-      console.log(res);
-      this.setState({
-        products: [...res.data.Products]
-      });
-      // console.log("Product: ", this.state.products);
-    });
-
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
 
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
     });
   }
@@ -124,6 +177,18 @@ export default class AddWastage extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
                     <FormControl
@@ -136,7 +201,7 @@ export default class AddWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Wastage Type
@@ -146,9 +211,10 @@ export default class AddWastage extends Component {
                         required
                         name="Wastage_Type"
                         value={this.state.Wastage_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Wastage_Type: event.target.value
+                            Wastage_Type: event.target.value,
+                            disable: true,
                           });
                         }}
                       >
@@ -170,11 +236,11 @@ export default class AddWastage extends Component {
                         fullWidth
                         size="small"
                       >
-                        <InputLabel
+                        {/* <InputLabel
                           style={{
                             backgroundColor: "white",
                             paddingLeft: "2px",
-                            paddingRight: "2px"
+                            paddingRight: "2px",
                           }}
                         >
                           Product Name
@@ -184,13 +250,17 @@ export default class AddWastage extends Component {
                           required
                           name="Product_Name"
                           value={this.state.Product_Name}
-                          onChange={event => {
+                          onChange={(event) => {
                             let prodCode;
                             let measuring;
-                            this.state.products.map(product => {
-                              if (product._id === event.target.value) {
-                                prodCode = product.product_code;
-                                measuring = product.product_measuring_unit;
+                            let availablestock;
+
+                            this.state.products.map((product) => {
+                              if (product.Product_Name === event.target.value) {
+                                prodCode = product.Product_ID;
+                                measuring = product.Measuring_Unit;
+                                availablestock = product.Quantity;
+
                                 console.log("Procode: ", prodCode);
                               }
                               return null;
@@ -198,22 +268,64 @@ export default class AddWastage extends Component {
                             this.setState({
                               Product_Name: event.target.value,
                               Product_ID: prodCode,
-                              Measuring_Unit: measuring
+                              Measuring_Unit: measuring,
+                              Available_Stock: availablestock,
+                              disable: true,
                             });
                           }}
                         >
                           {this.state.products.map((product, index) => {
                             return (
+                              // <MenuItem
+                              //   //selected
+                              //   key={index}
+                              //   value={product.Product_Name}
+                              // >
+                              //   {product.Product_Name}
+                              // </MenuItem>
                               <MenuItem
-                                //selected
                                 key={index}
-                                value={product._id}
+                                value={product.Product_Name}
                               >
-                                {product.product_name}
+                                {this.state.productlist.map((list, index) => {
+                                  if (product.Product_Name === list._id) {
+                                    return list.product_name;
+                                  }
+                                  return null;
+                                })}
                               </MenuItem>
                             );
                           })}
-                        </Select>
+                        </Select> */}
+                        <Autocomplete
+                          options={this.state.products}
+                          autoHighlight={true}
+                          value={this.state.ProductRecord}
+                          getOptionLabel={(option) =>
+                            this.getProductName(option.Product_Name)
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Product Name"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                          onChange={(event, value) => {
+                            if (value !== null) {
+                              this.setState({
+                                ProductRecord: value,
+                                Product_Name: value.Product_Name,
+                                Product_ID: value.Product_ID,
+                                Measuring_Unit: value.Measuring_Unit,
+                                Available_Stock: value.Quantity,
+                              });
+                            }
+
+                            console.log("Product:", value);
+                          }}
+                        />
                       </FormControl>
                     ) : (
                       <FormControl
@@ -222,11 +334,11 @@ export default class AddWastage extends Component {
                         fullWidth
                         size="small"
                       >
-                        <InputLabel
+                        {/* <InputLabel
                           style={{
                             backgroundColor: "white",
                             paddingLeft: "2px",
-                            paddingRight: "2px"
+                            paddingRight: "2px",
                           }}
                         >
                           Material Name
@@ -236,14 +348,18 @@ export default class AddWastage extends Component {
                           required
                           name="Raw_Material_Id"
                           value={this.state.Raw_Material_Id}
-                          onChange={event => {
+                          onChange={(event) => {
                             let materialCode;
                             let Measuring;
-                            this.state.materials.map(material => {
-                              if (material._id === event.target.value) {
-                                materialCode = material.raw_material_code;
-                                Measuring =
-                                  material.raw_material_measuring_unit;
+                            let availablestock;
+
+                            this.state.materials.map((material) => {
+                              if (
+                                material.Raw_Material_Id === event.target.value
+                              ) {
+                                materialCode = material.Raw_Material_Code;
+                                Measuring = material.Measuring_Unit;
+                                availablestock = material.Quantity;
                                 console.log("code: ", materialCode);
                               }
                               return null;
@@ -251,22 +367,63 @@ export default class AddWastage extends Component {
                             this.setState({
                               Raw_Material_Id: event.target.value,
                               raw_material_code: materialCode,
-                              Measuring_Unit: Measuring
+                              Measuring_Unit: Measuring,
+                              Available_Stock: availablestock,
+
+                              disable: true,
                             });
                           }}
                         >
-                          {this.state.materials.map((material, index) => {
+                          {this.state.materials.map((material1, index) => {
                             return (
                               <MenuItem
-                                //selected
                                 key={index}
-                                value={material._id}
+                                value={material1.Raw_Material_Id}
                               >
-                                {material.raw_material_name}
+                                {this.state.material.map((material, index) => {
+                                  if (
+                                    material1.Raw_Material_Id === material._id
+                                  ) {
+                                    return material.raw_material_name;
+                                  }
+                                  return null;
+                                })}
                               </MenuItem>
                             );
                           })}
-                        </Select>
+                        </Select> */}
+                        <Autocomplete
+                          options={this.state.materials}
+                          autoHighlight={true}
+                          value={this.state.materialRecord}
+                          getOptionLabel={(option) =>
+                            this.getMaterialName(option.Raw_Material_Id)
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Raw Material"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                          onChange={(event, value) => {
+                            console.log("materialRecord:", value);
+                            console.log(
+                              "stateRecord:",
+                              this.state.raw_material_code
+                            );
+                            if (value !== null) {
+                              this.setState({
+                                materialRecord: value,
+                                Raw_Material_Id: value.Raw_Material_Id,
+                                raw_material_code: value.Raw_Material_Code,
+                                Measuring_Unit: value.Measuring_Unit,
+                                Available_Stock: value.Quantity,
+                              });
+                            }
+                          }}
+                        />
                       </FormControl>
                     )}
                   </Box>
@@ -279,9 +436,10 @@ export default class AddWastage extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Quantity: event.target.value
+                          Quantity: event.target.value,
+                          disable: true,
                         });
                       }}
                     ></TextField>
@@ -300,7 +458,7 @@ export default class AddWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Id Type
@@ -310,9 +468,10 @@ export default class AddWastage extends Component {
                         required
                         name="Id_Type"
                         value={this.state.Id_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Id_Type: event.target.value
+                            Id_Type: event.target.value,
+                            disable: true,
                           });
                         }}
                       >
@@ -335,7 +494,7 @@ export default class AddWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -345,9 +504,10 @@ export default class AddWastage extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
+                            disable: true,
                           });
                           console.log(event.target.value);
                         }}
@@ -397,12 +557,13 @@ export default class AddWastage extends Component {
                             required
                             name="Id"
                             value={this.state.Id[index].id}
-                            onChange={event => {
+                            onChange={(event) => {
                               this.setState({
-                                a_id: event.target.value
+                                a_id: event.target.value,
+                                disable: true,
                               });
                               console.log(event.target.value);
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                 prevState.Id[index].id = prevState.a_id;
 
                                 console.log("====", prevState.Id[index]);
@@ -416,13 +577,13 @@ export default class AddWastage extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Id.push({
-                                    id: ""
+                                    id: "",
                                   });
                                   console.log(prevState.Id);
                                 });
@@ -435,11 +596,11 @@ export default class AddWastage extends Component {
                                 fontSize: "30px",
                                 padding: "0px",
 
-                                margin: "4px"
+                                margin: "4px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Id.splice(index, 1);
                                   console.log(prevState.Id);
                                 });
@@ -459,9 +620,10 @@ export default class AddWastage extends Component {
                       variant="outlined"
                       Name="Wastage Date"
                       value={this.state.Wastage_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          Wastage_Date: date
+                          Wastage_Date: date,
+                          disable: true,
                         });
                         console.log(date);
                       }}
@@ -478,11 +640,40 @@ export default class AddWastage extends Component {
                       label="Reasons"
                       size="small"
                       value={this.state.Description}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Description: event.target.value
+                          Description: event.target.value,
+                          disable: false,
                         });
                         console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" display="flex" justifyContent="flex-end">
+                    <TextField
+                      size="small"
+                      label="Available Stock"
+                      disabled
+                      defaultValue=" "
+                      InputLabelProps={{
+                        style: {
+                          color: "black",
+                          fontWeight: "bold",
+                        },
+                      }}
+                      InputProps={{
+                        style: {
+                          fontWeight: "bold",
+                        },
+                      }}
+                      value={this.state.Available_Stock}
+                      onChange={(event) => {
+                        this.setState({
+                          Available_Stock: event.target.value,
+                          disable: false,
+                        });
                       }}
                     ></TextField>
                   </Box>
@@ -524,6 +715,8 @@ export default class AddWastage extends Component {
               onClick={() => {
                 this.onAddHandler();
               }}
+              // disabled={this.state.disable}
+              disabled={this.state.subdisplay}
             >
               Submit
             </Button>

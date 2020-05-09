@@ -9,18 +9,20 @@ import {
   MenuItem,
   InputAdornment,
   Dialog,
-  DialogContent
+  DialogContent,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../styles/FormStyles";
 import { Datepick } from "../../../Components/Date/Datepick";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class EditSales extends Component {
   constructor(props) {
@@ -44,47 +46,72 @@ export default class EditSales extends Component {
       success: false,
       measuring_units: [],
       products: [],
+      product: [],
+      productlist: [],
       code: "",
       b_id: "",
       distributors: [],
       DiscountValue: null,
       distributorlist: [],
       distributorInfo: false,
-      openDialog: false
+      openDialog: false,
+      subdisplay: false,
+      progress: true,
+      ProductRecord: [],
+      currency: [],
     };
     this.onEditHandler = () => {
-      axios
-        .post("/sales/edit", {
-          _id: this.state._id,
-          Product_ID: this.state.Product_ID,
-          Product_Name: this.state.Product_Name,
-          Box_Id: this.state.Box_Id,
-          Quantity: this.state.Quantity,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Selling_Date: this.state.Selling_Date,
-          Distributor: this.state.Distributor,
-          Payment_Type: this.state.Payment_Type,
-          Price: this.state.Price,
-          Final_Price: this.state.Final_Price,
-          Discount: this.state.Discount,
-          Advance: this.state.Advance,
-          Balance: this.state.Balance
-        })
-        .then(res => {
-          console.log(res.data);
-          // if (res.data.errors) {
-          //   if (res.data.errors.length > 0) {
-          //     console.log(res.data.errors);
-          //     this.setState({
-          //       errors: [...res.data.errors],
-          //       success: false
-          //     });
-          //   } else {
-          this.props.cancel();
-          //   }
-          // }
-        })
-        .catch(err => console.log(err));
+      if (
+        this.state.Product_Name !== "" &&
+        this.state.Quantity !== "" &&
+        this.state.Box_Id[0].id !== "" &&
+        this.state.Selling_Date !== null &&
+        this.state.Distributor !== "" &&
+        this.state.Payment_Type !== "" &&
+        this.state.Balance >= 0
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
+        });
+        axios
+          .post("/sales/edit", {
+            _id: this.state._id,
+            Product_ID: this.state.Product_ID,
+            Product_Name: this.state.Product_Name,
+            Box_Id: this.state.Box_Id,
+            Quantity: this.state.Quantity,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Selling_Date: this.state.Selling_Date,
+            Distributor: this.state.Distributor,
+            Payment_Type: this.state.Payment_Type,
+            Price: this.state.Price,
+            Final_Price: this.state.Final_Price,
+            Discount: this.state.Discount,
+            Advance: this.state.Advance,
+            Balance: this.state.Balance,
+          })
+          .then((res) => {
+            console.log(res.data);
+            this.setState({
+              progress: true,
+            });
+            // if (res.data.errors) {
+            //   if (res.data.errors.length > 0) {
+            //     console.log(res.data.errors);
+            //     this.setState({
+            //       errors: [...res.data.errors],
+            //       success: false
+            //     });
+            //   } else {
+            this.props.cancel();
+            //   }
+            // }
+          })
+          .catch((err) => console.log(err));
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
     };
     this.distributorInfo = () => {
       let temp = [];
@@ -120,32 +147,64 @@ export default class EditSales extends Component {
     // this.closeDialog = () => {
     //   this.setState({ openDialog: false });
     // };
+    this.getProductName = (id) => {
+      let temp = id;
+      this.state.productlist.map((product) => {
+        if (product._id === id) {
+          temp = product.product_name;
+        }
+        return null;
+      });
+      return temp;
+    };
   }
   componentDidMount() {
+    axios.get("/currency").then((res) => {
+      this.setState({
+        currency: res.data.Currency[0].currency_type,
+      });
+      console.log("currency:", this.state.currency);
+    });
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
     });
-    axios.get("/products/products").then(res => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
-        products: [...res.data.Products]
+        product: [...res.data.Products],
       });
+
       // console.log("Product: ", this.state.products);
     });
-    axios.get("/distributors/distributors").then(res => {
+    axios.get("/products/products").then((res) => {
+      console.log(res);
+      this.setState({
+        productlist: [...res.data.Products],
+      });
+
+      // console.log("Product: ", this.state.products);
+    });
+    axios.get("/production-stock/stock").then((res) => {
+      console.log("products", res.data);
+      this.setState({ products: [...res.data] });
+    });
+    axios.get("/distributors/distributors").then((res) => {
       console.log(res);
       this.setState({
         distributors: [...res.data.Distributors],
-        distributorlist: [...res.data.Distributors]
+        distributorlist: [...res.data.Distributors],
+        progress: false,
       });
       console.log("distributors : ", res.data.Distributors);
     });
+    console.log("productrecord", this.props.ProductRecord());
 
     this.setState({
+      ProductRecord: this.props.ProductRecord(),
       _id: this.props.sales._id,
       Product_Name: this.props.sales.Product_Name,
       Quantity: this.props.sales.Quantity,
@@ -159,7 +218,7 @@ export default class EditSales extends Component {
       Final_Price: this.props.sales.Final_Price,
       Discount: this.props.sales.Discount,
       Advance: this.props.sales.Advance,
-      Balance: this.props.sales.Balance
+      Balance: this.props.sales.Balance,
     });
     // }
     //   onChange={event => {
@@ -190,14 +249,26 @@ export default class EditSales extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <FormControl variant="outlined" fullWidth size="small">
-                      <InputLabel
+                      {/* <InputLabel
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Product Name
@@ -208,10 +279,10 @@ export default class EditSales extends Component {
                         name="Product_Name"
                         disabled={this.props.disabled.Product_Name}
                         value={this.state.Product_Name}
-                        onChange={event => {
+                        onChange={(event) => {
                           let prodCode;
                           let prodMeasur;
-                          this.state.products.map(product => {
+                          this.state.products.map((product) => {
                             if (product._id === event.target.value) {
                               prodCode = product.product_code;
                               prodMeasur = product.product_measuring_unit;
@@ -222,7 +293,7 @@ export default class EditSales extends Component {
                           this.setState({
                             Product_Name: event.target.value,
                             Product_ID: prodCode,
-                            Measuring_Unit: prodMeasur
+                            Measuring_Unit: prodMeasur,
                           });
                         }}
                       >
@@ -237,12 +308,37 @@ export default class EditSales extends Component {
                             </MenuItem>
                           );
                         })}
-                        {/* <MenuItem value="Product Name" disabled>
-                            Product Name
-                          </MenuItem>
-                          <MenuItem value="Orange Juice">Orange Juice</MenuItem>
-                          <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
-                      </Select>
+                            
+                      </Select> */}
+                      <Autocomplete
+                        options={this.state.products}
+                        autoHighlight={true}
+                        value={this.state.ProductRecord}
+                        getOptionLabel={(option) =>
+                          this.getProductName(option.product_name)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Product Name"
+                            variant="outlined"
+                            size="small"
+                          />
+                        )}
+                        onChange={(event, value) => {
+                          if (value !== null) {
+                            this.setState({
+                              ProductRecord: value,
+                              Product_Name: value.Product_Name,
+                              Product_ID: value.Product_ID,
+                              Measuring_Unit: value.Measuring_Unit,
+                              Available_Stock: value.Quantity,
+                            });
+                          }
+
+                          console.log("Product:", value);
+                        }}
+                      />
                     </FormControl>
                   </Box>
                   <Box width="50%" style={style}>
@@ -255,9 +351,9 @@ export default class EditSales extends Component {
                       required
                       name="Product_ID"
                       value={this.state.Product_ID}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Product_ID: event.target.value
+                          Product_ID: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -271,7 +367,7 @@ export default class EditSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Distributor
@@ -282,9 +378,9 @@ export default class EditSales extends Component {
                         name="Distributor"
                         disabled={this.props.disabled.Distributor}
                         value={this.state.Distributor}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Distributor: event.target.value
+                            Distributor: event.target.value,
                           });
                         }}
                       >
@@ -314,10 +410,10 @@ export default class EditSales extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         let prodprice = 1;
 
-                        this.state.products.map(product => {
+                        this.state.products.map((product) => {
                           console.log("Pro: ", this.state.Product_Name);
                           if (product._id === this.state.Product_Name) {
                             prodprice = parseInt(product.product_price);
@@ -327,7 +423,7 @@ export default class EditSales extends Component {
                         });
                         this.setState({
                           Quantity: event.target.value,
-                          Price: event.target.value * prodprice
+                          Price: event.target.value * prodprice,
                           // DiscountValue:
                           //   this.state.Price * (this.state.Discount / 100),
                           // Final_Price:
@@ -343,7 +439,7 @@ export default class EditSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -354,9 +450,9 @@ export default class EditSales extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                           console.log(event.target.value);
                         }}
@@ -402,12 +498,12 @@ export default class EditSales extends Component {
                             name="Box_Id"
                             disabled={this.props.disabled.Box_Id}
                             value={this.state.Box_Id[index].id}
-                            onChange={event => {
+                            onChange={(event) => {
                               this.setState({
-                                b_id: event.target.value
+                                b_id: event.target.value,
                               });
                               console.log(event.target.value);
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                 prevState.Box_Id[index].id = prevState.b_id;
 
                                 // console.log( prevState.Box_Id[index]);
@@ -421,13 +517,13 @@ export default class EditSales extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Box_Id.push({
-                                    id: ""
+                                    id: "",
                                   });
                                   console.log(prevState.Box_Id);
                                 });
@@ -439,11 +535,11 @@ export default class EditSales extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Box_Id.splice(index, 1);
                                   console.log(prevState.Box_Id);
                                 });
@@ -463,9 +559,9 @@ export default class EditSales extends Component {
                       Name="Selling_Date"
                       disabled={this.props.disabled.Selling_Date}
                       value={this.state.Selling_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          Selling_Date: date
+                          Selling_Date: date,
                         });
                         console.log(date);
                       }}
@@ -485,17 +581,17 @@ export default class EditSales extends Component {
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
-                        )
+                        ),
                       }}
                       disabled={this.props.disabled.Discount}
                       value={this.state.Discount}
-                      onChange={event => {
+                      onChange={(event) => {
                         event.persist();
                         this.setState({
-                          Discount: event.target.value
+                          Discount: event.target.value,
                         });
 
-                        this.setState(prev => {
+                        this.setState((prev) => {
                           prev.DiscountValue =
                             prev.Price * (event.target.value / 100);
                           prev.Final_Price = prev.Price - prev.DiscountValue;
@@ -516,6 +612,13 @@ export default class EditSales extends Component {
                       label="Total Price"
                       required
                       name="Price"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Price}
                       // onChange={event => {
                       //   this.setState({
@@ -533,7 +636,7 @@ export default class EditSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Payment Type
@@ -544,9 +647,9 @@ export default class EditSales extends Component {
                         name="Payment_Type"
                         disabled={this.props.disabled.Payment_Type}
                         value={this.state.Payment_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Payment_Type: event.target.value
+                            Payment_Type: event.target.value,
                           });
                         }}
                       >
@@ -568,6 +671,13 @@ export default class EditSales extends Component {
                       label="Final_Price"
                       required
                       name="Final_Price"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Final_Price}
                       // onChange={event => {
                       //   this.setState({
@@ -587,12 +697,19 @@ export default class EditSales extends Component {
                       label="Advance Amount"
                       required
                       name="Advance"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       disabled={this.props.disabled.Advance}
                       value={this.state.Advance}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
                           Advance: event.target.value,
-                          Balance: this.state.Final_Price - event.target.value
+                          Balance: this.state.Final_Price - event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -608,6 +725,13 @@ export default class EditSales extends Component {
                       label="Balance Amount"
                       required
                       name="Balance"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Balance}
                       // onChange={event => {
                       //   this.setState({
@@ -641,7 +765,7 @@ export default class EditSales extends Component {
               size="large"
               onClick={() => {
                 this.setState({
-                  distributorInfo: true
+                  distributorInfo: true,
                 });
                 this.openDialog();
                 // this.state.openDialog = true;
@@ -673,6 +797,7 @@ export default class EditSales extends Component {
               size="large"
               fontWeight="bold"
               onClick={this.onEditHandler}
+              disabled={this.state.subdisplay}
             >
               Update
             </Button>

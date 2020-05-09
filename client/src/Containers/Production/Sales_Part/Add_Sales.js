@@ -7,7 +7,8 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  LinearProgress,
 } from "@material-ui/core";
 // import PaperBoard from "../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
@@ -15,11 +16,12 @@ import Styles from "../styles/FormStyles";
 import { Datepick } from "../../../Components/Date/Datepick";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class AddSales extends Component {
   constructor(props) {
@@ -46,64 +48,116 @@ export default class AddSales extends Component {
       success: false,
       measuring_units: [],
       products: [],
-      productstocks: [],
+      // productstocks: [],
+      product: [],
+      currency: [],
+      productlist: [],
       code: "",
       b_id: "",
       distributors: [],
-      DiscountValue: null
+      DiscountValue: null,
+      subdisplay: false,
+      progress: false,
+      ProductRecord: [],
     };
     this.onAddHandler = () => {
-      console.log("Ready to add");
-      axios
-        .post("/sales/add", {
-          _id: this.state._id,
-          Product_ID: this.state.Product_ID,
-          Product_Name: this.state.Product_Name,
-          Box_Id: this.state.Box_Id,
-          Quantity: this.state.Quantity,
-          Available_Stock: this.state.Available_Stock,
-          Balance_Stock: this.state.Balance_Stock,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Selling_Date: this.state.Selling_Date,
-          Distributor: this.state.Distributor,
-          Payment_Type: this.state.Payment_Type,
-          Price: this.state.Price,
-          Final_Price: this.state.Final_Price,
-          Discount: this.state.Discount,
-          Advance: this.state.Advance,
-          Balance: this.state.Balance
-        })
-        .then(res => {
-          console.log(res);
-          this.props.cancel();
+      if (
+        this.state.Product_Name !== "" &&
+        this.state.Quantity !== "" &&
+        this.state.Box_Id[0].id !== "" &&
+        this.state.Selling_Date !== null &&
+        this.state.Distributor !== "" &&
+        this.state.Payment_Type !== "" &&
+        this.state.Balance >= 0
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
         });
+        axios
+          .post("/sales/add", {
+            _id: this.state._id,
+            Product_ID: this.state.Product_ID,
+            Product_Name: this.state.Product_Name,
+            Box_Id: this.state.Box_Id,
+            Quantity: this.state.Quantity,
+            Available_Stock: this.state.Available_Stock,
+            Balance_Stock: this.state.Balance_Stock,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Selling_Date: this.state.Selling_Date,
+            Distributor: this.state.Distributor,
+            Payment_Type: this.state.Payment_Type,
+            Price: this.state.Price,
+            Final_Price: this.state.Final_Price,
+            Discount: this.state.Discount,
+            Advance: this.state.Advance,
+            Balance: this.state.Balance,
+          })
+          .then((res) => {
+            this.setState({
+              progress: true,
+            });
+            this.props.cancel();
+          });
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
+    };
+    this.getProductName = (id) => {
+      let temp = id;
+      this.state.productlist.map((product) => {
+        if (product._id === id) {
+          temp = product.product_name;
+        }
+        return null;
+      });
+      return temp;
     };
   }
   componentDidMount() {
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/currency").then((res) => {
+      this.setState({
+        currency: res.data.Currency[0].currency_type,
+      });
+      console.log("currency:", this.state.currency);
+    });
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
     });
-    axios.get("/products/products").then(res => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
-        products: [...res.data.Products]
+        product: [...res.data.Products],
       });
+
       // console.log("Product: ", this.state.products);
     });
-    axios.get("/distributors/distributors").then(res => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
-        distributors: [...res.data.Distributors]
+        productlist: [...res.data.Products],
+      });
+
+      // console.log("Product: ", this.state.products);
+    });
+    axios.get("/production-stock/stock").then((res) => {
+      console.log("products", res.data);
+      this.setState({ products: [...res.data] });
+    });
+    axios.get("/distributors/distributors").then((res) => {
+      console.log(res);
+      this.setState({
+        distributors: [...res.data.Distributors],
       });
       console.log("distributors : ", res.data.Distributors);
     });
-    axios.get("/production-stock/stock").then(res => {
+    axios.get("/production-stock/stock").then((res) => {
       console.log(res);
       this.setState({
-        productstocks: [...res.data]
+        productstocks: [...res.data],
       });
       console.log("Production_Stock : ", res.data);
     });
@@ -132,6 +186,18 @@ export default class AddSales extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <FormControl
@@ -140,11 +206,11 @@ export default class AddSales extends Component {
                       fullWidth
                       size="small"
                     >
-                      <InputLabel
+                      {/* <InputLabel
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Product Name
@@ -154,11 +220,11 @@ export default class AddSales extends Component {
                         required
                         name="Product_Name"
                         value={this.state.Product_Name}
-                        onChange={event => {
+                        onChange={(event) => {
                           let prodCode;
                           let prodMeasur;
                           let availablestock;
-                          this.state.productstocks.map(product => {
+                          this.state.productstocks.map((product) => {
                             if (product.Product_Name === event.target.value) {
                               prodCode = product.Product_ID;
                               prodMeasur = product.Measuring_Unit;
@@ -173,7 +239,7 @@ export default class AddSales extends Component {
                             Product_Name: event.target.value,
                             Product_ID: prodCode,
                             Measuring_Unit: prodMeasur,
-                            Available_Stock: availablestock
+                            Available_Stock: availablestock,
                           });
                           console.log("product Name", this.state.Product_Name);
                         }}
@@ -190,7 +256,36 @@ export default class AddSales extends Component {
                             </MenuItem>
                           );
                         })}
-                      </Select>
+                      </Select> */}
+                      <Autocomplete
+                        options={this.state.products}
+                        autoHighlight={true}
+                        value={this.state.ProductRecord}
+                        getOptionLabel={(option) =>
+                          this.getProductName(option.Product_Name)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Product Name"
+                            variant="outlined"
+                            size="small"
+                          />
+                        )}
+                        onChange={(event, value) => {
+                          if (value !== null) {
+                            this.setState({
+                              ProductRecord: value,
+                              Product_Name: value.Product_Name,
+                              Product_ID: value.Product_ID,
+                              Measuring_Unit: value.Measuring_Unit,
+                              Available_Stock: value.Quantity,
+                            });
+                          }
+
+                          console.log("Product:", value);
+                        }}
+                      />
                     </FormControl>
                   </Box>
                   <Box width="50%" style={style}>
@@ -203,9 +298,9 @@ export default class AddSales extends Component {
                       required
                       name="Product_ID"
                       value={this.state.Product_ID}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Product_ID: event.target.value
+                          Product_ID: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -220,11 +315,12 @@ export default class AddSales extends Component {
                       variant="outlined"
                       label="Available Stock"
                       required
+                      disabled
                       name="Available_Stock"
                       value={this.state.Available_Stock}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Available_Stock: event.target.value
+                          Available_Stock: event.target.value,
                           //Balance: this.state.Final_Price - event.target.value
                         });
                         console.log(event.target.value);
@@ -240,10 +336,10 @@ export default class AddSales extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         let prodprice;
 
-                        this.state.products.map(product => {
+                        this.state.product.map((product) => {
                           console.log("Pro: ", product.product_name);
                           if (product._id === this.state.Product_Name) {
                             prodprice = parseInt(product.product_price);
@@ -255,7 +351,7 @@ export default class AddSales extends Component {
                           Quantity: event.target.value,
                           Price: event.target.value * prodprice,
                           Balance_Stock:
-                            this.state.Available_Stock - event.target.value
+                            this.state.Available_Stock - event.target.value,
                         });
                       }}
                     ></TextField>
@@ -292,7 +388,7 @@ export default class AddSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -303,9 +399,9 @@ export default class AddSales extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                           console.log(event.target.value);
                         }}
@@ -339,7 +435,7 @@ export default class AddSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Distributor
@@ -349,9 +445,9 @@ export default class AddSales extends Component {
                         required
                         name="Distributor"
                         value={this.state.Distributor}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Distributor: event.target.value
+                            Distributor: event.target.value,
                           });
                         }}
                       >
@@ -386,12 +482,12 @@ export default class AddSales extends Component {
                             required
                             name="Box_Id"
                             value={this.state.Box_Id[index].id}
-                            onChange={event => {
+                            onChange={(event) => {
                               this.setState({
-                                b_id: event.target.value
+                                b_id: event.target.value,
                               });
                               console.log(event.target.value);
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                 prevState.Box_Id[index].id = prevState.b_id;
 
                                 console.log("====", prevState.Box_Id[index]);
@@ -405,13 +501,13 @@ export default class AddSales extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Box_Id.push({
-                                    id: ""
+                                    id: "",
                                   });
                                   console.log(prevState.Box_Id);
                                 });
@@ -423,11 +519,11 @@ export default class AddSales extends Component {
                               style={{
                                 fontSize: "29px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Box_Id.splice(index, 1);
                                   console.log(prevState.Box_Id);
                                 });
@@ -446,9 +542,9 @@ export default class AddSales extends Component {
                       variant="outlined"
                       Name="Selling_Date"
                       value={this.state.Selling_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          Selling_Date: date
+                          Selling_Date: date,
                         });
                         console.log(date);
                       }}
@@ -463,21 +559,20 @@ export default class AddSales extends Component {
                       fullWidth
                       variant="outlined"
                       label="Discount"
-                      required
                       name="Discount"
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">%</InputAdornment>
-                        )
+                        ),
                       }}
                       value={this.state.Discount}
-                      onChange={event => {
+                      onChange={(event) => {
                         event.persist();
                         this.setState({
-                          Discount: event.target.value
+                          Discount: event.target.value,
                         });
 
-                        this.setState(prev => {
+                        this.setState((prev) => {
                           prev.DiscountValue =
                             prev.Price * (event.target.value / 100);
                           prev.Final_Price = prev.Price - prev.DiscountValue;
@@ -498,6 +593,13 @@ export default class AddSales extends Component {
                       label="Total Price"
                       required
                       name="Price"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Price}
                       // onChange={event => {
                       //   this.setState({
@@ -520,7 +622,7 @@ export default class AddSales extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Payment Type
@@ -530,9 +632,9 @@ export default class AddSales extends Component {
                         required
                         name="Payment_Type"
                         value={this.state.Payment_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Payment_Type: event.target.value
+                            Payment_Type: event.target.value,
                           });
                         }}
                       >
@@ -542,6 +644,7 @@ export default class AddSales extends Component {
                         <MenuItem value="By Cash">By Cash</MenuItem>
                         <MenuItem value="By Cheque">By Cheque</MenuItem>
                         <MenuItem value="Debit">Debit</MenuItem>
+                        <MenuItem value="Credit">Credit</MenuItem>
                       </Select>
                     </FormControl>
                   </Box>
@@ -554,6 +657,13 @@ export default class AddSales extends Component {
                       label="Final_Price"
                       required
                       name="Final_Price"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Final_Price}
                       // onChange={event => {
                       //   this.setState({
@@ -571,14 +681,25 @@ export default class AddSales extends Component {
                       fullWidth
                       variant="outlined"
                       label="Advance Amount"
-                      required
                       name="Advance"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Advance}
-                      onChange={event => {
-                        this.setState({
-                          Advance: event.target.value,
-                          Balance: this.state.Final_Price - event.target.value
-                        });
+                      onChange={(event) => {
+                        if (event.target.value <= this.state.Price) {
+                          this.setState({
+                            Advance: event.target.value,
+                            Balance:
+                              this.state.Final_Price - event.target.value,
+                          });
+                        } else {
+                          alert("Please check Advance Amount");
+                        }
                         console.log(event.target.value);
                       }}
                     ></TextField>
@@ -593,6 +714,13 @@ export default class AddSales extends Component {
                       label="Balance Amount"
                       required
                       name="Balance"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="start">
+                            {this.state.currency}
+                          </InputAdornment>
+                        ),
+                      }}
                       value={this.state.Balance}
                       // onChange={event => {
                       //   this.setState({
@@ -640,6 +768,7 @@ export default class AddSales extends Component {
               onClick={() => {
                 this.onAddHandler();
               }}
+              disabled={this.state.subdisplay}
             >
               Submit
             </Button>

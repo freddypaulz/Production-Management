@@ -6,16 +6,18 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../../styles/FormStyles";
 import { Datepick } from "../../../../Components/Date/Datepick";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class EditProduction extends Component {
   constructor(props) {
@@ -34,45 +36,67 @@ export default class EditProduction extends Component {
       success: false,
       measuring_units: [],
       products: [],
-      code: ""
+      code: "",
+      subdisplay: false,
+      progress: true,
+      ProductRecord: [],
     };
     this.onEditHandler = () => {
-      axios
-        .post("/production/edit", {
-          _id: this.state._id,
-          Product_ID: this.state.Product_ID,
-          Product_Name: this.state.Product_Name,
-          Batch_Id: this.state.Batch_Id,
-          Quantity: this.state.Quantity,
-          Status: this.state.Status,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Expiry_Duration_Days: this.state.Expiry_Duration_Days,
-          Manufacture_Date: this.state.Manufacture_Date
-        })
-        .then(res => {
-          console.log(res.data);
-          this.props.cancel();
-        })
-        .catch(err => console.log(err));
+      if (
+        // this.state.Product_Name !== "" &&
+        this.state.Quantity !== "" &&
+        this.state.Batch_Id !== "" &&
+        this.state.Manufacture_Date !== "" &&
+        this.state.Expiry_Duration_Days !== ""
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
+        });
+        axios
+          .post("/production/edit", {
+            _id: this.state._id,
+            Product_ID: this.state.Product_ID,
+            Product_Name: this.state.Product_Name,
+            Batch_Id: this.state.Batch_Id,
+            Quantity: this.state.Quantity,
+            Status: this.state.Status,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Expiry_Duration_Days: this.state.Expiry_Duration_Days,
+            Manufacture_Date: this.state.Manufacture_Date,
+          })
+          .then((res) => {
+            this.setState({
+              progress: true,
+            });
+            this.props.cancel();
+          })
+          .catch((err) => console.log(err));
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
     };
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
     });
-    axios.get("/products/products").then(res => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
-        products: [...res.data.Products]
+        products: [...res.data.Products],
+        progress: false,
       });
       // console.log("Product: ", this.state.products);
     });
 
     this.setState({
+      ProductRecord: this.props.ProductRecord(),
+
       _id: this.props.Production._id,
       Product_ID: this.props.Production.Product_ID,
       Product_Name: this.props.Production.Product_Name,
@@ -81,7 +105,7 @@ export default class EditProduction extends Component {
       Status: this.props.Production.Status,
       Measuring_Unit: this.props.Production.Measuring_Unit,
       Expiry_Duration_Days: this.props.Production.Expiry_Duration_Days,
-      Manufacture_Date: this.props.Production.Manufacture_Date
+      Manufacture_Date: this.props.Production.Manufacture_Date,
     });
     // }
     //   onChange={event => {
@@ -112,6 +136,18 @@ export default class EditProduction extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <FormControl
@@ -120,11 +156,11 @@ export default class EditProduction extends Component {
                       fullWidth
                       size="small"
                     >
-                      <InputLabel
+                      {/* <InputLabel
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Product Name
@@ -135,9 +171,9 @@ export default class EditProduction extends Component {
                         required
                         name="Product_Name"
                         value={this.state.Product_Name}
-                        onChange={event => {
+                        onChange={(event) => {
                           let prodCode;
-                          this.state.products.map(product => {
+                          this.state.products.map((product) => {
                             if (product._id === event.target.value) {
                               prodCode = product.product_code;
                               console.log("Procode: ", prodCode);
@@ -146,7 +182,7 @@ export default class EditProduction extends Component {
                           });
                           this.setState({
                             Product_Name: event.target.value,
-                            Product_ID: prodCode
+                            Product_ID: prodCode,
                           });
                         }}
                       >
@@ -161,12 +197,38 @@ export default class EditProduction extends Component {
                             </MenuItem>
                           );
                         })}
-                        {/* <MenuItem value="Product Name" disabled>
+                          <MenuItem value="Product Name" disabled>
                             Product Name
                           </MenuItem>
                           <MenuItem value="Orange Juice">Orange Juice</MenuItem>
-                          <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
-                      </Select>
+                          <MenuItem value="Apple Juice">Apple Juice</MenuItem>  
+                      </Select> */}
+                      <Autocomplete
+                        options={this.state.products}
+                        autoHighlight={true}
+                        value={this.state.ProductRecord}
+                        getOptionLabel={(option) => option.product_name}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Product Name"
+                            variant="outlined"
+                            size="small"
+                          />
+                        )}
+                        onChange={(event, value) => {
+                          if (value !== null) {
+                            this.setState({
+                              ProductRecord: value,
+                              Product_Name: value._id,
+                              Product_ID: value.product_code,
+                              Measuring_Unit: value.product_measuring_unit,
+                            });
+                          }
+
+                          console.log("Product:", value);
+                        }}
+                      />
                     </FormControl>
                   </Box>
                   <Box width="50%" style={style}>
@@ -180,9 +242,9 @@ export default class EditProduction extends Component {
                       required
                       name="Product_ID"
                       value={this.state.Product_ID}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Product_ID: event.target.value
+                          Product_ID: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -200,9 +262,9 @@ export default class EditProduction extends Component {
                       required
                       name="Batch_Id"
                       value={this.state.Batch_Id}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Batch_Id: event.target.value
+                          Batch_Id: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -220,9 +282,9 @@ export default class EditProduction extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Quantity: event.target.value
+                          Quantity: event.target.value,
                         });
                       }}
                     ></TextField>
@@ -238,7 +300,7 @@ export default class EditProduction extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -250,9 +312,9 @@ export default class EditProduction extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                           console.log(event.target.value);
                         }}
@@ -291,9 +353,9 @@ export default class EditProduction extends Component {
                       required
                       name="Expiry_Duration_Days"
                       value={this.state.Expiry_Duration_Days}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Expiry_Duration_Days: event.target.value
+                          Expiry_Duration_Days: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -306,9 +368,9 @@ export default class EditProduction extends Component {
                       variant="outlined"
                       Name="Manufacture_Date"
                       value={this.state.Manufacture_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          Manufacture_Date: date
+                          Manufacture_Date: date,
                         });
                         console.log(date);
                       }}
@@ -327,7 +389,7 @@ export default class EditProduction extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Status
@@ -337,9 +399,9 @@ export default class EditProduction extends Component {
                         variant="outlined"
                         required
                         value={this.state.Status}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Status: event.target.value
+                            Status: event.target.value,
                           });
                           console.log(event.target.value);
                         }}
@@ -391,6 +453,7 @@ export default class EditProduction extends Component {
               size="large"
               fontWeight="bold"
               onClick={this.onEditHandler}
+              disabled={this.state.subdisplay}
             >
               Update
             </Button>

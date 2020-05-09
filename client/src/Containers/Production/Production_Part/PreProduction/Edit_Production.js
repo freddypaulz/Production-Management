@@ -9,106 +9,110 @@ import {
   MenuItem,
   LinearProgress,
 } from "@material-ui/core";
-
 import axios from "axios";
-import Styles from "../styles/FormStyles";
-import { Datepick } from "../../../Components/Date/Datepick";
-import Autocomplete from "@material-ui/lab/Autocomplete";
+import Styles from "../../styles/FormStyles";
+import { Datepick } from "../../../../Components/Date/Datepick";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
   marginLeft: "6px",
 };
-export default class AddProductionUnit extends Component {
+export default class EditProduction extends Component {
   constructor(props) {
     super();
     this.state = {
       _id: "",
-      Raw_Material_Id: "",
-      Raw_Material_Code: "",
-      Quantity: "",
-      Measuring_Unit: "",
-      Priority: "",
-      Due_Date: null,
-      Status: "Requesting",
-      Comments: "-",
+      Product_Name: "Product_Name",
+      Product_ID: "Product_ID",
+      Batch_Id: "",
+      Quantity: " Quantity",
+      Measuring_Unit: "Measuring_Unit",
+      Expiry_Duration_Days: "",
+      Status: "",
+      Manufacture_Date: null,
       errors: [],
-      openAdd: false,
       success: false,
       measuring_units: [],
-      materials: [],
+      products: [],
       code: "",
       subdisplay: false,
-      progress: false,
-      materialRecord: [],
+      progress: true,
     };
-    this.onAddHandler = () => {
+    this.onProductHandler = () => {
       if (
-        this.state.Raw_Material_Id !== "" &&
+        this.state.Product_Name !== "" &&
         this.state.Quantity !== "" &&
-        this.state.Priority !== "" &&
-        this.state.Due_Date !== null
+        this.state.Batch_Id !== "" &&
+        this.state.Manufacture_Date !== "" &&
+        this.state.Expiry_Duration_Days !== ""
       ) {
         this.setState({
           subdisplay: true,
           progress: true,
         });
         axios
-          .post("/production-unit/add", {
-            _id: this.state._id,
-            Raw_Material_Id: this.state.Raw_Material_Id,
-            Raw_Material_Code: this.state.Raw_Material_Code,
+          .post("/production/edit", {
+            Product_ID: this.state.Product_ID,
+            Product_Name: this.state.Product_Name,
+            Batch_Id: this.state.Batch_Id,
             Quantity: this.state.Quantity,
-            Measuring_Unit: this.state.Measuring_Unit,
-            Priority: this.state.Priority,
-            Due_Date: this.state.Due_Date,
             Status: this.state.Status,
-            Comments: this.state.Comments,
-            Created_By: {
-              Employee_Id: sessionStorage.getItem("User ID"),
-              Role_Id: sessionStorage.getItem("Role ID"),
-            },
-            logs: {
-              from: "Production Unit",
-              to: "Production",
-              comments: this.state.Comments,
-            },
+            Measuring_Unit: this.state.Measuring_Unit,
+            Expiry_Duration_Days: this.state.Expiry_Duration_Days,
+            Manufacture_Date: this.state.Manufacture_Date,
           })
           .then((res) => {
             this.setState({
               progress: true,
             });
             this.props.cancel();
-          });
+          })
+          .catch((err) => console.log(err));
       } else {
         alert("Please check all the fields are entered properly");
       }
     };
   }
   componentDidMount() {
+    // if (this.state.Wastage_Type === "") {
     axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits],
       });
     });
-
-    axios.get("/raw-material").then((res) => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
-        materials: [...res.data.RawMaterials],
+        products: [...res.data.Products],
+        progress: false,
       });
       // console.log("Product: ", this.state.products);
     });
+
+    this.setState({
+      Product_ID: this.props.Production.Product_ID,
+      Product_Name: this.props.Production.Product_Name,
+      Batch_Id: this.props.Production.Batch_Id,
+      Quantity: this.props.Production.Quantity,
+      Status: this.props.Production.Status,
+      Measuring_Unit: this.props.Production.Measuring_Unit,
+      Expiry_Duration_Days: this.props.Production.Expiry_Duration_Days,
+      Manufacture_Date: this.props.Production.Manufacture_Date,
+    });
+    // }
+    //   onChange={event => {
+    //     this.setState({ country_name: event.target.value });
+    //   }}value={this.state.country_name}
   }
   render() {
     return (
       <Box style={styles.box}>
         <Box fontSize="30px" mb={3}>
-          Add unit Request
+          Edit Production
         </Box>
-        {/* {this.state.errors.length > 0 ? (
+        {this.state.errors.length > 0 ? (
           this.state.errors.map((error, index) => {
             return (
               <Box style={styles.box_msg} bgcolor="#f73067" key={index}>
@@ -116,11 +120,11 @@ export default class AddProductionUnit extends Component {
               </Box>
             );
           })
-        ) : this.state.success === true ? ( */}
-        {/* <Box bgcolor="#3df45b" style={styles.box_msg}>
+        ) : this.state.success === true ? (
+          <Box bgcolor="#3df45b" style={styles.box_msg}>
             Successful
-          </Box> */}
-        {/* ) : null} */}
+          </Box>
+        ) : null}
         {/* <PaperBoard> */}
         <Box style={styles.root}>
           <Box display="flex" justifyContent="center">
@@ -146,109 +150,99 @@ export default class AddProductionUnit extends Component {
                       fullWidth
                       size="small"
                     >
-                      {/* <InputLabel
+                      <InputLabel
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
                           paddingRight: "2px",
                         }}
                       >
-                        Material Name
+                        Product Name
                       </InputLabel>
                       <Select
+                        disabled={this.props.disabled.Product_Name}
                         variant="outlined"
                         required
-                        name="Raw_Material_Id"
-                        value={this.state.Raw_Material_Id}
+                        name="Product_Name"
+                        value={this.state.Product_Name}
                         onChange={(event) => {
-                          let materialCode;
-                          let materialUnit;
-                          this.state.materials.map((material) => {
-                            if (material._id === event.target.value) {
-                              materialCode = material.raw_material_code;
-                              materialUnit =
-                                material.raw_material_measuring_unit;
-                              console.log("code: ", materialCode);
+                          let prodCode;
+                          this.state.products.map((product) => {
+                            if (product._id === event.target.value) {
+                              prodCode = product.product_code;
+                              console.log("Procode: ", prodCode);
                             }
                             return null;
                           });
                           this.setState({
-                            Raw_Material_Id: event.target.value,
-                            Raw_Material_Code: materialCode,
-                            Measuring_Unit: materialUnit,
+                            Product_Name: event.target.value,
+                            Product_ID: prodCode,
                           });
                         }}
                       >
-                        {this.state.materials.map((material, index) => {
+                        {this.state.products.map((product, index) => {
                           return (
                             <MenuItem
                               //selected
                               key={index}
-                              value={material._id}
+                              value={product._id}
                             >
-                              {material.raw_material_name}
+                              {product.product_name}
                             </MenuItem>
                           );
                         })}
-                          <MenuItem value="Product Name" disabled>
+                        {/* <MenuItem value="Product Name" disabled>
                             Product Name
                           </MenuItem>
                           <MenuItem value="Orange Juice">Orange Juice</MenuItem>
-                          <MenuItem value="Apple Juice">Apple Juice</MenuItem>  
-                      </Select> */}
-                      <Autocomplete
-                        options={this.state.materials}
-                        autoHighlight={true}
-                        value={this.state.materialRecord}
-                        getOptionLabel={(option) => option.raw_material_name}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Raw Material"
-                            variant="outlined"
-                            size="small"
-                          />
-                        )}
-                        onChange={(event, value) => {
-                          console.log("materialRecord:", value);
-                          console.log(
-                            "stateRecord:",
-                            this.state.materialRecord
-                          );
-                          if (value !== null) {
-                            this.setState({
-                              materialRecord: value,
-                              Raw_Material_Id: value._id,
-                              Raw_Material_Code: value.raw_material_code,
-                              Measuring_Unit: value.raw_material_measuring_unit,
-                            });
-                          }
-                        }}
-                      />
+                          <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
+                      </Select>
                     </FormControl>
                   </Box>
                   <Box width="50%" style={style}>
                     <TextField
+                      disabled
+                      // ={this.props.disabled.Product_ID}
                       size="small"
                       fullWidth
                       variant="outlined"
-                      label="Material_Code"
+                      label="Product_ID"
                       required
-                      name="Raw_Material_Code"
-                      value={this.state.Raw_Material_Code}
+                      name="Product_ID"
+                      value={this.state.Product_ID}
                       onChange={(event) => {
                         this.setState({
-                          Raw_Material_Code: event.target.value,
+                          Product_ID: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
                     ></TextField>
                   </Box>
                 </Box>
-
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
+                    <TextField
+                      disabled={this.props.disabled.Batch_Id}
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Batch_Id"
+                      required
+                      name="Batch_Id"
+                      value={this.state.Batch_Id}
+                      onChange={(event) => {
+                        this.setState({
+                          Batch_Id: event.target.value,
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+                </Box>
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <TextField
+                      disabled={this.props.disabled.Quantity}
                       size="small"
                       fullWidth
                       variant="outlined"
@@ -280,6 +274,8 @@ export default class AddProductionUnit extends Component {
                         Measuring Unit
                       </InputLabel>
                       <Select
+                        disabled
+                        // ={this.props.disabled.Measuring_Unit}
                         name="Measuring_Unit"
                         variant="outlined"
                         required
@@ -304,17 +300,53 @@ export default class AddProductionUnit extends Component {
                             );
                           }
                         )}
-                        {/* <MenuItem value="Product Name" disabled>
-                          ltr
-                        </MenuItem>
-                        <MenuItem value="Orange Juice">kg</MenuItem>
-                        <MenuItem value="Apple Juice">Apple Juice</MenuItem> */}
+                        {/* <MenuItem value="unit" disabled>
+                            unit
+                          </MenuItem>
+                          <MenuItem value="kg">kg</MenuItem>
+                          <MenuItem value="box">box</MenuItem> */}
                       </Select>
                     </FormControl>
                   </Box>
                 </Box>
+
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
+                    <TextField
+                      disabled={this.props.disabled.Expiry_Duration_Days}
+                      size="small"
+                      fullWidth
+                      variant="outlined"
+                      label="Expiry_Duration_Days"
+                      required
+                      name="Expiry_Duration_Days"
+                      value={this.state.Expiry_Duration_Days}
+                      onChange={(event) => {
+                        this.setState({
+                          Expiry_Duration_Days: event.target.value,
+                        });
+                        console.log(event.target.value);
+                      }}
+                    ></TextField>
+                  </Box>
+                  <Box width="50%" style={style}>
+                    <Datepick
+                      disabled={this.props.disabled.Manufacture_Date}
+                      id="4"
+                      variant="outlined"
+                      Name="Manufacture_Date"
+                      value={this.state.Manufacture_Date}
+                      setDate={(date) => {
+                        this.setState({
+                          Manufacture_Date: date,
+                        });
+                        console.log(date);
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -328,79 +360,30 @@ export default class AddProductionUnit extends Component {
                           paddingRight: "2px",
                         }}
                       >
-                        Priority
+                        Status
                       </InputLabel>
                       <Select
+                        name="Status"
                         variant="outlined"
                         required
-                        name="Priority"
-                        value={this.state.Priority}
+                        value={this.state.Status}
                         onChange={(event) => {
                           this.setState({
-                            Priority: event.target.value,
+                            Status: event.target.value,
                           });
+                          console.log(event.target.value);
                         }}
                       >
-                        <MenuItem value="Priority" disabled>
-                          Priority
+                        <MenuItem value="Status " disabled></MenuItem>
+                        <MenuItem value="Ready to Product QC">
+                          Ready to Product QC
                         </MenuItem>
-                        <MenuItem value="Low">Low</MenuItem>
-                        <MenuItem value="Medium">Medium</MenuItem>
-                        <MenuItem value="High">High</MenuItem>
+                        <MenuItem value="Ready to Packing QC">
+                          Ready to Packing QC
+                        </MenuItem>
+                        <MenuItem value="Ready For QC">Ready For QC</MenuItem>
                       </Select>
                     </FormControl>
-                  </Box>
-                  <Box width="50%" style={style}>
-                    <Datepick
-                      id="4"
-                      variant="outlined"
-                      Name="Due_Date"
-                      value={this.state.Due_Date}
-                      setDate={(date) => {
-                        this.setState({
-                          Due_Date: date,
-                        });
-                        console.log(date);
-                      }}
-                    />
-                  </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style}>
-                    <TextField
-                      disabled
-                      size="small"
-                      fullWidth
-                      variant="outlined"
-                      label="Status"
-                      required
-                      name="Status"
-                      value={this.state.Status}
-                      onChange={(event) => {
-                        this.setState({
-                          Status: event.target.value,
-                        });
-                      }}
-                    ></TextField>
-                  </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style}>
-                    <TextField
-                      multiline
-                      size="small"
-                      rowsMax="3"
-                      variant="outlined"
-                      fullWidth
-                      label="Comments"
-                      value={this.state.Comments}
-                      onChange={(event) => {
-                        this.setState({
-                          Comments: event.target.value,
-                        });
-                        console.log(event.target.value);
-                      }}
-                    ></TextField>
                   </Box>
                 </Box>
               </Box>
@@ -408,6 +391,7 @@ export default class AddProductionUnit extends Component {
           </Box>
         </Box>
         {/* </PaperBoard> */}
+
         <Box
           display=" flex"
           pt={2}
@@ -430,19 +414,17 @@ export default class AddProductionUnit extends Component {
               Cancel
             </Button>
           </Box>
-          <Box marginLeft="10px">
+          <Box marginLeft="10px" display={this.props.disabled.btnDisplay}>
             <Button
               fullWidth
               variant="contained"
               color="primary"
               size="large"
-              fontSize="20px"
-              onClick={() => {
-                this.onAddHandler();
-              }}
+              fontWeight="bold"
+              onClick={this.onProductHandler}
               disabled={this.state.subdisplay}
             >
-              Submit
+              Update
             </Button>
           </Box>
         </Box>

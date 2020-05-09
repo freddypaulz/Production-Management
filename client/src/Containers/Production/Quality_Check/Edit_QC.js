@@ -7,7 +7,8 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  Checkbox
+  Checkbox,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../styles/FormStyles";
@@ -17,7 +18,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class Qualitycheck extends Component {
   constructor(props) {
@@ -50,83 +51,145 @@ export default class Qualitycheck extends Component {
       prefixcode: "",
       boxprefixcode: "",
       boxcodes: [],
-      display: "none"
+      display: "none",
+      subdisplay: false,
+      progress: true,
     };
     this.onEditHandler = () => {
-      axios
-        .post("/quality-check/edit", {
-          _id: this.state._id,
-          QC_Type: this.state.QC_Type,
-          Product_Name: this.state.Product_Name,
-          Product_ID: this.state.Product_ID,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Quantity: this.state.Quantity,
-          Method: this.state.Method,
-          Id_Type: this.state.Id_Type,
-          Id: this.state.Id,
-          QC_Id: this.state.QC_Id,
-          Box_Id: this.state.Box_Id,
-          I_Capacity: this.state.I_Capacity,
-          B_Capacity: this.state.B_Capacity,
-          QC_Date: this.state.QC_Date,
-          Result: this.state.Result,
-          Comments: this.state.Comments,
-          Status: this.state.Status
-        })
-        .then(res => {
-          console.log(res.data);
-          // if (res.data.errors) {
-          //   if (res.data.errors.length > 0) {
-          //     console.log(res.data.errors);
-          //     this.setState({
-          //       errors: [...res.data.errors],
-          //       success: false
-          //     });
-          //   } else {
-          this.props.cancel();
-          //   }
-          // }
-        })
-        .catch(err => console.log(err));
+      if (this.state.QC_Type !== "") {
+        if (this.state.QC_Type === "Packing") {
+          if (
+            this.state.I_Capacity !== "" &&
+            this.state.B_Capacity !== "" &&
+            this.state.Box_Id !== "" &&
+            this.state.Id !== "" &&
+            this.state.Id_Type !== "" &&
+            this.state.QC_Date !== ""
+          ) {
+            this.setState({
+              subdisplay: true,
+              progress: true,
+            });
+            axios.post("/quality-check/add", {
+              _id: this.state._id,
+              QC_Type: this.state.QC_Type,
+              Product_Name: this.state.Product_Name,
+              Product_ID: this.state.Product_ID,
+              Batch_Id: this.state.Batch_Id,
+              Measuring_Unit: this.state.Measuring_Unit,
+              Quantity: this.state.Quantity,
+              Method: this.state.methods,
+              Id_Type: this.state.Id_Type,
+              Id: this.state.Id,
+              QC_Id: this.state.QC_Id,
+              Box_Id: this.state.Box_Id,
+              I_Capacity: this.state.I_Capacity,
+              B_Capacity: this.state.B_Capacity,
+              QC_Date: this.state.QC_Date,
+              Result: this.state.Result,
+              Comments: this.state.Comments,
+              Status: this.state.Status,
+            });
+            // .then((res) => {
+            //   console.log(res.data);
+            //   // if (res.data.errors) {
+            //   //   if (res.data.errors.length > 0) {
+            //   //     console.log(res.data.errors);
+            //   //     this.setState({
+            //   //       errors: [...res.data.errors],
+            //   //       success: false
+            //   //     });
+            //   //   } else {
+            //   this.props.cancel();
+            //   //   }
+            //   // }
+            // })
+            // .catch((err) => console.log(err));
+          } else {
+            alert("Please check all the fields are entered properly");
+          }
+        } else if (this.state.QC_Type === "Product") {
+          if (this.state.QC_Id !== "" && this.state.QC_Date !== "") {
+            this.setState({
+              subdisplay: true,
+              progress: true,
+            });
+            axios
+              .post("/quality-check/add", {
+                _id: this.state._id,
+                QC_Type: this.state.QC_Type,
+                Product_Name: this.state.Product_Name,
+                Product_ID: this.state.Product_ID,
+                Batch_Id: this.state.Batch_Id,
+                Measuring_Unit: this.state.Measuring_Unit,
+                Quantity: this.state.Quantity,
+                Method: this.state.methods,
+                Id_Type: this.state.Id_Type,
+                Id: this.state.Id,
+                QC_Id: this.state.QC_Id,
+                Box_Id: this.state.Box_Id,
+                I_Capacity: this.state.I_Capacity,
+                B_Capacity: this.state.B_Capacity,
+                QC_Date: this.state.QC_Date,
+                Result: this.state.Result,
+                Comments: this.state.Comments,
+                Status: this.state.Status,
+              })
+              .then((res) => {
+                console.log(res.data);
+                this.setState({
+                  progress: true,
+                });
+                this.props.cancel();
+                //   }
+                // }
+              })
+              .catch((err) => console.log(err));
+          } else {
+            alert("Please check all the fields are entered properly");
+          }
+        }
+      }
     };
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
-      axios.get("/products/products").then(res => {
+      axios.get("/products/products").then((res) => {
         console.log(res);
         this.setState({
-          products: [...res.data.Products]
+          products: [...res.data.Products],
         });
         // console.log("Product: ", this.state.products);
       });
-      axios.get("/qc-method").then(res => {
+      axios.get("/qc-method").then((res) => {
         console.log("qc----", res);
         this.setState({
-          methods: [...res.data]
+          methods: [...res.data],
         });
         // console.log("Product: ", this.state.products);
       });
     });
-    axios.get("/product-code").then(res => {
+    axios.get("/product-code").then((res) => {
       console.log("productcodes", res.data.ProductCode);
       this.setState({
         productcodes: [...res.data.ProductCode],
         prefixcode:
           res.data.ProductCode[0].code_prefix +
-          res.data.ProductCode[0].code_separator
+          res.data.ProductCode[0].code_separator,
       });
     });
-    axios.get("/box-code").then(res => {
+    axios.get("/box-code").then((res) => {
       console.log("boxcodes", res.data.BoxCode);
       this.setState({
         boxcodes: [...res.data.BoxCode],
         boxprefixcode:
-          res.data.BoxCode[0].code_prefix + res.data.BoxCode[0].code_separator
+          res.data.BoxCode[0].code_prefix + res.data.BoxCode[0].code_separator,
+        progress: false,
       });
       console.log(
         "concode:",
@@ -170,7 +233,7 @@ export default class Qualitycheck extends Component {
       QC_Date: this.props.qualitycheck.QC_Date,
       Result: this.props.qualitycheck.Result,
       Comments: this.props.qualitycheck.Comments,
-      Status: this.props.qualitycheck.Status
+      Status: this.props.qualitycheck.Status,
     });
     // }
     //   onChange={event => {
@@ -201,6 +264,18 @@ export default class Qualitycheck extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
                     <FormControl
@@ -213,7 +288,7 @@ export default class Qualitycheck extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Qualitycheck Type
@@ -224,7 +299,7 @@ export default class Qualitycheck extends Component {
                         required
                         name="QC_Type"
                         value={this.state.QC_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({ QC_Type: event.target.value });
                         }}
                       >
@@ -249,7 +324,7 @@ export default class Qualitycheck extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Item Name
@@ -260,9 +335,9 @@ export default class Qualitycheck extends Component {
                         required
                         name="Product_Name"
                         value={this.state.Product_Name}
-                        onChange={event => {
+                        onChange={(event) => {
                           let prodCode;
-                          this.state.products.map(product => {
+                          this.state.products.map((product) => {
                             if (product._id === event.target.value) {
                               prodCode = product.product_code;
                               console.log("Procode: ", prodCode);
@@ -271,7 +346,7 @@ export default class Qualitycheck extends Component {
                           });
                           this.setState({
                             Product_Name: event.target.value,
-                            Id: prodCode
+                            Id: prodCode,
                           });
                         }}
                       >
@@ -299,9 +374,9 @@ export default class Qualitycheck extends Component {
                       required
                       name="Product_ID"
                       value={this.state.Product_ID}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Product_ID: event.target.value
+                          Product_ID: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -320,7 +395,7 @@ export default class Qualitycheck extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({ Quantity: event.target.value });
                       }}
                     ></TextField>
@@ -337,7 +412,7 @@ export default class Qualitycheck extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -348,9 +423,9 @@ export default class Qualitycheck extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                         }}
                       >
@@ -384,7 +459,7 @@ export default class Qualitycheck extends Component {
                           style={{
                             backgroundColor: "white",
                             paddingLeft: "2px",
-                            paddingRight: "2px"
+                            paddingRight: "2px",
                           }}
                         >
                           Id Type
@@ -395,7 +470,7 @@ export default class Qualitycheck extends Component {
                           required
                           name="Id_Type"
                           value={this.state.Id_Type}
-                          onChange={event => {
+                          onChange={(event) => {
                             this.setState({ Id_Type: event.target.value });
                           }}
                         >
@@ -417,7 +492,7 @@ export default class Qualitycheck extends Component {
                         required
                         name="B_Capacity"
                         value={this.state.B_Capacity}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({ B_Capacity: event.target.value });
 
                           // let cap = [];
@@ -444,7 +519,7 @@ export default class Qualitycheck extends Component {
                         required
                         name="I_Capacity"
                         value={this.state.I_Capacity}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({ I_Capacity: event.target.value });
 
                           // let temp = [];
@@ -477,9 +552,9 @@ export default class Qualitycheck extends Component {
                         required
                         name="Box_Id"
                         value={this.state.Box_Id}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Box_Id: event.target.value
+                            Box_Id: event.target.value,
                           });
                         }}
                       ></TextField>
@@ -498,7 +573,7 @@ export default class Qualitycheck extends Component {
                         required
                         name="Id"
                         value={this.state.Id}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({ Id: event.target.value });
                         }}
                       ></TextField>
@@ -516,7 +591,7 @@ export default class Qualitycheck extends Component {
                         required
                         name="QC_Id"
                         value={this.state.QC_Id}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({ QC_Id: event.target.value });
                         }}
                       ></TextField>
@@ -531,9 +606,9 @@ export default class Qualitycheck extends Component {
                       variant="outlined"
                       Name="QC_Date"
                       value={this.state.QC_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          QC_Date: date
+                          QC_Date: date,
                         });
                       }}
                     />
@@ -563,11 +638,11 @@ export default class Qualitycheck extends Component {
                                 checked={method.Value}
                                 name="Method"
                                 value={this.state.Method}
-                                onClick={event => {
+                                onClick={(event) => {
                                   method.Value = !method.Value;
                                   this.setState({
                                     methods: [...this.state.methods],
-                                    Method: event.target.value
+                                    Method: event.target.value,
                                   });
                                   console.log("methods", this.state.methods);
                                 }}
@@ -594,7 +669,7 @@ export default class Qualitycheck extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Result Status
@@ -605,9 +680,9 @@ export default class Qualitycheck extends Component {
                         required
                         name="Result"
                         value={this.state.Result}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Result: event.target.value
+                            Result: event.target.value,
                           });
                         }}
                       >
@@ -638,7 +713,7 @@ export default class Qualitycheck extends Component {
                       rowsMax="3"
                       name="Comments"
                       value={this.state.Comments}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({ Comments: event.target.value });
                       }}
                     ></TextField>
@@ -679,6 +754,7 @@ export default class Qualitycheck extends Component {
               size="large"
               fontWeight="bold"
               onClick={this.onEditHandler}
+              disabled={this.state.subdisplay}
             >
               update
             </Button>

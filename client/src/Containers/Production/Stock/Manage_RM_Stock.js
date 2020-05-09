@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import MaterialTable from "material-table";
 import { Box } from "@material-ui/core";
 import axios from "axios";
+import { LinearProgress } from "@material-ui/core";
 
 export default class ManageRMStock extends Component {
   constructor(props) {
@@ -16,10 +17,13 @@ export default class ManageRMStock extends Component {
         { title: "Quantity", field: "Quantity" },
         {
           title: "Measuring Unit",
-          field: "Measuring_Unit"
-        }
+          field: "Measuring_Unit",
+        },
       ],
       data: [],
+      msg: "Fetching Data...",
+      isLoading: true,
+      progress: 0,
       openAdd: false,
       openEdit: false,
       open: false,
@@ -31,8 +35,8 @@ export default class ManageRMStock extends Component {
         Measuring_Unit: false,
 
         btnDisplay: "none",
-        btnText: "Close"
-      }
+        btnText: "Close",
+      },
     };
     this.closeAlert = () => {
       this.setState({ alert: false });
@@ -40,28 +44,29 @@ export default class ManageRMStock extends Component {
     this.OnEditHandler = (event, rowData) => {
       axios
         .post("/production-raw-material-stock", {
-          _id: rowData._id
+          _id: rowData._id,
         })
-        .then(res => {
+        .then((res) => {
           console.log(res.data[0]);
           this.EditData = { ...res.data[0] };
           console.log(this.EditData);
           this.setState({
-            openEdit: true
+            openEdit: true,
+            progress: 50,
           });
         });
     };
     this.handleClose = () => {
-      axios.get("/production-raw-material-stock").then(res => {
+      axios.get("/production-raw-material-stock").then((res) => {
         console.log(res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
           //Axios
           axios
             .post("/measuring-units/measuring-unit", {
-              _id: res.data[i].Measuring_Unit
+              _id: res.data[i].Measuring_Unit,
             })
-            .then(MeasuringUnit => {
+            .then((MeasuringUnit) => {
               console.log(MeasuringUnit);
               if (MeasuringUnit.data.MeasuringUnit[0]) {
                 console.log(
@@ -70,12 +75,14 @@ export default class ManageRMStock extends Component {
                 res.data[i].Measuring_Unit =
                   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 80,
                 });
               } else {
                 res.data[i].Measuring_Unit = "problem loading Measuring Unit";
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 80,
                 });
               }
             });
@@ -83,22 +90,26 @@ export default class ManageRMStock extends Component {
           //Axios
           axios
             .post("/raw-materials/raw-material", {
-              _id: res.data[i].Raw_Material_Id
+              _id: res.data[i].Raw_Material_Id,
               //_id: res.data[i].Product_ID
             })
-            .then(MaterialId => {
+            .then((MaterialId) => {
               console.log(MaterialId);
               if (MaterialId.data.RawMaterial[0]) {
                 console.log(MaterialId.data.RawMaterial[0].raw_material_name);
                 res.data[i].Raw_Material_Id =
                   MaterialId.data.RawMaterial[0].raw_material_name;
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 100,
+                  isLoading: false,
                 });
               } else {
                 res.data[i].Raw_Material_Id = "problem loading";
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 100,
+                  isLoading: false,
                 });
               }
             });
@@ -107,6 +118,13 @@ export default class ManageRMStock extends Component {
         // this.setState({
         //   data: [...res.data.Productions]
         // });
+        let i = 0;
+        if (i >= res.data.length)
+          this.setState({
+            progress: 100,
+            msg: "Data Not Found!",
+            isLoading: false,
+          });
       });
     };
   }
@@ -127,39 +145,53 @@ export default class ManageRMStock extends Component {
 
         <MaterialTable
           title=" "
+          isLoading={this.state.isLoading}
           columns={this.state.columns}
           data={this.state.data}
           style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
+          localization={{
+            body: {
+              emptyDataSourceMessage: this.state.msg,
+            },
+          }}
+          components={{
+            OverlayLoading: (props) => (
+              <LinearProgress
+                variant="determinate"
+                value={this.state.progress}
+              ></LinearProgress>
+            ),
+          }}
           options={{
             sorting: true,
             headerStyle: {
               backgroundColor: "#3f51b5",
               color: "#FFF",
               fontSize: "medium",
-              fontWeight: "bold"
-            }
+              fontWeight: "bold",
+            },
           }}
-          editable={{
-            onRowDelete: oldData =>
-              axios
-                .post("/production-raw-material-stock/delete", {
-                  _id: oldData._id
-                })
-                .then(RMRequest => {
-                  console.log(RMRequest);
-                  if (RMRequest) {
-                    this.setState(prevState => {
-                      const data = [...prevState.data];
-                      data.splice(data.indexOf(oldData), 1);
-                      return { ...prevState, data };
-                    });
+          // editable={{
+          //   onRowDelete: oldData =>
+          //     axios
+          //       .post("/production-raw-material-stock/delete", {
+          //         _id: oldData._id
+          //       })
+          //       .then(RMRequest => {
+          //         console.log(RMRequest);
+          //         if (RMRequest) {
+          //           this.setState(prevState => {
+          //             const data = [...prevState.data];
+          //             data.splice(data.indexOf(oldData), 1);
+          //             return { ...prevState, data };
+          //           });
 
-                    this.setState({
-                      alert: true
-                    });
-                  }
-                })
-          }}
+          //           this.setState({
+          //             alert: true
+          //           });
+          //         }
+          //       })
+          // }}
         />
       </Box>
     );

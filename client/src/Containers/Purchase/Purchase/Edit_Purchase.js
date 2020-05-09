@@ -9,18 +9,21 @@ import {
    MenuItem,
    Dialog,
    Link,
-   DialogContent
+   DialogContent,
+   LinearProgress,
+   InputAdornment,
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
 import { Datepick } from '../../../Components/Date/Datepick';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import Stock from './Add_Purchase_Stock';
 import moment from 'moment';
 const styles = Styles;
 const style = {
    marginRight: '6px',
-   marginLeft: '6px'
+   marginLeft: '6px',
 };
 export default class EditPurchase extends Component {
    constructor(props) {
@@ -34,7 +37,7 @@ export default class EditPurchase extends Component {
          Priority: '',
          Due_Date: null,
          Status: '',
-         Comments: 'no comments',
+         Comments: '',
          Total_Price: null,
          Vendor: '',
          errors: [],
@@ -48,18 +51,31 @@ export default class EditPurchase extends Component {
          To: '',
          file: '',
          openDialog: false,
-         vendorInfo: false
+         vendorInfo: false,
+         availStock: null,
+         submitBtnDisable: false,
+         stockBtnDisable: false,
+         progress: true,
+         currency: [],
       };
 
       this.openDialog = () => {
          this.setState({ openDialog: true });
       };
 
-      this.closeDialog = () => {
+      this.closeDialog = (btn) => {
          this.setState({ openDialog: false });
+         if (btn === 'submit') {
+            this.props.cancel();
+         }
       };
 
       this.onEditHandler = () => {
+         if (this.state.Comments === '') {
+            this.setState({
+               Comments: 'no comments',
+            });
+         }
          if (
             this.state.Quantity !== null &&
             this.state.Vendor !== '' &&
@@ -68,6 +84,10 @@ export default class EditPurchase extends Component {
             this.state.Measuring_Unit !== '' &&
             this.state.Status !== ''
          ) {
+            this.setState({
+               submitBtnDisable: true,
+               progress: true,
+            });
             const formData = new FormData();
             console.log('fileLength: ', this.state.file);
             for (let i = 0; i < this.state.file.length; i++) {
@@ -77,16 +97,17 @@ export default class EditPurchase extends Component {
                   'file',
                   this.state.file[i],
                   'quotation_' +
-                  new moment().format('DD_MM_YYYY_HH_m_s.') + fileType[1]
+                     new moment().format('DD_MM_YYYY_HH_m_s.') +
+                     fileType[1]
                );
             }
             axios
                .post('/files', formData, {
                   headers: {
-                     'content-type': 'multipart/form-data'
-                  }
+                     'content-type': 'multipart/form-data',
+                  },
                })
-               .then(res => {
+               .then((res) => {
                   console.log('file: ', res);
                   axios
                      .post('/log/comment', {
@@ -94,10 +115,10 @@ export default class EditPurchase extends Component {
                            reqId: props.Purchase._id,
                            from: sessionStorage.getItem('Role ID'),
                            to: 'Finance',
-                           comments: this.state.Comments
-                        }
+                           comments: this.state.Comments,
+                        },
                      })
-                     .then(comments => {
+                     .then((comments) => {
                         console.log('Comments: ', comments);
                         axios.post('/request-details/edit', {
                            _id: this.state._id,
@@ -109,14 +130,19 @@ export default class EditPurchase extends Component {
                            Due_Date: this.state.Due_Date,
                            Status: this.state.Status,
                            Comments: this.state.Comments,
-                           Vendor: this.state.Vendor,
+                           Vendor: this.state.Vendor._id,
                            Total_Price: this.state.Total_Price,
-                           Quotation_Document_URL: res.data
+                           Quotation_Document_URL: res.data,
                         });
                      })
-                     .then(this.props.cancel());
+                     .then(() => {
+                        this.setState({
+                           progress: false,
+                        });
+                        this.props.cancel();
+                     });
                })
-               .catch(err => console.log(err));
+               .catch((err) => console.log(err));
          } else {
             alert('please check all fields are entered properly');
          }
@@ -153,12 +179,13 @@ export default class EditPurchase extends Component {
       this.loadStatus = () => {
          let status = [
             'Requesting',
+            'ForwardedToPurchase',
             'Finance-Accepted',
             'Purchase-Completed',
             'ForwardedToFinance',
             'Purchase-Accepted',
             'Purchase-Rejected',
-            'ForwardedToProduction'
+            'ForwardedToProduction',
          ];
          return status.map((msg, index) => (
             <MenuItem
@@ -178,7 +205,8 @@ export default class EditPurchase extends Component {
       this.vendorInfo = () => {
          let temp = [];
          this.state.vendorList.map((vendor, index) => {
-            if (vendor._id === this.state.Vendor) {
+            console.log('Vendorinfo:', this.state.Vendor._id);
+            if (vendor._id === this.state.Vendor._id) {
                console.log('matched');
                temp.push(
                   <Box key={index}>
@@ -207,82 +235,92 @@ export default class EditPurchase extends Component {
          return temp;
       };
 
-      this.getMaterialDetails = (id) => {
-         let temp = id;
-         this.state.materials.map(material => {
-            if (material._id === id) {
-               temp = material.raw_material_code;
-            }
-            return null
-         })
-         return temp;
-      }
-
-      this.getDetails = (id) => {
-         let temp = id;
-         console.log('reqdetails:', this.state.reqDetails);
-         this.state.reqDetails.map(details => {
-            if (details._id === id) {
-               temp = this.getMaterialDetails(details.Raw_Material_Id);
-            }
-            return null
+      this.sendMaterials = () => {
+         this.setState({
+            progress: true,
          });
-         return temp;
+         axios
+            .post('/purchase-stocks/add-production', {
+               _id: this.props.Purchase._id,
+               Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
+               Raw_Material_Code: this.props.Purchase.Raw_Material_Code,
+               Quantity: this.props.Purchase.Quantity,
+               Measuring_Unit: this.props.Purchase.Measuring_Unit,
+               Id: this.props.Purchase._id,
+            })
+            .then((response) => {
+               console.log('response: ', response);
+               axios
+                  .post('purchase-stocks/status', {
+                     _id: this.props.Purchase._id,
+                  })
+                  .then((resp) => {
+                     console.log('resp: ', resp);
+                     this.setState({
+                        progress: false,
+                     });
+                     this.props.cancel();
+                  });
+            })
+            .catch((err) => {
+               console.log('stock not reduced', err);
+            });
       };
-
-      this.getStockDetails = () => {
-         console.log('stockList:', this.state.stockList);
-         let temp;
-         let rcode = this.getDetails(this.props.Purchase._id);
-         this.state.stockList.map(stock => {
-            let scode = this.getDetails(stock.Purchase_Id);
-            console.log('scode:', scode, rcode)
-            if (scode === rcode) {
-               temp = stock.Total_Quantity
-            }
-            return null
-         })
-         return temp;
-      }
    }
 
    componentDidMount() {
-      axios.get('/raw-material').then(res => {
+      axios.get('/raw-material').then((res) => {
          console.log(res);
          this.setState({
-            materials: [...res.data.RawMaterials]
+            materials: [...res.data.RawMaterials],
          });
       });
 
-      axios.get('/vendors/vendors').then(res => {
+      axios.get('/vendors/vendors').then((res) => {
          console.log(res);
          this.setState({
-            vendorList: [...res.data.Vendors]
+            vendorList: [...res.data.Vendors],
          });
       });
 
-      axios.get('/measuring-units/measuring-units').then(res => {
-         console.log(res);
-         this.setState({
-            unitList: [...res.data.MeasuringUnits]
-         });
-      }).then(() => {
-         axios.get('/purchase-stocks').then(res => {
+      axios
+         .get('/measuring-units/measuring-units')
+         .then((res) => {
+            console.log(res);
             this.setState({
-               stockList: [...res.data.stock]
-            })
-         }).then(() => {
-            axios.get('/request-details').then(res => {
-               this.setState({
-                  reqDetails: [...res.data]
-               })
-            })
-         }).catch(err => {
-            console.log('cannot get reqdetails', err)
+               unitList: [...res.data.MeasuringUnits],
+            });
          })
-      }).catch(err => {
-         console.log('cannot get unitlist', err)
-      })
+         .then(() => {
+            axios
+               .get('/purchase-stocks')
+               .then((res) => {
+                  this.setState({
+                     stockList: [...res.data.stock],
+                  });
+               })
+               .then(() => {
+                  axios.get('/request-details').then((res) => {
+                     this.setState({
+                        reqDetails: [...res.data],
+                        progress: false,
+                     });
+                  });
+               })
+               .catch((err) => {
+                  console.log('cannot get reqdetails', err);
+               });
+         })
+         .catch((err) => {
+            console.log('cannot get unitlist', err);
+         });
+
+      axios.get('/currency').then((res) => {
+         this.setState({
+            currency: res.data.Currency[0].currency_type,
+         });
+         console.log('currency:', this.state.currency);
+      });
 
       this.setState({
          _id: this.props.Purchase._id,
@@ -294,8 +332,8 @@ export default class EditPurchase extends Component {
          Due_Date: this.props.Purchase.Due_Date,
          Status: this.props.Purchase.Status,
          Comments: this.state.Comments,
-         Vendor: this.props.Purchase.Vendor,
-         Total_Price: this.props.Purchase.Total_Price
+         Vendor: this.props.vendorRecord(),
+         Total_Price: this.props.Purchase.Total_Price,
       });
    }
 
@@ -322,6 +360,18 @@ export default class EditPurchase extends Component {
                <Box display='flex' justifyContent='center'>
                   <Box style={styles.lbox}>
                      <Box style={styles.form}>
+                        {this.state.progress === true ? (
+                           <LinearProgress
+                              color='primary'
+                              variant='indeterminate'
+                              style={{
+                                 marginLeft: '10px',
+                                 marginBottom: '10px',
+                              }}
+                           />
+                        ) : (
+                           <Box></Box>
+                        )}
                         <Box style={styles.boxSize2}>
                            <Box width='50%' style={style}>
                               <FormControl
@@ -334,7 +384,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Material Name
@@ -345,9 +395,9 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Raw_Material_Id'
                                     value={this.state.Raw_Material_Id}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        let materialCode;
-                                       this.state.materials.map(material => {
+                                       this.state.materials.map((material) => {
                                           if (
                                              material._id === event.target.value
                                           ) {
@@ -362,7 +412,7 @@ export default class EditPurchase extends Component {
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
-                                          Raw_Material_Code: materialCode
+                                          Raw_Material_Code: materialCode,
                                        });
                                     }}
                                  >
@@ -391,9 +441,9 @@ export default class EditPurchase extends Component {
                                  label='Material_Code'
                                  required
                                  value={this.state.Raw_Material_Code}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Material_Code: event.target.value
+                                       Material_Code: event.target.value,
                                     });
                                     console.log(event.target.value);
                                  }}
@@ -410,9 +460,9 @@ export default class EditPurchase extends Component {
                                  label='Quantity'
                                  required
                                  value={this.state.Quantity}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Quantity: event.target.value
+                                       Quantity: event.target.value,
                                     });
                                  }}
                               ></TextField>
@@ -428,7 +478,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Measuring Unit
@@ -439,9 +489,9 @@ export default class EditPurchase extends Component {
                                     variant='outlined'
                                     required
                                     value={this.state.Measuring_Unit}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Measuring_Unit: event.target.value
+                                          Measuring_Unit: event.target.value,
                                        });
                                        console.log(event.target.value);
                                     }}
@@ -473,41 +523,29 @@ export default class EditPurchase extends Component {
                                  fullWidth
                                  size='small'
                               >
-                                 <InputLabel
-                                    style={{
-                                       backgroundColor: 'white',
-                                       paddingLeft: '2px',
-                                       paddingRight: '2px'
-                                    }}
-                                 >
-                                    Vendor Name
-                                 </InputLabel>
-                                 <Select
+                                 <Autocomplete
                                     disabled={this.props.disabled.vendor}
-                                    variant='outlined'
-                                    required
-                                    name='Vendor'
+                                    options={this.state.vendorList}
+                                    autoHighlight={true}
                                     value={this.state.Vendor}
-                                    onChange={event => {
-                                       this.setState({
-                                          Vendor: event.target.value
-                                       });
-                                    }}
-                                 >
-                                    {this.state.vendorList.map(
-                                       (vendor, index) => {
-                                          return (
-                                             <MenuItem
-                                                //selected
-                                                key={index}
-                                                value={vendor._id}
-                                             >
-                                                {vendor.vendor_name}
-                                             </MenuItem>
-                                          );
-                                       }
+                                    getOptionLabel={(option) =>
+                                       option.vendor_name
+                                    }
+                                    renderInput={(params) => (
+                                       <TextField
+                                          {...params}
+                                          label='Vendor'
+                                          variant='outlined'
+                                          size='small'
+                                       />
                                     )}
-                                 </Select>
+                                    onChange={(event, value) => {
+                                       this.setState({
+                                          Vendor: value,
+                                       });
+                                       console.log('Vendor:', value);
+                                    }}
+                                 />
                               </FormControl>
                            </Box>
                            <Box width='50%' style={style}>
@@ -517,11 +555,18 @@ export default class EditPurchase extends Component {
                                  fullWidth
                                  variant='outlined'
                                  label='Total_Price'
+                                 InputProps={{
+                                    endAdornment: (
+                                       <InputAdornment position='start'>
+                                          {this.state.currency}
+                                       </InputAdornment>
+                                    ),
+                                 }}
                                  required
                                  value={this.state.Total_Price}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Total_Price: event.target.value
+                                       Total_Price: event.target.value,
                                     });
                                  }}
                               ></TextField>
@@ -539,7 +584,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Priority
@@ -567,9 +612,9 @@ export default class EditPurchase extends Component {
                                  variant='outlined'
                                  Name='Due_Date'
                                  value={this.state.Due_Date}
-                                 setDate={date => {
+                                 setDate={(date) => {
                                     this.setState({
-                                       Due_Date: date
+                                       Due_Date: date,
                                     });
                                     console.log(date);
                                  }}
@@ -588,7 +633,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Status
@@ -599,26 +644,26 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Status'
                                     value={this.state.Status}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Status: event.target.value
+                                          Status: event.target.value,
                                        });
                                        if (
                                           event.target.value ===
                                           'ForwardedToFinance'
                                        ) {
-                                          this.setState(prevState => {
+                                          this.setState((prevState) => {
                                              prevState.To = 'Finance';
                                           });
                                        } else if (
                                           event.target.value ===
-                                          'ForwardedToProduction' ||
+                                             'ForwardedToProduction' ||
                                           event.target.value ===
-                                          'Purchase-Accepted' ||
+                                             'Purchase-Accepted' ||
                                           event.target.value ===
-                                          'Purchase-Rejected'
+                                             'Purchase-Rejected'
                                        ) {
-                                          this.setState(prevState => {
+                                          this.setState((prevState) => {
                                              prevState.To = 'Purchase';
                                           });
                                        }
@@ -643,9 +688,9 @@ export default class EditPurchase extends Component {
                                  fullWidth
                                  label='Comment'
                                  value={this.state.Comments}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Comments: event.target.value
+                                       Comments: event.target.value,
                                     });
                                     console.log(event.target.value);
                                  }}
@@ -660,9 +705,9 @@ export default class EditPurchase extends Component {
                                  id='#file'
                                  type='file'
                                  multiple='multiple'
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       file: event.target.files
+                                       file: event.target.files,
                                     });
                                     console.log('temp: ', this.state.file);
                                  }}
@@ -672,7 +717,8 @@ export default class EditPurchase extends Component {
                                     <Button
                                        style={{
                                           display: this.props.uploadFile,
-                                          marginLeft: '10px'
+                                          marginLeft: '10px',
+                                          width: '100%',
                                        }}
                                        variant='contained'
                                        component='span'
@@ -684,41 +730,46 @@ export default class EditPurchase extends Component {
                                  </label>
                                  <Box
                                     style={{
+                                       paddingTop: '5px',
                                        marginLeft: '10px',
-                                       paddingTop: '5px'
                                     }}
                                  >
                                     {this.showFile()}
                                  </Box>
                               </Box>
                               <Box
+                                 style={{ marginLeft: '20px' }}
                                  display={
                                     this.props.Purchase.Quotation_Document_URL
                                        .length > 0
                                        ? 'flex'
                                        : 'none'
                                  }
-                                 marginLeft='10px'
                                  alignSelf='center'
                               >
                                  {this.loadFile()}
                               </Box>
                            </Box>
-                           {/* <Box width='100%' display='flex'>
+                           <Box display='flex' style={style}>
                               <TextField
                                  disabled
+                                 id='stock'
                                  size='small'
-                                 fullWidth
-                                 variant='outlined'
-                                 label='Stock Quantity'
-                                 required
-                                 value={this.getStockDetails}
+                                 label='Available Stock'
+                                 defaultValue=' '
+                                 value={this.props.availStock}
+                                 InputLabelProps={{
+                                    style: {
+                                       color: 'black',
+                                       fontWeight: 'bold',
+                                    },
+                                 }}
+                                 InputProps={{
+                                    style: {
+                                       fontWeight: 'bold',
+                                    },
+                                 }}
                               ></TextField>
-                           </Box> */}
-                        </Box>
-                        <Box style={styles.boxSize2}>
-                           <Box width='100%'>
-                              Stock: {this.getStockDetails()}
                            </Box>
                         </Box>
                      </Box>
@@ -749,7 +800,9 @@ export default class EditPurchase extends Component {
                </Box>
                <Box
                   marginLeft='10px'
-                  display={this.state.Vendor !== '' ? 'flex' : 'none'}
+                  display={
+                     this.state.Vendor._id !== undefined ? 'flex' : 'none'
+                  }
                >
                   <Button
                      variant='contained'
@@ -758,13 +811,41 @@ export default class EditPurchase extends Component {
                      fontWeight='bold'
                      onClick={() => {
                         this.setState({
-                           vendorInfo: true
+                           vendorInfo: true,
                         });
                         this.openDialog();
                      }}
                      style={{ fontWeight: 'bold' }}
                   >
                      Vendor Info
+                  </Button>
+               </Box>
+               <Box
+                  display={
+                     this.props.availStock - this.props.Purchase.Quantity >=
+                        0 &&
+                     this.props.role !== 'Admin' &&
+                     this.props.Purchase.Status === 'Requesting'
+                        ? 'flex'
+                        : 'none'
+                  }
+                  ml={1}
+               >
+                  <Button
+                     disabled={this.state.stockBtnDisable}
+                     variant='contained'
+                     color='primary'
+                     size='large'
+                     fontWeight='Bold'
+                     onClick={() => {
+                        this.setState({
+                           stockBtnDisable: true,
+                        });
+                        this.sendMaterials();
+                     }}
+                     style={{ fontWeight: 'bold' }}
+                  >
+                     Send Materials
                   </Button>
                </Box>
                <Box
@@ -782,7 +863,7 @@ export default class EditPurchase extends Component {
                      fontWeight='bold'
                      onClick={() => {
                         this.setState({
-                           vendorInfo: false
+                           vendorInfo: false,
                         });
                         this.openDialog();
                      }}
@@ -793,11 +874,14 @@ export default class EditPurchase extends Component {
                </Box>
                <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
                   <Button
+                     disabled={this.state.submitBtnDisable}
                      variant='contained'
                      color='primary'
                      size='large'
                      fontWeight='bold'
-                     onClick={this.onEditHandler}
+                     onClick={() => {
+                        this.onEditHandler();
+                     }}
                      style={{ fontWeight: 'bold' }}
                   >
                      Submit
@@ -810,8 +894,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                        <Box></Box>
-                     );
+                     <Box></Box>
+                  );
                }}
                maxWidth='sm'
                fullWidth
@@ -828,14 +912,28 @@ export default class EditPurchase extends Component {
                            Vendor Information
                         </Box>
                         {this.vendorInfo()}
+                        <Box display='flex' justifyContent='flex-end'>
+                           <Button
+                              variant='contained'
+                              color='primary'
+                              size='small'
+                              fontWeight='bold'
+                              onClick={() => {
+                                 this.closeDialog();
+                              }}
+                           >
+                              Close
+                           </Button>
+                        </Box>
                      </Box>
                   ) : (
-                        <Stock
-                           Purchase={this.props.Purchase}
-                           closeDialog={this.closeDialog}
-                           upload={this.props.uploadFile}
-                        />
-                     )}
+                     <Stock
+                        Purchase={this.props.Purchase}
+                        closeDialog={this.closeDialog}
+                        upload={this.props.uploadFile}
+                        closeEdit={this.props.cancel}
+                     />
+                  )}
                </DialogContent>
             </Dialog>
          </Box>

@@ -6,18 +6,20 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../../styles/FormStyles";
 import { Datepick } from "../../../../Components/Date/Datepick";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class EditWastage extends Component {
   constructor(props) {
@@ -39,67 +41,91 @@ export default class EditWastage extends Component {
       materials: [],
       products: [],
       measuring_units: [],
-      A_Id: ""
+      MaterialRecord: [],
+      ProductRecord: [],
+      A_Id: "",
+      subdisplay: false,
+      progress: true,
     };
     this.onEditHandler = () => {
-      axios
-        .post("/wastage/edit", {
-          _id: this.state._id,
-          Wastage_Type: this.state.Wastage_Type,
-          Product_Name: this.state.Product_Name,
-          Raw_Material_Id: this.state.Raw_Material_Id,
-          Quantity: this.state.Quantity,
-          Product_ID: this.state.Product_ID,
-          raw_material_code: this.state.raw_material_code,
-          Id_Type: this.state.Id_Type,
-          Id: this.state.Id,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Wastage_Date: this.state.Wastage_Date,
-          Description: this.state.Description
-        })
-        .then(res => {
-          console.log(res.data);
-          // if (res.data.errors) {
-          //   if (res.data.errors.length > 0) {
-          //     console.log(res.data.errors);
-          //     this.setState({
-          //       errors: [...res.data.errors],
-          //       success: false
-          //     });
-          //   } else {
-          this.props.cancel();
-          //   }
-          // }
-        })
-        .catch(err => console.log(err));
+      if (
+        this.state.Quantity !== "" &&
+        this.state.Id_Type !== "" &&
+        this.state.Id[0].id !== "" &&
+        this.state.Wastage_Date !== null &&
+        this.state.Description !== ""
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
+        });
+        axios
+          .post("/wastage/edit", {
+            _id: this.state._id,
+            Wastage_Type: this.state.Wastage_Type,
+            Product_Name: this.state.Product_Name,
+            Raw_Material_Id: this.state.Raw_Material_Id,
+            Quantity: this.state.Quantity,
+            Product_ID: this.state.Product_ID,
+            raw_material_code: this.state.raw_material_code,
+            Id_Type: this.state.Id_Type,
+            Id: this.state.Id,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Wastage_Date: this.state.Wastage_Date,
+            Description: this.state.Description,
+          })
+          .then((res) => {
+            console.log(res.data);
+            // if (res.data.errors) {
+            //   if (res.data.errors.length > 0) {
+            //     console.log(res.data.errors);
+            //     this.setState({
+            //       errors: [...res.data.errors],
+            //       success: false
+            //     });
+            //   } else {
+            this.setState({
+              progress: true,
+            });
+            this.props.cancel();
+            //   }
+            // }
+          })
+          .catch((err) => console.log(err));
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
     };
   }
   componentDidMount() {
     // if (this.state.Wastage_Type === "") {
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
       });
     });
-    axios.get("/raw-material").then(res => {
+    axios.get("/raw-material").then((res) => {
       console.log(res);
       this.setState({
         materials: [...res.data.RawMaterials],
-        Raw_Material_Id: this.props.wastage.Raw_Material_Id
+        Raw_Material_Id: this.props.wastage.Raw_Material_Id,
       });
       // console.log("Product: ", this.state.products);
     });
     console.log("wid::", this.props.wastage.Id);
-    axios.get("/products/products").then(res => {
+    axios.get("/products/products").then((res) => {
       console.log(res);
       this.setState({
         products: [...res.data.Products],
-        Product_Name: this.props.wastage.Product_Name
+        Product_Name: this.props.wastage.Product_Name,
+        progress: false,
       });
       // console.log("Product: ", this.state.products);
     });
     this.setState({
+      ProductRecord: this.props.ProductRecord(),
+      MaterialRecord: this.props.MaterialRecord(),
       Wastage_Type: this.props.wastage.Wastage_Type,
       Quantity: this.props.wastage.Quantity,
       Product_ID: this.props.wastage.Product_ID,
@@ -109,7 +135,7 @@ export default class EditWastage extends Component {
       Measuring_Unit: this.props.wastage.Measuring_Unit,
       Wastage_Date: this.props.wastage.Wastage_Date,
       Description: this.props.wastage.Description,
-      _id: this.props.wastage._id
+      _id: this.props.wastage._id,
     });
     // }
     //   onChange={event => {
@@ -140,6 +166,18 @@ export default class EditWastage extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="100%" style={style}>
                     <FormControl
@@ -152,7 +190,7 @@ export default class EditWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Wastage Type
@@ -163,9 +201,9 @@ export default class EditWastage extends Component {
                         required
                         name="Wastage_Type"
                         value={this.state.Wastage_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Wastage_Type: event.target.value
+                            Wastage_Type: event.target.value,
                           });
                         }}
                       >
@@ -187,11 +225,11 @@ export default class EditWastage extends Component {
                         fullWidth
                         size="small"
                       >
-                        <InputLabel
+                        {/* <InputLabel
                           style={{
                             backgroundColor: "white",
                             paddingLeft: "2px",
-                            paddingRight: "2px"
+                            paddingRight: "2px",
                           }}
                         >
                           Product Name
@@ -202,9 +240,9 @@ export default class EditWastage extends Component {
                           required
                           name="Product_Name"
                           value={this.state.Product_Name}
-                          onChange={event => {
+                          onChange={(event) => {
                             let prodCode;
-                            this.state.products.map(product => {
+                            this.state.products.map((product) => {
                               if (product._id === event.target.value) {
                                 prodCode = product.product_code;
                                 console.log("Procode: ", prodCode);
@@ -213,7 +251,7 @@ export default class EditWastage extends Component {
                             });
                             this.setState({
                               Product_Name: event.target.value,
-                              Product_ID: prodCode
+                              Product_ID: prodCode,
                             });
                           }}
                         >
@@ -228,7 +266,36 @@ export default class EditWastage extends Component {
                               </MenuItem>
                             );
                           })}
-                        </Select>
+                        </Select> */}
+                        <Autocomplete
+                          options={this.state.products}
+                          autoHighlight={true}
+                          value={this.state.ProductRecord}
+                          getOptionLabel={(option) =>
+                            this.getProductName(option.Product_Name)
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Product Name"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                          onChange={(event, value) => {
+                            if (value !== null) {
+                              this.setState({
+                                ProductRecord: value,
+                                Product_Name: value.Product_Name,
+                                Product_ID: value.Product_ID,
+                                Measuring_Unit: value.Measuring_Unit,
+                                Available_Stock: value.Quantity,
+                              });
+                            }
+
+                            console.log("Product:", value);
+                          }}
+                        />
                       </FormControl>
                     ) : (
                       <FormControl
@@ -237,11 +304,11 @@ export default class EditWastage extends Component {
                         fullWidth
                         size="small"
                       >
-                        <InputLabel
+                        {/* <InputLabel
                           style={{
                             backgroundColor: "white",
                             paddingLeft: "2px",
-                            paddingRight: "2px"
+                            paddingRight: "2px",
                           }}
                         >
                           Material Name
@@ -252,9 +319,9 @@ export default class EditWastage extends Component {
                           required
                           name="Raw_Material_Id"
                           value={this.state.Raw_Material_Id}
-                          onChange={event => {
+                          onChange={(event) => {
                             let materialCode;
-                            this.state.materials.map(material => {
+                            this.state.materials.map((material) => {
                               if (material._id === event.target.value) {
                                 materialCode = material.raw_material_code;
                                 console.log("code: ", materialCode);
@@ -263,7 +330,7 @@ export default class EditWastage extends Component {
                             });
                             this.setState({
                               Raw_Material_Id: event.target.value,
-                              Raw_Material_Code: materialCode
+                              Raw_Material_Code: materialCode,
                             });
                           }}
                         >
@@ -278,7 +345,39 @@ export default class EditWastage extends Component {
                               </MenuItem>
                             );
                           })}
-                        </Select>
+                        </Select> */}
+                        <Autocomplete
+                          options={this.state.materials}
+                          autoHighlight={true}
+                          value={this.state.MaterialRecord}
+                          getOptionLabel={(option) =>
+                            this.getMaterialName(option.Raw_Material_Id)
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Raw Material"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                          onChange={(event, value) => {
+                            console.log("materialRecord:", value);
+                            console.log(
+                              "stateRecord:",
+                              this.state.raw_material_code
+                            );
+                            if (value !== null) {
+                              this.setState({
+                                materialRecord: value,
+                                Raw_Material_Id: value.Raw_Material_Id,
+                                raw_material_code: value.Raw_Material_Code,
+                                Measuring_Unit: value.Measuring_Unit,
+                                Available_Stock: value.Quantity,
+                              });
+                            }
+                          }}
+                        />
                       </FormControl>
                     )}
                   </Box>
@@ -292,9 +391,9 @@ export default class EditWastage extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Quantity: event.target.value
+                          Quantity: event.target.value,
                         });
                       }}
                     ></TextField>
@@ -313,7 +412,7 @@ export default class EditWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Id Type
@@ -324,9 +423,9 @@ export default class EditWastage extends Component {
                         required
                         name="Id_Type"
                         value={this.state.Id_Type}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Id_Type: event.target.value
+                            Id_Type: event.target.value,
                           });
                         }}
                       >
@@ -349,7 +448,7 @@ export default class EditWastage extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -360,9 +459,9 @@ export default class EditWastage extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                         }}
                       >
@@ -415,12 +514,12 @@ export default class EditWastage extends Component {
                             onFocus={() => {
                               console.log("wiiid:", this.state.Id[index].Id);
                             }}
-                            onChange={event => {
+                            onChange={(event) => {
                               this.setState({
-                                A_Id: event.target.value
+                                A_Id: event.target.value,
                               });
                               console.log(event.target.value);
-                              this.setState(prevState => {
+                              this.setState((prevState) => {
                                 prevState.Id[index].id = prevState.A_Id;
 
                                 console.log(prevState.Id[index]);
@@ -434,13 +533,13 @@ export default class EditWastage extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Id.push({
-                                    id: ""
+                                    id: "",
                                   });
                                   console.log(prevState.Id);
                                 });
@@ -452,11 +551,11 @@ export default class EditWastage extends Component {
                               style={{
                                 fontSize: "30px",
                                 margin: "4px",
-                                padding: "0px"
+                                padding: "0px",
                               }}
                               onClick={() => {
                                 this.setState({});
-                                this.setState(prevState => {
+                                this.setState((prevState) => {
                                   prevState.Id.splice(index, 1);
                                   console.log(prevState.Id);
                                 });
@@ -476,9 +575,9 @@ export default class EditWastage extends Component {
                       variant="outlined"
                       name="Wastage Date"
                       value={this.state.Wastage_Date}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Wastage_Date: event.target.value
+                          Wastage_Date: event.target.value,
                         });
                       }}
                     />
@@ -500,9 +599,9 @@ export default class EditWastage extends Component {
                       fullWidth
                       label="Reasons"
                       value={this.state.Description}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Description: event.target.value
+                          Description: event.target.value,
                         });
                       }}
                     ></TextField>
@@ -543,6 +642,7 @@ export default class EditWastage extends Component {
               size="large"
               fontWeight="bold"
               onClick={this.onEditHandler}
+              disabled={this.state.subdisplay}
             >
               Update
             </Button>

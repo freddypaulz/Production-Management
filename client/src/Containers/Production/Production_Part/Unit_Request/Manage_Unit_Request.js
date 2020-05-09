@@ -1,6 +1,11 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, DialogContent, Snackbar } from "@material-ui/core";
+import {
+  Box,
+  DialogContent,
+  Snackbar,
+  LinearProgress,
+} from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import axios from "axios";
 import EditUnitRequest from "./Edit_Unit_Request";
@@ -17,16 +22,23 @@ export default class ManageUnitRequest extends Component {
         { title: "Quantity", field: "Quantity" },
         {
           title: "Measuring Unit",
-          field: "Measuring_Unit_Name"
+          field: "Measuring_Unit_Name",
         },
         { title: "Priority", field: "Priority" },
-        { title: "Status", field: "Status" }
+        { title: "Status", field: "Status" },
       ],
       data: [],
+      msg: "Fetching Data...",
+      isLoading: true,
+      progress: 0,
       openAdd: false,
       openEdit: false,
       open: false,
       alert: false,
+      materialList: [],
+      unitList: [],
+      materials: [],
+
       fieldDisabled: {
         Raw_Material_Id: false,
         Raw_Material_Code: false,
@@ -37,34 +49,62 @@ export default class ManageUnitRequest extends Component {
         Status: false,
         Comments: false,
         btnDisplay: "none",
-        btnText: "Close"
-      }
+        btnText: "Close",
+      },
     };
     this.OnEditHandler = (event, rowData) => {
       axios
         .post("/production-unit", {
-          _id: rowData._id
+          _id: rowData._id,
         })
-        .then(res => {
+        .then((res) => {
           console.log(res.data[0]);
           this.EditData = { ...res.data[0] };
           console.log(this.EditData);
           this.setState({
-            openEdit: true
+            openEdit: true,
+            progress: 20,
           });
         });
     };
+    this.getMaterialName = (id) => {
+      let temp = id;
+      this.state.materialList.map((material) => {
+        if (material._id === id) {
+          temp = material.raw_material_name;
+        }
+        return null;
+      });
+      return temp;
+    };
+    this.getUnit = (id) => {
+      let temp = id;
+      this.state.unitList.map((unit) => {
+        if (unit._id === id) {
+          temp = unit.measuring_unit_name;
+        }
+        return null;
+      });
+      return temp;
+    };
     this.handleClose = () => {
-      axios.get("/production-unit").then(res => {
+      axios.get("/raw-material").then((res) => {
+        console.log(res);
+        this.setState({
+          materials: [...res.data.RawMaterials],
+        });
+        // console.log("Product: ", this.state.products);
+      });
+      axios.get("/production-unit").then((res) => {
         console.log("reqdetails:", res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
           //Axios
           axios
             .post("/measuring-units/measuring-unit", {
-              _id: res.data[i].Measuring_Unit
+              _id: res.data[i].Measuring_Unit,
             })
-            .then(MeasuringUnit => {
+            .then((MeasuringUnit) => {
               console.log(MeasuringUnit);
               if (MeasuringUnit.data.MeasuringUnit[0]) {
                 console.log(
@@ -73,12 +113,14 @@ export default class ManageUnitRequest extends Component {
                 res.data[i].Measuring_Unit_Name =
                   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 50,
                 });
               } else {
                 res.data[i].Measuring_Unit = "problem loading Measuring Unit";
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 50,
                 });
               }
             });
@@ -86,26 +128,37 @@ export default class ManageUnitRequest extends Component {
           //Axios
           axios
             .post("/raw-material", {
-              _id: res.data[i].Raw_Material_Id
+              _id: res.data[i].Raw_Material_Id,
             })
-            .then(MaterialId => {
+            .then((MaterialId) => {
               console.log(MaterialId);
               if (MaterialId.data.RawMaterial[0]) {
                 console.log(MaterialId.data.RawMaterial[0].raw_material_name);
                 res.data[i].Raw_Material_Id =
                   MaterialId.data.RawMaterial[0].raw_material_name;
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 100,
+                  isLoading: false,
                 });
               } else {
                 res.data[i].Raw_Material_Id = "problem loading";
                 this.setState({
-                  data: [...res.data]
+                  data: [...res.data],
+                  progress: 100,
+                  isLoading: false,
                 });
               }
             });
           //end
         }
+        let i = 0;
+        if (i >= res.data.length)
+          this.setState({
+            progress: 100,
+            msg: "Data Not Found!",
+            isLoading: false,
+          });
       });
     };
   }
@@ -126,22 +179,36 @@ export default class ManageUnitRequest extends Component {
 
         <MaterialTable
           title=" "
+          isLoading={this.state.isLoading}
           columns={this.state.columns}
           data={this.state.data}
           style={{ width: "90%", maxHeight: "500px", overflow: "auto" }}
+          localization={{
+            body: {
+              emptyDataSourceMessage: this.state.msg,
+            },
+          }}
+          components={{
+            OverlayLoading: (props) => (
+              <LinearProgress
+                variant="determinate"
+                value={this.state.progress}
+              ></LinearProgress>
+            ),
+          }}
           options={{
             sorting: true,
             headerStyle: {
               backgroundColor: "#3f51b5",
               color: "#FFF",
               fontSize: "medium",
-              fontWeight: "bold"
-            }
+              fontWeight: "bold",
+            },
           }}
           actions={[
             {
               icon: "edit",
-              tooltip: "Edit User",
+              tooltip: "Edit",
               onClick: (event, rowData) => {
                 this.setState({
                   fieldDisabled: {
@@ -154,12 +221,12 @@ export default class ManageUnitRequest extends Component {
                     Status: false,
                     Comments: false,
                     btnDisplay: "flex",
-                    btnText: "Cancel"
-                  }
+                    btnText: "Cancel",
+                  },
                 });
                 this.OnEditHandler(event, rowData);
-              }
-            }
+              },
+            },
           ]}
           // editable={{
           //   onRowDelete: oldData =>
@@ -196,8 +263,8 @@ export default class ManageUnitRequest extends Component {
                 Status: true,
                 Comments: true,
                 btnDisplay: "none",
-                btnText: "Close"
-              }
+                btnText: "Close",
+              },
             });
             this.OnEditHandler(event, rowData);
           }}
@@ -208,9 +275,19 @@ export default class ManageUnitRequest extends Component {
             <EditUnitRequest
               unit={this.EditData}
               disabled={this.state.fieldDisabled}
+              MaterialRecord={() => {
+                let temp = [];
+                this.state.materials.map((material) => {
+                  if (material._id === this.EditData.Raw_Material_Id) {
+                    temp = material;
+                  }
+                  return null;
+                });
+                return temp;
+              }}
               cancel={() => {
                 this.setState({
-                  openEdit: false
+                  openEdit: false,
                 });
                 this.handleClose();
               }}

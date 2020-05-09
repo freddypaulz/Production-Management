@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-   logs.find({}, function(err, data) {
+   logs.find({}, function (err, data) {
       if (err) {
          throw err;
       } else {
@@ -30,6 +30,9 @@ router.post('/comment', (req, res) => {
       var from = req.body.logs.from;
       var to = req.body.logs.to;
       var comments = req.body.logs.comments;
+      if (comments === '') {
+         comments = 'no comments'
+      }
       const log = new logs({
          Request_Id: reqId,
          Address: {
@@ -38,7 +41,7 @@ router.post('/comment', (req, res) => {
          },
          Comments: comments
       });
-      log.save(function(err, data) {
+      log.save(function (err, data) {
          if (err) {
             throw err;
          } else {

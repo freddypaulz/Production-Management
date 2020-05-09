@@ -6,16 +6,18 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  LinearProgress,
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "../../styles/FormStyles";
 import { Datepick } from "../../../../Components/Date/Datepick";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const styles = Styles;
 const style = {
   marginRight: "6px",
-  marginLeft: "6px"
+  marginLeft: "6px",
 };
 export default class EditUnitRequest extends Component {
   constructor(props) {
@@ -34,44 +36,65 @@ export default class EditUnitRequest extends Component {
       success: false,
       measuring_units: [],
       materials: [],
-
-      code: ""
+      subdisplay: false,
+      progress: true,
+      code: "",
+      MaterialRecord: [],
     };
     this.onEditHandler = () => {
-      axios
-        .post("/production-unit/edit", {
-          _id: this.state._id,
-          Raw_Material_Id: this.state.Raw_Material_Id,
-          Raw_Material_Code: this.state.Raw_Material_Code,
-          Quantity: this.state.Quantity,
-          Measuring_Unit: this.state.Measuring_Unit,
-          Priority: this.state.Priority,
-          Due_Date: this.state.Due_Date,
-          Status: this.state.Status,
-          Comments: this.state.Comments
-        })
-        .then(res => {
-          console.log(res.data);
-          this.props.cancel();
-        })
-        .catch(err => console.log(err));
+      if (
+        // this.state.Raw_Material_Id !== "" &&
+        this.state.Quantity !== "" &&
+        this.state.Priority !== "" &&
+        this.state.Due_Date !== null
+      ) {
+        this.setState({
+          subdisplay: true,
+          progress: true,
+        });
+        axios
+          .post("/production-unit/edit", {
+            _id: this.state._id,
+            Raw_Material_Id: this.state.Raw_Material_Id,
+            Raw_Material_Code: this.state.Raw_Material_Code,
+            Quantity: this.state.Quantity,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Priority: this.state.Priority,
+            Due_Date: this.state.Due_Date,
+            Status: this.state.Status,
+            Comments: this.state.Comments,
+          })
+          .then((res) => {
+            console.log(res.data);
+            this.setState({
+              progress: true,
+            });
+            this.props.cancel();
+          })
+          .catch((err) => console.log(err));
+      } else {
+        alert("Please check all the fields are entered properly");
+      }
     };
   }
   componentDidMount() {
-    axios.get("/raw-material").then(res => {
+    axios.get("/raw-material").then((res) => {
       console.log(res);
       this.setState({
-        materials: [...res.data.RawMaterials]
+        materials: [...res.data.RawMaterials],
       });
     });
 
-    axios.get("/measuring-units/measuring-units").then(res => {
+    axios.get("/measuring-units/measuring-units").then((res) => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        measuring_units: [...res.data.MeasuringUnits],
+        progress: false,
       });
     });
     this.setState({
+      MaterialRecord: this.props.MaterialRecord(),
+
       _id: this.props.unit._id,
       Raw_Material_Id: this.props.unit.Raw_Material_Id,
       Raw_Material_Code: this.props.unit.Raw_Material_Code,
@@ -80,7 +103,7 @@ export default class EditUnitRequest extends Component {
       Priority: this.props.unit.Priority,
       Due_Date: this.props.unit.Due_Date,
       Status: this.props.unit.Status,
-      Comments: this.props.unit.Comments
+      Comments: this.props.unit.Comments,
     });
   }
   render() {
@@ -107,6 +130,18 @@ export default class EditUnitRequest extends Component {
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
+                {this.state.progress === true ? (
+                  <LinearProgress
+                    color="primary"
+                    variant="indeterminate"
+                    style={{
+                      marginLeft: "10px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                ) : (
+                  <Box></Box>
+                )}
                 <Box style={styles.boxSize2}>
                   <Box width="50%" style={style}>
                     <FormControl
@@ -115,11 +150,11 @@ export default class EditUnitRequest extends Component {
                       fullWidth
                       size="small"
                     >
-                      <InputLabel
+                      {/* <InputLabel
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Material Name
@@ -130,9 +165,9 @@ export default class EditUnitRequest extends Component {
                         required
                         name="Raw_Material_Id"
                         value={this.state.Raw_Material_Id}
-                        onChange={event => {
+                        onChange={(event) => {
                           let materialCode;
-                          this.state.materials.map(material => {
+                          this.state.materials.map((material) => {
                             if (material._id === event.target.value) {
                               materialCode = material.raw_material_code;
                               console.log("code: ", materialCode);
@@ -141,7 +176,7 @@ export default class EditUnitRequest extends Component {
                           });
                           this.setState({
                             Raw_Material_Id: event.target.value,
-                            Raw_Material_Code: materialCode
+                            Raw_Material_Code: materialCode,
                           });
                         }}
                       >
@@ -156,7 +191,36 @@ export default class EditUnitRequest extends Component {
                             </MenuItem>
                           );
                         })}
-                      </Select>
+                      </Select> */}
+                      <Autocomplete
+                        options={this.state.materials}
+                        autoHighlight={true}
+                        value={this.state.MaterialRecord}
+                        getOptionLabel={(option) => option.raw_material_name}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Raw Material"
+                            variant="outlined"
+                            size="small"
+                          />
+                        )}
+                        onChange={(event, value) => {
+                          console.log("materialRecord:", value);
+                          console.log(
+                            "stateRecord:",
+                            this.state.materialRecord
+                          );
+                          if (value !== null) {
+                            this.setState({
+                              materialRecord: value,
+                              Raw_Material_Id: value._id,
+                              Raw_Material_Code: value.raw_material_code,
+                              Measuring_Unit: value.raw_material_measuring_unit,
+                            });
+                          }
+                        }}
+                      />
                     </FormControl>
                   </Box>
                   <Box width="50%" style={style}>
@@ -169,9 +233,9 @@ export default class EditUnitRequest extends Component {
                       required
                       name="Material_Code"
                       value={this.state.Raw_Material_Code}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Material_Code: event.target.value
+                          Material_Code: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -190,9 +254,9 @@ export default class EditUnitRequest extends Component {
                       required
                       name="Quantity"
                       value={this.state.Quantity}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Quantity: event.target.value
+                          Quantity: event.target.value,
                         });
                       }}
                     ></TextField>
@@ -208,7 +272,7 @@ export default class EditUnitRequest extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Measuring Unit
@@ -219,9 +283,9 @@ export default class EditUnitRequest extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Measuring_Unit: event.target.value
+                            Measuring_Unit: event.target.value,
                           });
                           console.log(event.target.value);
                         }}
@@ -256,7 +320,7 @@ export default class EditUnitRequest extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Priority
@@ -267,9 +331,9 @@ export default class EditUnitRequest extends Component {
                         required
                         name="Priority"
                         value={this.state.Priority}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Priority: event.target.value
+                            Priority: event.target.value,
                           });
                         }}
                       >
@@ -289,9 +353,9 @@ export default class EditUnitRequest extends Component {
                       variant="outlined"
                       Name="Due_Date"
                       value={this.state.Due_Date}
-                      setDate={date => {
+                      setDate={(date) => {
                         this.setState({
-                          Due_Date: date
+                          Due_Date: date,
                         });
                         console.log(date);
                       }}
@@ -310,7 +374,7 @@ export default class EditUnitRequest extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Status
@@ -323,9 +387,9 @@ export default class EditUnitRequest extends Component {
                         name="Status"
                         disabled={this.props.disabled.Status}
                         value={this.state.Status}
-                        onChange={event => {
+                        onChange={(event) => {
                           this.setState({
-                            Status: event.target.value
+                            Status: event.target.value,
                           });
                         }}
                       >
@@ -352,9 +416,9 @@ export default class EditUnitRequest extends Component {
                       fullWidth
                       label="Comments"
                       value={this.state.Comments}
-                      onChange={event => {
+                      onChange={(event) => {
                         this.setState({
-                          Comments: event.target.value
+                          Comments: event.target.value,
                         });
                         console.log(event.target.value);
                       }}
@@ -396,6 +460,7 @@ export default class EditUnitRequest extends Component {
               size="large"
               fontWeight="bold"
               onClick={this.onEditHandler}
+              disabled={this.state.subdisplay}
             >
               Update
             </Button>

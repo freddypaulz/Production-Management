@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import MaterialTable from 'material-table';
-import { Box, Button, DialogContent } from '@material-ui/core';
+import { Box, Button, DialogContent, LinearProgress } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import axios from 'axios';
 import AddWastage from './Add_Wastage';
@@ -12,11 +12,14 @@ export default class ManageWastage extends Component {
       this.EditData = {};
       this.state = {
          columns: [
-            { title: 'Material Name', field: 'Item_Name' },
+            { title: 'Material Name', field: 'Raw_Material_Id' },
             { title: 'Quantity', field: 'Quantity' },
-            { title: 'Measuring Unit', field: 'Measuring_Unit' }
+            { title: 'Measuring Unit', field: 'Measuring_Unit' },
          ],
          data: [],
+         msg: 'Fetching Data...',
+         materialList: [],
+         unitList: [],
          openAdd: false,
          openEdit: false,
          fieldDisabled: {
@@ -30,77 +33,93 @@ export default class ManageWastage extends Component {
             Wastage_Date: false,
             Description: false,
             btnDisplay: 'none',
-            btnText: 'Close'
-         }
+            btnText: 'Close',
+         },
+         isLoading: true,
+         progress: 0,
       };
+
+      this.getMaterialName = (id) => {
+         let temp = id;
+         this.state.materialList.map((material) => {
+            if (material._id === id) {
+               temp = material.raw_material_name;
+            }
+            return null;
+         });
+         return temp;
+      };
+
+      this.getUnit = (id) => {
+         let temp = id;
+         this.state.unitList.map((unit) => {
+            if (unit._id === id) {
+               temp = unit.measuring_unit_name;
+            }
+            return null;
+         });
+         return temp;
+      };
+
       this.OnEditHandler = (event, rowData) => {
          axios
             .post('/purchase-wastages', {
-               _id: rowData._id
+               _id: rowData._id,
             })
-            .then(res => {
+            .then((res) => {
                //console.log(Wastage);
                this.EditData = { ...res.data[0] };
                console.log(this.EditData);
                this.setState({
-                  openEdit: true
+                  openEdit: true,
                });
             });
       };
+
       this.handleClose = () => {
-         axios.get('/purchase-wastages').then(res => {
-            console.log(res.data);
-            for (let i = 0; i < res.data.length; i++) {
-               res.data[i].id = i + 1;
-               //Axios
+         //get Material List
+         axios
+            .get('/raw-materials/raw-materials')
+            .then((res) => {
+               this.setState({
+                  materialList: [...res.data.RawMaterials],
+                  progress: 45,
+               });
+               //get Unit List
                axios
-                  .post('/measuring-unit', {
-                     _id: res.data[i].Measuring_Unit
+                  .get('/measuring-units/measuring-units')
+                  .then((res) => {
+                     this.setState({
+                        unitList: [...res.data.MeasuringUnits],
+                        progress: 90,
+                     });
+                     axios.get('/purchase-wastages').then((res) => {
+                        let temp = [];
+                        console.log('Wastage Details:', res.data);
+                        for (let i = 0; i < res.data.length; i++) {
+                           res.data[i].Raw_Material_Id = this.getMaterialName(
+                              res.data[i].Raw_Material_Id
+                           );
+                           res.data[i].Measuring_Unit = this.getUnit(
+                              res.data[i].Measuring_Unit
+                           );
+                           temp.push(res.data[i]);
+                        }
+                        this.setState({
+                           progress: 100,
+                           data: temp,
+                           msg: 'Data not Found!',
+                           isLoading: false,
+                        });
+                     });
                   })
-                  .then(MeasuringUnit => {
-                     console.log(MeasuringUnit);
-                     if (MeasuringUnit.data.MeasuringUnit[0]) {
-                        console.log(
-                           MeasuringUnit.data.MeasuringUnit[0]
-                              .measuring_unit_name
-                        );
-                        res.data[i].Measuring_Unit =
-                           MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
-                        this.setState({
-                           data: [...res.data]
-                        });
-                     } else {
-                        res.data[i].Measuring_Unit =
-                           'problem loading Measuring Unit';
-                        this.setState({
-                           data: [...res.data]
-                        });
-                     }
+                  .catch((err) => {
+                     console.log('cannot get unitList', err);
                   });
-               axios
-                  .post('/raw-material', {
-                     _id: res.data[i].Raw_Material_Id
-                  })
-                  .then(MaterialId => {
-                     console.log(MaterialId);
-                     if (MaterialId.data.RawMaterial[0]) {
-                        console.log(
-                           MaterialId.data.RawMaterial[0].raw_material_name
-                        );
-                        res.data[i].Item_Name =
-                           MaterialId.data.RawMaterial[0].raw_material_name;
-                        this.setState({
-                           data: [...res.data]
-                        });
-                     } else {
-                        res.data[i].Item_Name = 'problem loading';
-                        this.setState({
-                           data: [...res.data]
-                        });
-                     }
-                  });
-            }
-         });
+            })
+            .catch((err) => {
+               console.log('cannot get materialList', err);
+            });
       };
    }
    componentDidMount() {
@@ -129,7 +148,7 @@ export default class ManageWastage extends Component {
                   size='small'
                   onClick={() => {
                      this.setState({
-                        openAdd: true
+                        openAdd: true,
                      });
                   }}
                >
@@ -138,17 +157,49 @@ export default class ManageWastage extends Component {
             </Box>
             <MaterialTable
                title=' '
+               isLoading={this.state.isLoading}
                columns={this.state.columns}
                data={this.state.data}
                style={{ width: '90%', maxHeight: '500px', overflow: 'auto' }}
+               localization={{
+                  body: {
+                     emptyDataSourceMessage: this.state.msg,
+                  },
+               }}
                options={{
                   sorting: true,
                   headerStyle: {
                      backgroundColor: '#3f51b5',
                      color: '#FFF',
                      fontSize: 'medium',
-                     fontWeight: 'bold'
-                  }
+                     fontWeight: 'bold',
+                  },
+               }}
+               components={{
+                  OverlayLoading: (props) => (
+                     <LinearProgress
+                        variant='determinate'
+                        value={this.state.progress}
+                     ></LinearProgress>
+                  ),
+               }}
+               editable={{
+                  onRowDelete: (oldData) =>
+                     axios
+                        .post('/purchase-stocks/wastage-return', {
+                           Raw_Material_Code: oldData.Raw_Material_Code,
+                           Total_Quantity: oldData.Quantity,
+                        })
+                        .then((res) => {
+                           console.log(res);
+                           axios
+                              .post('/purchase-wastages/delete', {
+                                 _id: oldData._id,
+                              })
+                              .then(() => {
+                                 this.handleClose();
+                              });
+                        }),
                }}
                onRowClick={(event, rowData) => {
                   this.setState({
@@ -163,8 +214,8 @@ export default class ManageWastage extends Component {
                         Wastage_Date: true,
                         Description: true,
                         btnDisplay: 'none',
-                        btnText: 'Close'
-                     }
+                        btnText: 'Close',
+                     },
                   });
                   this.OnEditHandler(event, rowData);
                }}
@@ -174,7 +225,7 @@ export default class ManageWastage extends Component {
                   <AddWastage
                      cancel={() => {
                         this.setState({
-                           openAdd: false
+                           openAdd: false,
                         });
                         this.handleClose();
                      }}
@@ -188,7 +239,7 @@ export default class ManageWastage extends Component {
                      wastage={this.EditData}
                      cancel={() => {
                         this.setState({
-                           openEdit: false
+                           openEdit: false,
                         });
                         this.handleClose();
                      }}

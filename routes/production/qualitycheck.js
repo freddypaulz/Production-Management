@@ -5,7 +5,7 @@ const Production = require("../../models/Production/Production");
 const Production_Stock = require("../../models/Production/Production_Stock");
 
 router.get("/", (req, res) => {
-  Qualitycheck.find({}, function(err, data) {
+  Qualitycheck.find({}, function (err, data) {
     if (err) throw err;
     res.send(data);
   });
@@ -14,20 +14,20 @@ router.get("/lastcode", (req, res) => {
   Qualitycheck.findOne({ QC_Type: "Packing" })
     .sort({ _id: -1 })
     .sort({ Id: -1 })
-    .exec(function(err, data) {
+    .exec(function (err, data) {
       res.send(data);
     });
 });
 router.get("/blcode", (req, res) => {
-  Qualitycheck.findOne()
+  Qualitycheck.findOne({ QC_Type: "Packing" })
     .sort({ _id: -1 })
     .sort({ Box_Id: -1 })
-    .exec(function(err, data) {
+    .exec(function (err, data) {
       res.send(data);
     });
 });
 router.post("/", (req, res) => {
-  Qualitycheck.find({ _id: req.body._id }, function(err, data) {
+  Qualitycheck.find({ _id: req.body._id }, function (err, data) {
     if (err) throw err;
     res.send(data);
   });
@@ -52,7 +52,7 @@ router.post("/add", (req, res) => {
     QC_Date,
     Result,
     Status,
-    Comments
+    Comments,
   } = req.body;
   console.log(req.body);
   let error = [req.body.error];
@@ -74,9 +74,9 @@ router.post("/add", (req, res) => {
     QC_Date,
     Result,
     Comments,
-    Status
+    Status,
   });
-  new_Qualitycheck.save().then(result => {
+  new_Qualitycheck.save().then((result) => {
     let flag = "";
 
     if (QC_Type === "Product" && Result === "Pass") {
@@ -86,7 +86,7 @@ router.post("/add", (req, res) => {
     } else if (QC_Type === "Packing" && Result === "Pass") {
       flag = "Packing QC Success";
       let Add = false;
-      Production_Stock.find({}).then(stock_entry => {
+      Production_Stock.find({}).then((stock_entry) => {
         for (let i = 0; i < stock_entry.length; i++) {
           if (stock_entry[i].Product_ID === Product_ID) {
             Add = true;
@@ -96,15 +96,15 @@ router.post("/add", (req, res) => {
               { Product_ID: Product_ID },
               {
                 $set: {
-                  Quantity: new_stock
-                }
+                  Quantity: new_stock,
+                },
               }
             )
-              .then(stock_Quantity => {
+              .then((stock_Quantity) => {
                 console.log("Quantity added");
                 res.send("Added successfully");
               })
-              .catch(err => {
+              .catch((err) => {
                 res.send(err);
               });
           } else {
@@ -115,9 +115,9 @@ router.post("/add", (req, res) => {
                 Quantity,
                 Measuring_Unit,
                 Id,
-                Box_Id
+                Box_Id,
               });
-              new_Production_Stock.save().then(Production_Stock => {
+              new_Production_Stock.save().then((Production_Stock) => {
                 console.log("stock added");
               });
             }
@@ -133,9 +133,9 @@ router.post("/add", (req, res) => {
             Quantity,
             Measuring_Unit,
             Id,
-            Box_Id
+            Box_Id,
           });
-          new_Production_Stock.save().then(Production_Stock => {
+          new_Production_Stock.save().then((Production_Stock) => {
             console.log("stock added");
           });
         }
@@ -146,24 +146,24 @@ router.post("/add", (req, res) => {
     }
     Production.findOneAndUpdate(
       {
-        Batch_Id
+        Batch_Id,
       },
       {
-        $set: { Status: flag }
+        $set: { Status: flag },
       }
     )
-      .then(production => {
+      .then((production) => {
         console.log(production);
-        //return res.send(result);
+        res.send(result);
       })
-      .catch(err => {
+      .catch((err) => {
         res.send(err);
       });
   });
 });
 
 router.post("/delete", (req, res) => {
-  Qualitycheck.findOneAndDelete({ _id: req.body._id }).then(result1 => {
+  Qualitycheck.findOneAndDelete({ _id: req.body._id }).then((result1) => {
     res.send(result1);
   });
 });
@@ -187,7 +187,7 @@ router.post("/edit", (req, res) => {
     QC_Date,
     Result,
     Comments,
-    Status
+    Status,
   } = req.body;
 
   let errors = [];
@@ -210,9 +210,9 @@ router.post("/edit", (req, res) => {
       QC_Date,
       Result,
       Comments,
-      Status
+      Status,
     }
-  ).then(qualitycheck => {
+  ).then((qualitycheck) => {
     res.send(qualitycheck);
     console.log("updated");
   });

@@ -64,7 +64,7 @@ router.post('/add', (req, res) => {
                         )
                         .then(stock_Quantity => {
                            console.log('Quantity lessed: ', stock_Quantity);
-                           res.send('subracted successfully');
+                           res.send('Stock reduced successfully');
                         })
                         .catch(err => {
                            res.send(err);
@@ -78,7 +78,7 @@ router.post('/add', (req, res) => {
                })
                .catch(err => {
                   console.log('not purchased', err);
-                  res.send('Not purchased');
+                  res.send('Not in stock');
                });
          }
          return res.send(Wastage);
@@ -91,6 +91,7 @@ router.post('/delete', (req, res, next) => {
       res.send(Wastage);
    });
 });
+
 router.post('/edit', (req, res) => {
    const {
       _id,

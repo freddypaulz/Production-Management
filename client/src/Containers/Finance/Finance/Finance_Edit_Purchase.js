@@ -9,7 +9,9 @@ import {
    MenuItem,
    Dialog,
    DialogContent,
-   Link
+   Link,
+   LinearProgress,
+   InputAdornment,
 } from '@material-ui/core';
 import axios from 'axios';
 import Styles from './styles/FormStyles';
@@ -18,7 +20,7 @@ import { Datepick } from '../../../Components/Date/Datepick';
 const styles = Styles;
 const style = {
    marginRight: '6px',
-   marginLeft: '6px'
+   marginLeft: '6px',
 };
 export default class EditPurchase extends Component {
    constructor(props) {
@@ -32,7 +34,7 @@ export default class EditPurchase extends Component {
          Priority: '',
          Due_Date: null,
          Status: '',
-         Comments: 'no comments',
+         Comments: '',
          Total_Price: '',
          Vendor: '',
          errors: [],
@@ -43,7 +45,10 @@ export default class EditPurchase extends Component {
          vendorInfo: false,
          logComments: 'no comments',
          To: '',
-         file: ''
+         file: '',
+         submitBtnDisable: false,
+         progress: true,
+         currency: [],
       };
 
       this.openDialog = () => {
@@ -55,16 +60,25 @@ export default class EditPurchase extends Component {
       };
 
       this.onEditHandler = () => {
+         if (this.state.Comments === '') {
+            this.setState({
+               Comments: 'no comments',
+            });
+         }
+         this.setState({
+            submitBtnDisable: true,
+            progress: true,
+         });
          axios
             .post('/log/comment', {
                logs: {
                   reqId: props.Finance._id,
                   from: sessionStorage.getItem('Role ID'),
                   to: this.state.To,
-                  comments: this.state.Comments
-               }
+                  comments: this.state.Comments,
+               },
             })
-            .then(comments => {
+            .then((comments) => {
                console.log('Comments: ', comments);
                axios.post('/request-details/edit', {
                   _id: this.state._id,
@@ -79,11 +93,16 @@ export default class EditPurchase extends Component {
                   Vendor: this.state.Vendor,
                   Total_Price: this.state.Total_Price,
                   Quotation_Document_URL: this.props.Finance
-                     .Quotation_Document_URL
+                     .Quotation_Document_URL,
                });
             })
-            .then(this.props.cancel())
-            .catch(err => console.log(err));
+            .then(() => {
+               this.setState({
+                  progress: false,
+               });
+               this.props.cancel();
+            })
+            .catch((err) => console.log(err));
       };
 
       this.vendorInfo = () => {
@@ -112,7 +131,7 @@ export default class EditPurchase extends Component {
             } else {
                console.log('vendor not match');
             }
-            return null
+            return null;
          });
          return temp;
       };
@@ -132,7 +151,7 @@ export default class EditPurchase extends Component {
                   </Link>
                </Box>
             );
-            return null
+            return null;
          });
          return temp;
       };
@@ -143,7 +162,7 @@ export default class EditPurchase extends Component {
             'Finance-Accepted',
             'Finance-Rejected',
             'ForwardedToAdmin',
-            'ForwardedToPurchase'
+            'ForwardedToPurchase',
          ];
          return status.map((msg, index) => (
             <MenuItem
@@ -158,23 +177,31 @@ export default class EditPurchase extends Component {
    }
 
    componentDidMount() {
-      axios.get('/raw-materials/raw-materials').then(res => {
+      axios.get('/raw-materials/raw-materials').then((res) => {
          console.log(res);
          this.setState({
-            materials: [...res.data.RawMaterials]
+            materials: [...res.data.RawMaterials],
          });
       });
-      axios.get('/vendors/vendors').then(res => {
+      axios.get('/vendors/vendors').then((res) => {
          console.log(res);
          this.setState({
-            vendorList: [...res.data.Vendors]
+            vendorList: [...res.data.Vendors],
          });
       });
-      axios.get('/measuring-units/measuring-units').then(res => {
+      axios.get('/measuring-units/measuring-units').then((res) => {
          console.log(res);
          this.setState({
-            measuring_units: [...res.data.MeasuringUnits]
+            measuring_units: [...res.data.MeasuringUnits],
+            progress: false,
          });
+      });
+
+      axios.get('/currency').then((res) => {
+         this.setState({
+            currency: res.data.Currency[0].currency_type,
+         });
+         console.log('currency:', this.state.currency);
       });
 
       this.setState({
@@ -189,7 +216,7 @@ export default class EditPurchase extends Component {
          Comments: this.state.Comments,
          Vendor: this.props.Finance.Vendor,
          Total_Price: this.props.Finance.Total_Price,
-         Quotation_Document_URL: this.props.Finance.Quotation_Document_URL
+         Quotation_Document_URL: this.props.Finance.Quotation_Document_URL,
       });
    }
 
@@ -216,6 +243,18 @@ export default class EditPurchase extends Component {
                <Box display='flex' justifyContent='center'>
                   <Box style={styles.lbox}>
                      <Box style={styles.form}>
+                        {this.state.progress === true ? (
+                           <LinearProgress
+                              color='primary'
+                              variant='indeterminate'
+                              style={{
+                                 marginLeft: '10px',
+                                 marginBottom: '10px',
+                              }}
+                           />
+                        ) : (
+                           <Box></Box>
+                        )}
                         <Box style={styles.boxSize2}>
                            <Box width='50%' style={style}>
                               <FormControl
@@ -228,7 +267,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Material Name
@@ -239,9 +278,9 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Raw_Material_Id'
                                     value={this.state.Raw_Material_Id}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        let materialCode;
-                                       this.state.materials.map(material => {
+                                       this.state.materials.map((material) => {
                                           if (
                                              material._id === event.target.value
                                           ) {
@@ -256,7 +295,7 @@ export default class EditPurchase extends Component {
                                        });
                                        this.setState({
                                           Raw_Material_Id: event.target.value,
-                                          Raw_Material_Code: materialCode
+                                          Raw_Material_Code: materialCode,
                                        });
                                     }}
                                  >
@@ -286,9 +325,9 @@ export default class EditPurchase extends Component {
                                  required
                                  name='Material_Code'
                                  value={this.state.Raw_Material_Code}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Material_Code: event.target.value
+                                       Material_Code: event.target.value,
                                     });
                                     console.log(event.target.value);
                                  }}
@@ -306,9 +345,9 @@ export default class EditPurchase extends Component {
                                  required
                                  name='Quantity'
                                  value={this.state.Quantity}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Quantity: event.target.value
+                                       Quantity: event.target.value,
                                     });
                                  }}
                               ></TextField>
@@ -324,7 +363,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Measuring Unit
@@ -335,9 +374,9 @@ export default class EditPurchase extends Component {
                                     variant='outlined'
                                     required
                                     value={this.state.Measuring_Unit}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Measuring_Unit: event.target.value
+                                          Measuring_Unit: event.target.value,
                                        });
                                        console.log(event.target.value);
                                     }}
@@ -373,7 +412,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Vendor Name
@@ -384,9 +423,9 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Vendor'
                                     value={this.state.Vendor}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Vendor: event.target.value
+                                          Vendor: event.target.value,
                                        });
                                     }}
                                  >
@@ -413,12 +452,19 @@ export default class EditPurchase extends Component {
                                  fullWidth
                                  variant='outlined'
                                  label='Total_Price'
+                                 InputProps={{
+                                    endAdornment: (
+                                       <InputAdornment position='start'>
+                                          {this.state.currency}
+                                       </InputAdornment>
+                                    ),
+                                 }}
                                  required
                                  name='Total_Price'
                                  value={this.state.Total_Price}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Total_Price: event.target.value
+                                       Total_Price: event.target.value,
                                     });
                                  }}
                               ></TextField>
@@ -436,7 +482,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Priority
@@ -447,9 +493,9 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Priority'
                                     value={this.state.Priority}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Priority: event.target.value
+                                          Priority: event.target.value,
                                        });
                                     }}
                                  >
@@ -469,9 +515,9 @@ export default class EditPurchase extends Component {
                                  variant='outlined'
                                  Name='Due_Date'
                                  value={this.state.Due_Date}
-                                 setDate={date => {
+                                 setDate={(date) => {
                                     this.setState({
-                                       Due_Date: date
+                                       Due_Date: date,
                                     });
                                     console.log(date);
                                  }}
@@ -490,7 +536,7 @@ export default class EditPurchase extends Component {
                                     style={{
                                        backgroundColor: 'white',
                                        paddingLeft: '2px',
-                                       paddingRight: '2px'
+                                       paddingRight: '2px',
                                     }}
                                  >
                                     Status
@@ -501,21 +547,31 @@ export default class EditPurchase extends Component {
                                     required
                                     name='Status'
                                     value={this.state.Status}
-                                    onChange={event => {
+                                    onChange={(event) => {
                                        this.setState({
-                                          Status: event.target.value
+                                          Status: event.target.value,
                                        });
-                                       if (event.target.value === 'ForwardedToAdmin') {
-                                          this.setState(prevState => {
-                                             prevState.To = 'Admin'
-                                          });
-                                          console.log('if To state setted: ', this.state.To)
-                                       } else if (event.target.value === 'ForwardedToPurchase'
-                                          || event.target.value === 'Finance-Accepted'
-                                          || event.target.value === 'Finance-Rejected'
+                                       if (
+                                          event.target.value ===
+                                          'ForwardedToAdmin'
                                        ) {
-                                          this.setState(prevState => {
-                                             prevState.To = 'Purchase'
+                                          this.setState((prevState) => {
+                                             prevState.To = 'Admin';
+                                          });
+                                          console.log(
+                                             'if To state setted: ',
+                                             this.state.To
+                                          );
+                                       } else if (
+                                          event.target.value ===
+                                             'ForwardedToPurchase' ||
+                                          event.target.value ===
+                                             'Finance-Accepted' ||
+                                          event.target.value ===
+                                             'Finance-Rejected'
+                                       ) {
+                                          this.setState((prevState) => {
+                                             prevState.To = 'Purchase';
                                           });
                                        }
                                     }}
@@ -539,9 +595,9 @@ export default class EditPurchase extends Component {
                                  fullWidth
                                  label='Comment'
                                  value={this.state.Comments}
-                                 onChange={event => {
+                                 onChange={(event) => {
                                     this.setState({
-                                       Comments: event.target.value
+                                       Comments: event.target.value,
                                     });
                                     console.log(event.target.value);
                                  }}
@@ -588,7 +644,7 @@ export default class EditPurchase extends Component {
                      fontWeight='bold'
                      onClick={() => {
                         this.setState({
-                           vendorInfo: true
+                           vendorInfo: true,
                         });
                         this.openDialog();
                      }}
@@ -599,6 +655,7 @@ export default class EditPurchase extends Component {
                </Box>
                <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
                   <Button
+                     disabled={this.state.submitBtnDisable}
                      variant='contained'
                      color='primary'
                      size='large'
@@ -616,8 +673,8 @@ export default class EditPurchase extends Component {
                   return this.state.vendorInfo === true ? (
                      this.closeDialog()
                   ) : (
-                        <Box></Box>
-                     );
+                     <Box></Box>
+                  );
                }}
                maxWidth='sm'
                fullWidth
@@ -633,10 +690,23 @@ export default class EditPurchase extends Component {
                         Vendor Information
                      </Box>
                      {this.vendorInfo()}
+                     <Box display='flex' justifyContent='flex-end'>
+                        <Button
+                           variant='contained'
+                           color='primary'
+                           size='small'
+                           fontWeight='bold'
+                           onClick={() => {
+                              this.closeDialog();
+                           }}
+                        >
+                           Close
+                        </Button>
+                     </Box>
                   </Box>
                </DialogContent>
             </Dialog>
-         </Box >
+         </Box>
       );
    }
 }
